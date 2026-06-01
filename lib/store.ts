@@ -1,10 +1,11 @@
-import type { Task, Scenario, Deliverable, Meeting, TeamMember, Milestone, Activity } from './types'
+import type { Task, Scenario, Deliverable, Meeting, TeamMember, Milestone, Activity, Issue } from './types'
 import teamData from './data/team.json'
 import scenarioData from './data/scenarios.json'
 import milestoneData from './data/milestones.json'
 import taskData from './data/tasks.json'
 import deliverableData from './data/deliverables.json'
 import meetingData from './data/meetings.json'
+import issueData from './data/issues.json'
 
 export const team: TeamMember[] = teamData as TeamMember[]
 export const scenarios: Scenario[] = scenarioData as Scenario[]
@@ -12,6 +13,7 @@ export const milestones: Milestone[] = milestoneData as Milestone[]
 export const tasks: Task[] = taskData as Task[]
 export const deliverables: Deliverable[] = deliverableData as Deliverable[]
 export const meetings: Meeting[] = meetingData as Meeting[]
+export const issues: Issue[] = issueData as Issue[]
 
 export function getMember(id: string): TeamMember | undefined {
   return team.find(m => m.id === id)

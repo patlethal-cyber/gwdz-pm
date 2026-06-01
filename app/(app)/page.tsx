@@ -1,6 +1,9 @@
 import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
 import MilestoneTimeline from '@/components/dashboard/MilestoneTimeline'
+import GanttChart from '@/components/dashboard/GanttChart'
+import TaskDistribution from '@/components/dashboard/TaskDistribution'
+import DepartmentProgress from '@/components/dashboard/DepartmentProgress'
 import RiskAlerts from '@/components/dashboard/RiskAlerts'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import {
@@ -106,7 +109,7 @@ export default function DashboardPage() {
       <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
 
       <div className="p-6 space-y-6">
-        {/* KPI Cards */}
+        {/* Row 1: KPI Cards */}
         <StatsCards
           totalTasks={totalTasks}
           inProgress={inProgress}
@@ -114,14 +117,27 @@ export default function DashboardPage() {
           deliverableRate={deliverableRate}
         />
 
-        {/* Milestone Timeline */}
+        {/* Row 2: Milestone Timeline */}
         <MilestoneTimeline milestones={milestones} />
 
-        {/* Bottom row: Risks + Activity */}
-        <div className="grid grid-cols-2 gap-6">
-          <RiskAlerts items={riskItems} />
-          <ActivityFeed items={activityItems} />
+        {/* Row 3: Gantt Chart + Task Distribution */}
+        <div className="grid grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <GanttChart />
+          </div>
+          <div className="col-span-1">
+            <TaskDistribution />
+          </div>
         </div>
+
+        {/* Row 4: Department Progress + Risk Alerts */}
+        <div className="grid grid-cols-2 gap-6">
+          <DepartmentProgress />
+          <RiskAlerts items={riskItems} />
+        </div>
+
+        {/* Row 5: Activity Feed */}
+        <ActivityFeed items={activityItems} />
       </div>
     </>
   )

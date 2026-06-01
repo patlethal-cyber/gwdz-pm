@@ -110,9 +110,30 @@ export interface Milestone {
 
 export interface Activity {
   id: string
-  type: 'task' | 'deliverable' | 'meeting' | 'milestone'
+  type: 'task' | 'deliverable' | 'meeting' | 'milestone' | 'issue'
   action: string
   subject: string
   userId: string
   timestamp: string
+}
+
+export type IssueStatus = '待处理' | '处理中' | '已解决' | '已关闭' | '已驳回'
+export type IssueSeverity = '严重' | '一般' | '轻微' | '建议'
+export type IssueSource = '甲方反馈' | 'UAT测试' | '内部发现' | '平台问题'
+
+export interface Issue {
+  id: string
+  title: string
+  description: string
+  status: IssueStatus
+  severity: IssueSeverity
+  source: IssueSource
+  reporterId: string
+  assigneeId: string
+  scenarioId?: string
+  linkedTaskId?: string
+  resolution?: string
+  createdAt: string
+  updatedAt: string
+  resolvedAt?: string
 }

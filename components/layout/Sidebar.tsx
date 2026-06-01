@@ -8,6 +8,7 @@ import {
   FileBox,
   Calendar,
   Users,
+  Bug,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/tasks', label: '任务', icon: CheckSquare },
   { href: '/deliverables', label: '交付物', icon: FileBox },
   { href: '/meetings', label: '会议', icon: Calendar },
+  { href: '/issues', label: '问题', icon: Bug },
   { href: '/team', label: '团队', icon: Users },
 ]
 

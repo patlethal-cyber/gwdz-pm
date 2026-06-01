@@ -5,11 +5,12 @@ import {
   FileText,
   Calendar,
   Flag,
+  AlertCircle,
 } from 'lucide-react'
 
 interface ActivityItem {
   id: string
-  type: 'task' | 'deliverable' | 'meeting' | 'milestone'
+  type: 'task' | 'deliverable' | 'meeting' | 'milestone' | 'issue'
   action: string
   subject: string
   userName: string
@@ -42,6 +43,11 @@ const typeConfig = {
     icon: Flag,
     bg: 'bg-amber-50',
     color: 'text-amber-600',
+  },
+  issue: {
+    icon: AlertCircle,
+    bg: 'bg-red-50',
+    color: 'text-red-600',
   },
 }
 
