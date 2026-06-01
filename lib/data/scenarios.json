@@ -1,0 +1,14 @@
+[
+  {"id":"s01","code":"S01","name":"质量分析报告生成","department":"客户质量部","type":"文档生成","batch":"二批（提前）","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"green","dataNote":"10文件 41MB，缺Word模板原件","owner":"m04"},
+  {"id":"s02","code":"S02","name":"失效器件信息查询与追踪","department":"客户质量部","type":"知识检索","batch":"一批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"green","dataNote":"20文件 14.5MB，最充分","owner":"m06"},
+  {"id":"s04","code":"S04","name":"质量履历查询与智能总结","department":"客户质量部","type":"知识检索","batch":"一批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"amber","dataNote":"2文件 426KB，少但密度高","owner":"m02"},
+  {"id":"s06","code":"S06","name":"失效分析知识库与语义搜索","department":"客户质量部","type":"知识检索","batch":"一批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"red","dataNote":"卡客户首批入库清单","owner":"m06"},
+  {"id":"s98","code":"S98","name":"质量问题引发供货管控查询","department":"客户质量部","type":"知识推理","batch":"二批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"amber","dataNote":"1文件 15KB，缺批次编码规则","owner":"m07"},
+  {"id":"s100","code":"S100","name":"质量文档审核","department":"客户质量部","type":"审核校验","batch":"一批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"red","dataNote":"1文件 18KB，严重缺6类文档样本","owner":"m07"},
+  {"id":"s101","code":"S101","name":"失效分析思路助手","department":"客户质量部","type":"知识推理","batch":"二批","executionGroup":"第二执行组","blueprintVersion":"v2 (0527)","dataReadiness":"amber","dataNote":"共享库 A1/A2/A3，跟随S06进度","owner":"m06"},
+  {"id":"s37","code":"37","name":"ATE固化升级流程文档自动生成","department":"测试一部","type":"文档生成","batch":"待定","executionGroup":"第一执行组","blueprintVersion":"v2.2 (0527)","dataReadiness":"green","dataNote":"已就绪","owner":"m04"},
+  {"id":"s38","code":"38","name":"测试知识助手","department":"测试一部","type":"知识检索","batch":"待定","executionGroup":"第一执行组","blueprintVersion":"v2.2 (0527)","dataReadiness":"green","dataNote":"200+文档（含版权风险）","owner":"m04"},
+  {"id":"s53","code":"53","name":"检查报告错别字优化行文流畅性","department":"测试二部","type":"审核校验","batch":"待定","executionGroup":"第一执行组","blueprintVersion":"v2.2 (0527)","dataReadiness":"green","dataNote":"已就绪","owner":"m04"},
+  {"id":"s95","code":"95","name":"测试报告AI生成","department":"测试二部","type":"文档生成","batch":"待定","executionGroup":"第一执行组","blueprintVersion":"v2.2 (0527)","dataReadiness":"green","dataNote":"已就绪，蓝图待评审","owner":"m05"},
+  {"id":"s99","code":"99","name":"QA问题记录检索","department":"测试二部","type":"知识检索","batch":"待定","executionGroup":"第一执行组","blueprintVersion":"v2.2 (0527)","dataReadiness":"green","dataNote":"1000+条QA记录","owner":"m05"}
+]

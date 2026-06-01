@@ -1,0 +1,9 @@
+[
+  {"id":"m1","code":"M1","name":"合同签订","date":"2026-05-15","status":"已完成","description":"法审完成，60自然日交付周期正式启动"},
+  {"id":"m2","code":"M2","name":"项目启动会","date":"2026-05-21","status":"已完成","description":"启动会 PPT 052901，仍在迭代中"},
+  {"id":"m3","code":"M3","name":"环境部署完成","date":"2026-05-25","status":"已完成","description":"HIAgent v2.5.1 部署于 8 节点 K8s"},
+  {"id":"m4","code":"M4","name":"第一批次 UAT 完成","date":"2026-06-18","status":"进行中","description":"S02/S04/S06/S100 数据底座 Agent 上线"},
+  {"id":"m5","code":"M5","name":"第二批次 UAT 完成","date":"2026-06-30","status":"待开始","description":"S01/S98/S101 消费数据底座，合同 60 天红线"},
+  {"id":"m6","code":"M6","name":"初验完成","date":"2026-07-15","status":"待开始","description":"试运行开始"},
+  {"id":"m7","code":"M7","name":"项目终验","date":"2026-08-14","status":"待开始","description":"之后进入 12 个月驻场支持"}
+]

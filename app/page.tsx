@@ -1,65 +1,128 @@
-import Image from "next/image";
+import Header from '@/components/layout/Header'
+import StatsCards from '@/components/dashboard/StatsCards'
+import MilestoneTimeline from '@/components/dashboard/MilestoneTimeline'
+import RiskAlerts from '@/components/dashboard/RiskAlerts'
+import ActivityFeed from '@/components/dashboard/ActivityFeed'
+import {
+  tasks,
+  milestones,
+  deliverables,
+  activities,
+  getTasksByStatus,
+  getOverdueTasks,
+  getMember,
+  getScenario,
+} from '@/lib/store'
 
-export default function Home() {
+export default function DashboardPage() {
+  // --- Stats ---
+  const totalTasks = tasks.length
+  const inProgress = getTasksByStatus('进行中').length
+  const overdueTasks = getOverdueTasks()
+  const overdueCount = overdueTasks.length
+
+  const archivedCount = deliverables.filter(
+    (d) => d.status === '已归档'
+  ).length
+  const deliverableRate = Math.round(
+    (archivedCount / deliverables.length) * 100
+  )
+
+  // --- Risk items ---
+  const urgentTasks = tasks.filter(
+    (t) => t.priority === '紧急' && t.status !== '已完成'
+  )
+
+  const riskMap = new Map<
+    string,
+    {
+      id: string
+      title: string
+      assignee: string
+      dueDate: string
+      scenario?: string
+      type: 'overdue' | 'urgent'
+    }
+  >()
+
+  for (const t of overdueTasks) {
+    const member = getMember(t.assigneeId)
+    const scenario = t.scenarioId ? getScenario(t.scenarioId) : undefined
+    riskMap.set(t.id, {
+      id: t.id,
+      title: t.title,
+      assignee: member?.name ?? t.assigneeId,
+      dueDate: t.dueDate,
+      scenario: scenario?.code,
+      type: 'overdue',
+    })
+  }
+
+  for (const t of urgentTasks) {
+    if (!riskMap.has(t.id)) {
+      const member = getMember(t.assigneeId)
+      const scenario = t.scenarioId ? getScenario(t.scenarioId) : undefined
+      riskMap.set(t.id, {
+        id: t.id,
+        title: t.title,
+        assignee: member?.name ?? t.assigneeId,
+        dueDate: t.dueDate,
+        scenario: scenario?.code,
+        type: 'urgent',
+      })
+    }
+  }
+
+  const riskItems = Array.from(riskMap.values()).sort((a, b) => {
+    if (a.type === 'overdue' && b.type !== 'overdue') return -1
+    if (a.type !== 'overdue' && b.type === 'overdue') return 1
+    return a.dueDate.localeCompare(b.dueDate)
+  })
+
+  // --- Activity feed ---
+  const sortedActivities = [...activities]
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    )
+    .slice(0, 8)
+
+  const activityItems = sortedActivities.map((act) => {
+    const member = getMember(act.userId)
+    return {
+      id: act.id,
+      type: act.type,
+      action: act.action,
+      subject: act.subject,
+      userName: member?.name ?? act.userId,
+      userInitials: member?.initials ?? '??',
+      userColor: member?.color ?? '#6b7280',
+      timestamp: act.timestamp,
+    }
+  })
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
+
+      <div className="p-6 space-y-6">
+        {/* KPI Cards */}
+        <StatsCards
+          totalTasks={totalTasks}
+          inProgress={inProgress}
+          overdue={overdueCount}
+          deliverableRate={deliverableRate}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        {/* Milestone Timeline */}
+        <MilestoneTimeline milestones={milestones} />
+
+        {/* Bottom row: Risks + Activity */}
+        <div className="grid grid-cols-2 gap-6">
+          <RiskAlerts items={riskItems} />
+          <ActivityFeed items={activityItems} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </div>
+    </>
+  )
 }
