@@ -1,11 +1,26 @@
 'use client'
 
-import { scenarios, deliverables } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 
-const GANTT_START = new Date('2026-05-01')
-const GANTT_END = new Date('2026-08-15')
-const TODAY = new Date('2026-05-31')
-const TOTAL_DAYS = Math.ceil((GANTT_END.getTime() - GANTT_START.getTime()) / (1000 * 60 * 60 * 24))
+function parseDate(s: string) {
+  const [y, m, d] = s.split('-').map(Number)
+  return { year: y, month: m, day: d }
+}
+
+function dateToDays(s: string): number {
+  const { year, month, day } = parseDate(s)
+  // Simple day count from a reference point (2026-01-01)
+  const monthDays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  let total = 0
+  for (let m = 1; m < month; m++) total += monthDays[m]
+  total += day
+  total += (year - 2026) * 365
+  return total
+}
+
+const GANTT_START_DAYS = dateToDays('2026-05-01')
+const GANTT_END_DAYS = dateToDays('2026-08-15')
+const TOTAL_DAYS = GANTT_END_DAYS - GANTT_START_DAYS
 
 const BATCH_COLORS: Record<string, string> = {
   '一批': '#7c3aed',
@@ -43,26 +58,17 @@ const READINESS_COLORS: Record<string, string> = {
 }
 
 function dayOffset(dateStr: string): number {
-  const d = new Date(dateStr)
-  return Math.ceil((d.getTime() - GANTT_START.getTime()) / (1000 * 60 * 60 * 24))
+  return dateToDays(dateStr) - GANTT_START_DAYS
 }
 
 function pct(days: number): number {
   return (days / TOTAL_DAYS) * 100
 }
 
-function getProgress(scenarioCode: string): number {
-  const scenarioDeliverables = deliverables.filter(d => d.scenarioCode === scenarioCode)
-  if (scenarioDeliverables.length === 0) return 0
-  const archived = scenarioDeliverables.filter(d => d.status === '已归档').length
-  return archived / scenarioDeliverables.length
-}
-
 function truncateName(name: string, max: number): string {
   return name.length > max ? name.slice(0, max) + '...' : name
 }
 
-// Generate month labels for header
 function getMonthLabels() {
   const labels: { month: string; startPct: number; widthPct: number }[] = []
   const months = [
@@ -79,12 +85,20 @@ function getMonthLabels() {
   return labels
 }
 
-// Scenario ordering: batch 1 first, then batch 2, then TBD
 const BATCH_ORDER: Record<string, number> = { '一批': 0, '二批（提前）': 1, '二批': 1, '待定': 2 }
 
 export default function GanttChart() {
+  const { scenarios, deliverables } = useData()
+
   const monthLabels = getMonthLabels()
   const todayPct = pct(dayOffset('2026-05-31'))
+
+  function getProgress(scenarioCode: string): number {
+    const scenarioDeliverables = deliverables.filter(d => d.scenarioCode === scenarioCode)
+    if (scenarioDeliverables.length === 0) return 0
+    const archived = scenarioDeliverables.filter(d => d.status === '已归档').length
+    return archived / scenarioDeliverables.length
+  }
 
   const sortedScenarios = [...scenarios].sort((a, b) => {
     const batchA = BATCH_ORDER[a.batch] ?? 3
@@ -201,31 +215,6 @@ export default function GanttChart() {
               )
             })}
 
-            {/* Today line */}
-            <div
-              className="absolute top-0 h-full border-l-2 border-dashed border-red-400 z-10"
-              style={{ left: `calc(180px + (100% - 180px) * ${todayPct / 100})` }}
-            >
-              <span className="absolute -top-5 -translate-x-1/2 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-medium text-white whitespace-nowrap">
-                今天
-              </span>
-            </div>
-
-            {/* Milestone lines */}
-            {MILESTONES.map((ms) => {
-              const msPct = pct(dayOffset(ms.date))
-              return (
-                <div
-                  key={ms.code}
-                  className="absolute top-0 h-full border-l border-dotted border-gray-300 z-[5]"
-                  style={{ left: `calc(180px + (100% - 180px) * ${msPct / 100})` }}
-                >
-                  <span className="absolute -bottom-5 -translate-x-1/2 text-[9px] text-gray-400 whitespace-nowrap">
-                    {ms.label}
-                  </span>
-                </div>
-              )
-            })}
           </div>
 
           {/* Legend */}

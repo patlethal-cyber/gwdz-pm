@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { X } from 'lucide-react'
 import type { Issue, IssueStatus, IssueSeverity, IssueSource } from '@/lib/types'
-import { team, scenarios, tasks } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 
 const statusOptions: IssueStatus[] = ['待处理', '处理中', '已解决', '已关闭', '已驳回']
 const severityOptions: IssueSeverity[] = ['严重', '一般', '轻微', '建议']
@@ -21,6 +21,7 @@ function generateId() {
 }
 
 export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModalProps) {
+  const { team, scenarios, tasks } = useData()
   const isEdit = !!issue
 
   const [title, setTitle] = useState('')
@@ -94,7 +95,6 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
 
   if (!isOpen) return null
 
-  const allTeam = team
   const showResolution = status === '已解决' || status === '已关闭'
 
   return (
@@ -182,7 +182,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">选择负责人...</option>
-                {allTeam.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}({m.organization})</option>)}
+                {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}({m.organization})</option>)}
               </select>
             </div>
           </div>

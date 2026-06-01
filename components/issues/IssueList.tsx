@@ -1,6 +1,7 @@
 'use client'
 
-import type { Issue, IssueStatus, IssueSeverity } from '@/lib/types'
+import Link from 'next/link'
+import type { Issue, IssueStatus, IssueSeverity, Task } from '@/lib/types'
 import type { TeamMember, Scenario } from '@/lib/types'
 
 const severityStyle: Record<IssueSeverity, string> = {
@@ -25,6 +26,7 @@ interface IssueListProps {
   onEdit: (issue: Issue) => void
   team: TeamMember[]
   scenarios: Scenario[]
+  tasks?: Task[]
 }
 
 function getMemberById(team: TeamMember[], id: string) {
@@ -35,7 +37,11 @@ function getScenarioById(scenarios: Scenario[], id: string) {
   return scenarios.find(s => s.id === id)
 }
 
-export default function IssueList({ issues, onEdit, team, scenarios }: IssueListProps) {
+function getTaskById(tasks: Task[], id: string) {
+  return tasks.find(t => t.id === id)
+}
+
+export default function IssueList({ issues, onEdit, team, scenarios, tasks = [] }: IssueListProps) {
   const sorted = [...issues].sort((a, b) => {
     const sevCmp = severityOrder[a.severity] - severityOrder[b.severity]
     if (sevCmp !== 0) return sevCmp
@@ -53,6 +59,7 @@ export default function IssueList({ issues, onEdit, team, scenarios }: IssueList
             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-20">状态</th>
             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-24">来源</th>
             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-24">关联场景</th>
+            <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-28">关联任务</th>
             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-32">负责人</th>
             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-28">报告日期</th>
           </tr>
@@ -61,6 +68,7 @@ export default function IssueList({ issues, onEdit, team, scenarios }: IssueList
           {sorted.map(issue => {
             const member = getMemberById(team, issue.assigneeId)
             const scenario = issue.scenarioId ? getScenarioById(scenarios, issue.scenarioId) : undefined
+            const linkedTask = issue.linkedTaskId ? getTaskById(tasks, issue.linkedTaskId) : undefined
 
             return (
               <tr
@@ -90,6 +98,20 @@ export default function IssueList({ issues, onEdit, team, scenarios }: IssueList
                 <td className="px-4 py-3">
                   {scenario ? (
                     <span className="text-xs text-violet-600 font-medium">{scenario.code}</span>
+                  ) : (
+                    <span className="text-xs text-gray-300">-</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {linkedTask ? (
+                    <Link
+                      href="/tasks"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium truncate block max-w-[100px]"
+                      title={linkedTask.title}
+                    >
+                      {linkedTask.title}
+                    </Link>
                   ) : (
                     <span className="text-xs text-gray-300">-</span>
                   )}

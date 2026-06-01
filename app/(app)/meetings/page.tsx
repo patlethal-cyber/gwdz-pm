@@ -1,22 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import MeetingList from '@/components/meetings/MeetingList'
 import MeetingModal from '@/components/meetings/MeetingModal'
-import { meetings as initialMeetings, getUpcomingMeetings, getPastMeetings } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { Meeting } from '@/lib/types'
 
 type Tab = 'upcoming' | 'past'
 
 export default function MeetingsPage() {
+  const { meetings, addMeeting, updateMeeting, ready } = useData()
   const [activeTab, setActiveTab] = useState<Tab>('upcoming')
   const [modalMeeting, setModalMeeting] = useState<Meeting | null | undefined>(undefined)
   // undefined = closed, null = create mode, Meeting = view/edit mode
 
-  const upcoming = getUpcomingMeetings()
-  const past = getPastMeetings()
+  const upcoming = useMemo(
+    () => meetings.filter(m => m.status === '即将召开').sort((a, b) => a.date.localeCompare(b.date)),
+    [meetings]
+  )
+
+  const past = useMemo(
+    () => meetings.filter(m => m.status === '已结束').sort((a, b) => b.date.localeCompare(a.date)),
+    [meetings]
+  )
 
   function openCreate() {
     setModalMeeting(null)
@@ -31,8 +39,22 @@ export default function MeetingsPage() {
   }
 
   function handleSave(meeting: Meeting) {
-    // In a real app this would persist; for now just close
+    const exists = meetings.some(m => m.id === meeting.id)
+    if (exists) {
+      updateMeeting(meeting.id, meeting)
+    } else {
+      const { id, createdAt, ...rest } = meeting
+      addMeeting(rest)
+    }
     closeModal()
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    )
   }
 
   const tabs: { key: Tab; label: string; count: number }[] = [

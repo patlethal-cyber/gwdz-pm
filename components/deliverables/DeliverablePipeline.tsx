@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
-import { deliverables, getMember } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
 const STATUS_COLUMNS: {
@@ -21,14 +21,19 @@ const STATUS_COLUMNS: {
 
 interface DeliverablePipelineProps {
   filteredDeliverables: Deliverable[]
+  onSelect: (d: Deliverable) => void
 }
 
-function DeliverableCard({ d }: { d: Deliverable }) {
+function DeliverableCard({ d, onSelect }: { d: Deliverable; onSelect: (d: Deliverable) => void }) {
+  const { getMember } = useData()
   const owner = getMember(d.ownerId)
   const updatedDate = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : ''
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group">
+    <div
+      onClick={() => onSelect(d)}
+      className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group"
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="text-sm font-medium text-gray-900 leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
           {d.name}
@@ -70,7 +75,7 @@ function DeliverableCard({ d }: { d: Deliverable }) {
   )
 }
 
-export default function DeliverablePipeline({ filteredDeliverables }: DeliverablePipelineProps) {
+export default function DeliverablePipeline({ filteredDeliverables, onSelect }: DeliverablePipelineProps) {
   return (
     <div className="flex gap-0 overflow-x-auto pb-4 px-6 pt-4 min-h-0 flex-1">
       {STATUS_COLUMNS.map((col, idx) => {
@@ -95,7 +100,7 @@ export default function DeliverablePipeline({ filteredDeliverables }: Deliverabl
                     暂无交付物
                   </div>
                 ) : (
-                  items.map(d => <DeliverableCard key={d.id} d={d} />)
+                  items.map(d => <DeliverableCard key={d.id} d={d} onSelect={onSelect} />)
                 )}
               </div>
             </div>

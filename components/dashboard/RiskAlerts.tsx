@@ -1,7 +1,6 @@
 'use client'
 
 import { AlertTriangle, Clock, ShieldCheck } from 'lucide-react'
-import type { Task } from '@/lib/types'
 
 interface RiskItem {
   id: string
@@ -17,17 +16,22 @@ interface RiskAlertsProps {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function isOverdue(dateStr: string) {
-  return dateStr < '2026-05-31'
+  const parts = dateStr.split('-')
+  return `${parts[0]}-${parts[1]}-${parts[2]}`
 }
 
 function daysUntil(dateStr: string) {
-  const diff = (new Date(dateStr).getTime() - new Date('2026-05-31').getTime()) / (1000 * 60 * 60 * 24)
-  return Math.ceil(diff)
+  const pa = '2026-05-31'.split('-').map(Number)
+  const pb = dateStr.split('-').map(Number)
+  const monthDays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  function toDayCount(parts: number[]) {
+    let total = 0
+    for (let m = 1; m < parts[1]; m++) total += monthDays[m]
+    total += parts[2]
+    total += (parts[0] - 2026) * 365
+    return total
+  }
+  return toDayCount(pb) - toDayCount(pa)
 }
 
 export default function RiskAlerts({ items }: RiskAlertsProps) {

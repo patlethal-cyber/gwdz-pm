@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
-import { getMember } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
 const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: string }> = {
@@ -18,11 +18,13 @@ type SortDir = 'asc' | 'desc'
 
 interface DeliverableListProps {
   filteredDeliverables: Deliverable[]
+  onSelect: (d: Deliverable) => void
 }
 
 const STATUS_ORDER: DeliverableStatus[] = ['待编制', '编制中', '待审核', '待签字', '已归档']
 
-export default function DeliverableList({ filteredDeliverables }: DeliverableListProps) {
+export default function DeliverableList({ filteredDeliverables, onSelect }: DeliverableListProps) {
+  const { getMember } = useData()
   const [sortField, setSortField] = useState<SortField>('code')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
@@ -98,6 +100,7 @@ export default function DeliverableList({ filteredDeliverables }: DeliverableLis
                 return (
                   <tr
                     key={d.id}
+                    onClick={() => onSelect(d)}
                     className={`border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/40' : ''}`}
                   >
                     <td className="px-4 py-3 font-medium text-gray-900">{d.name}</td>

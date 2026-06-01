@@ -9,6 +9,7 @@ import {
   Calendar,
   Users,
   Bug,
+  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/meetings', label: '会议', icon: Calendar },
   { href: '/issues', label: '问题', icon: Bug },
   { href: '/team', label: '团队', icon: Users },
+  { href: '/reports', label: '报告', icon: FileText },
 ]
 
 export default function Sidebar() {

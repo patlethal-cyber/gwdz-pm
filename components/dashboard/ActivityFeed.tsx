@@ -52,10 +52,20 @@ const typeConfig = {
 }
 
 function relativeTime(timestamp: string) {
-  const now = new Date('2026-05-31T12:00:00')
-  const then = new Date(timestamp)
-  const diffMs = now.getTime() - then.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
+  // Parse timestamps by splitting to avoid Date constructor timezone issues
+  const nowParts = '2026-05-31T12:00:00'.split(/[-T:]/).map(Number)
+  const thenParts = timestamp.split(/[-T:]/).map(Number)
+
+  const monthDays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  function toMinutes(p: number[]) {
+    let days = 0
+    for (let m = 1; m < p[1]; m++) days += monthDays[m]
+    days += p[2]
+    days += (p[0] - 2026) * 365
+    return days * 24 * 60 + p[3] * 60 + p[4]
+  }
+
+  const diffMin = toMinutes(nowParts) - toMinutes(thenParts)
   const diffHr = Math.floor(diffMin / 60)
   const diffDay = Math.floor(diffHr / 24)
 
@@ -64,7 +74,7 @@ function relativeTime(timestamp: string) {
   if (diffHr < 24) return `${diffHr} 小时前`
   if (diffDay === 1) return '昨天'
   if (diffDay < 7) return `${diffDay} 天前`
-  return `${then.getMonth() + 1}/${then.getDate()}`
+  return `${thenParts[1]}/${thenParts[2]}`
 }
 
 export default function ActivityFeed({ items }: ActivityFeedProps) {
@@ -75,7 +85,7 @@ export default function ActivityFeed({ items }: ActivityFeedProps) {
       </h2>
 
       <div className="space-y-1">
-        {items.map((item, idx) => {
+        {items.map((item) => {
           const config = typeConfig[item.type]
           const Icon = config.icon
 

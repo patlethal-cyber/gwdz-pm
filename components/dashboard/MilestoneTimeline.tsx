@@ -1,10 +1,7 @@
 'use client'
 
+import { useData } from '@/lib/data-context'
 import type { Milestone } from '@/lib/types'
-
-interface MilestoneTimelineProps {
-  milestones: Milestone[]
-}
 
 function statusDot(status: Milestone['status']) {
   switch (status) {
@@ -29,18 +26,31 @@ function statusLabel(status: Milestone['status']) {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return `${d.getMonth() + 1}/${d.getDate()}`
+  const parts = dateStr.split('-')
+  const m = parseInt(parts[1], 10)
+  const d = parseInt(parts[2], 10)
+  return `${m}/${d}`
 }
 
 function daysBetween(a: string, b: string) {
-  return (new Date(b).getTime() - new Date(a).getTime()) / (1000 * 60 * 60 * 24)
+  const pa = a.split('-').map(Number)
+  const pb = b.split('-').map(Number)
+  // Simple day calc using month lengths
+  const monthDays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  function toDayCount(parts: number[]) {
+    let total = 0
+    for (let m = 1; m < parts[1]; m++) total += monthDays[m]
+    total += parts[2]
+    total += (parts[0] - 2026) * 365
+    return total
+  }
+  return toDayCount(pb) - toDayCount(pa)
 }
 
-export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps) {
-  const sorted = [...milestones].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  )
+export default function MilestoneTimeline() {
+  const { milestones } = useData()
+
+  const sorted = [...milestones].sort((a, b) => a.date.localeCompare(b.date))
 
   const today = '2026-05-31'
   const firstDate = sorted[0]?.date ?? today
@@ -82,41 +92,38 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
 
         {/* milestone nodes */}
         <div className="relative flex justify-between">
-          {sorted.map((ms) => {
-            const pct = (daysBetween(firstDate, ms.date) / totalSpan) * 100
-            return (
-              <div
-                key={ms.id}
-                className="flex flex-col items-center"
-                style={{ width: `${100 / sorted.length}%` }}
+          {sorted.map((ms) => (
+            <div
+              key={ms.id}
+              className="flex flex-col items-center"
+              style={{ width: `${100 / sorted.length}%` }}
+            >
+              {/* code label */}
+              <span className="mb-2 text-xs font-bold text-gray-700">
+                {ms.code}
+              </span>
+
+              {/* dot */}
+              <div className={`z-10 h-3.5 w-3.5 rounded-full ${statusDot(ms.status)}`} />
+
+              {/* name */}
+              <span className="mt-2 text-xs font-medium text-gray-800 text-center leading-tight max-w-[100px]">
+                {ms.name}
+              </span>
+
+              {/* date */}
+              <span className="mt-0.5 text-[11px] text-gray-400">
+                {formatDate(ms.date)}
+              </span>
+
+              {/* status badge */}
+              <span
+                className={`mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusLabel(ms.status)}`}
               >
-                {/* code label */}
-                <span className="mb-2 text-xs font-bold text-gray-700">
-                  {ms.code}
-                </span>
-
-                {/* dot */}
-                <div className={`z-10 h-3.5 w-3.5 rounded-full ${statusDot(ms.status)}`} />
-
-                {/* name */}
-                <span className="mt-2 text-xs font-medium text-gray-800 text-center leading-tight max-w-[100px]">
-                  {ms.name}
-                </span>
-
-                {/* date */}
-                <span className="mt-0.5 text-[11px] text-gray-400">
-                  {formatDate(ms.date)}
-                </span>
-
-                {/* status badge */}
-                <span
-                  className={`mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${statusLabel(ms.status)}`}
-                >
-                  {ms.status}
-                </span>
-              </div>
-            )
-          })}
+                {ms.status}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

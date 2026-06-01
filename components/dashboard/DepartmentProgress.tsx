@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { deliverables } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { DeliverableStatus } from '@/lib/types'
 
 const STATUS_CONFIG: { status: DeliverableStatus; label: string; color: string }[] = [
@@ -30,6 +30,8 @@ const DEPT_SHORT: Record<string, string> = {
 }
 
 export default function DepartmentProgress() {
+  const { deliverables } = useData()
+
   const data = DEPARTMENTS.map((dept) => {
     const deptDeliverables = deliverables.filter(d => d.department === dept)
     const row: Record<string, string | number> = { name: DEPT_SHORT[dept] ?? dept }
@@ -41,7 +43,7 @@ export default function DepartmentProgress() {
   })
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="min-h-[300px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <h2 className="mb-4 text-base font-semibold text-gray-900">
         部门交付进度
       </h2>

@@ -15,7 +15,7 @@ import {
   Users,
 } from 'lucide-react'
 import type { Meeting, AgendaItem, ActionItem, MeetingStatus } from '@/lib/types'
-import { team, getMember } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 
 type MeetingType = Meeting['type']
 
@@ -57,6 +57,7 @@ function emptyMeeting(): Meeting {
 }
 
 export default function MeetingModal({ meeting, onClose, onSave }: MeetingModalProps) {
+  const { team, getMember } = useData()
   const isCreate = !meeting
   const [form, setForm] = useState<Meeting>(meeting ? { ...meeting } : emptyMeeting())
   const [showAttendeeDropdown, setShowAttendeeDropdown] = useState(false)

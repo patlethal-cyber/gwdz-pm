@@ -5,8 +5,9 @@ import { LayoutGrid, List, ChevronDown } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import DeliverablePipeline from '@/components/deliverables/DeliverablePipeline'
 import DeliverableList from '@/components/deliverables/DeliverableList'
-import { deliverables, getDeliverablesByStatus } from '@/lib/store'
-import type { DeliverableStatus } from '@/lib/types'
+import DeliverableModal from '@/components/deliverables/DeliverableModal'
+import { useData } from '@/lib/data-context'
+import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
 type ViewMode = 'pipeline' | 'list'
 
@@ -51,9 +52,12 @@ function FilterDropdown({
 }
 
 export default function DeliverablesPage() {
+  const { deliverables, updateDeliverable, ready } = useData()
   const [viewMode, setViewMode] = useState<ViewMode>('pipeline')
   const [deptFilter, setDeptFilter] = useState('全部')
   const [templateFilter, setTemplateFilter] = useState('全部')
+  const [selectedDeliverable, setSelectedDeliverable] = useState<Deliverable | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const filteredDeliverables = useMemo(() => {
     return deliverables.filter(d => {
@@ -61,7 +65,7 @@ export default function DeliverablesPage() {
       if (templateFilter !== '全部' && d.templateType !== templateFilter) return false
       return true
     })
-  }, [deptFilter, templateFilter])
+  }, [deliverables, deptFilter, templateFilter])
 
   const statusCounts = useMemo(() => {
     const counts: Record<DeliverableStatus, number> = {
@@ -72,6 +76,31 @@ export default function DeliverablesPage() {
     }
     return counts
   }, [filteredDeliverables])
+
+  function handleSelect(d: Deliverable) {
+    setSelectedDeliverable(d)
+    setModalOpen(true)
+  }
+
+  function handleModalClose() {
+    setModalOpen(false)
+    setSelectedDeliverable(null)
+  }
+
+  function handleModalSave(updates: Partial<Deliverable>) {
+    if (selectedDeliverable) {
+      updateDeliverable(selectedDeliverable.id, updates)
+    }
+    handleModalClose()
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    )
+  }
 
   const headerActions = (
     <div className="flex items-center gap-2">
@@ -132,10 +161,18 @@ export default function DeliverablesPage() {
 
       {/* View content */}
       {viewMode === 'pipeline' ? (
-        <DeliverablePipeline filteredDeliverables={filteredDeliverables} />
+        <DeliverablePipeline filteredDeliverables={filteredDeliverables} onSelect={handleSelect} />
       ) : (
-        <DeliverableList filteredDeliverables={filteredDeliverables} />
+        <DeliverableList filteredDeliverables={filteredDeliverables} onSelect={handleSelect} />
       )}
+
+      {/* Modal */}
+      <DeliverableModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        deliverable={selectedDeliverable ?? undefined}
+        onSave={handleModalSave}
+      />
     </div>
   )
 }

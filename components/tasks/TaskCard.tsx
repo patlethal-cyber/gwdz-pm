@@ -1,8 +1,8 @@
 'use client'
 
-import { Calendar, Tag } from 'lucide-react'
+import { Calendar, Tag, Bug } from 'lucide-react'
 import type { Task } from '@/lib/types'
-import { getMember, getScenario } from '@/lib/store'
+import type { Issue } from '@/lib/types'
 
 const priorityConfig: Record<Task['priority'], { color: string; dot: string }> = {
   '紧急': { color: 'text-red-700 bg-red-50', dot: 'bg-red-500' },
@@ -14,11 +14,15 @@ const priorityConfig: Record<Task['priority'], { color: string; dot: string }> =
 interface TaskCardProps {
   task: Task
   onClick: (task: Task) => void
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, task: Task) => void
+  linkedIssue?: Issue
+  getMember?: (id: string) => { name: string; initials: string; color: string } | undefined
+  getScenario?: (id: string) => { code: string; name: string } | undefined
 }
 
-export default function TaskCard({ task, onClick }: TaskCardProps) {
-  const member = getMember(task.assigneeId)
-  const scenario = task.scenarioId ? getScenario(task.scenarioId) : undefined
+export default function TaskCard({ task, onClick, onDragStart, linkedIssue, getMember, getScenario }: TaskCardProps) {
+  const member = getMember?.(task.assigneeId)
+  const scenario = task.scenarioId ? getScenario?.(task.scenarioId) : undefined
   const prio = priorityConfig[task.priority]
   const today = '2026-05-31'
   const isOverdue = task.status !== '已完成' && task.dueDate < today
@@ -28,13 +32,20 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
   return (
     <div
+      draggable="true"
+      onDragStart={e => onDragStart?.(e, task)}
       onClick={() => onClick(task)}
-      className="bg-white rounded-lg border border-gray-200 p-3.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+      className="bg-white rounded-lg border border-gray-200 p-3.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group active:cursor-grabbing"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h4 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {task.title}
-        </h4>
+        <div className="flex items-center gap-1.5 min-w-0">
+          {linkedIssue && (
+            <Bug size={13} className="text-red-500 flex-shrink-0" />
+          )}
+          <h4 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+            {task.title}
+          </h4>
+        </div>
         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium flex-shrink-0 ${prio.color}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${prio.dot}`} />
           {task.priority}

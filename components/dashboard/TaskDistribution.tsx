@@ -1,7 +1,7 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts'
-import { tasks } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { TaskStatus } from '@/lib/types'
 
 const STATUS_CONFIG: { status: TaskStatus; label: string; color: string }[] = [
@@ -12,6 +12,8 @@ const STATUS_CONFIG: { status: TaskStatus; label: string; color: string }[] = [
 ]
 
 export default function TaskDistribution() {
+  const { tasks } = useData()
+
   const data = STATUS_CONFIG.map(({ status, label, color }) => ({
     name: label,
     value: tasks.filter(t => t.status === status).length,
@@ -21,7 +23,7 @@ export default function TaskDistribution() {
   const total = tasks.length
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="min-h-[300px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <h2 className="mb-4 text-base font-semibold text-gray-900">
         任务分布
       </h2>

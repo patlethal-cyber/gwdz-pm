@@ -2,7 +2,7 @@
 
 import { Clock, MapPin, ListChecks, CheckCircle2 } from 'lucide-react'
 import type { Meeting } from '@/lib/types'
-import { getMember } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 
 type MeetingType = Meeting['type']
 
@@ -29,6 +29,8 @@ function formatDate(dateStr: string): string {
 }
 
 export default function MeetingList({ meetings, variant, onSelect }: MeetingListProps) {
+  const { getMember } = useData()
+
   if (meetings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Info, Shield, Database, HelpCircle, Eye, EyeOff, Download, ExternalLink, CheckSquare, FileText, Calendar, AlertTriangle, Users, Cpu } from 'lucide-react'
 import Header from '@/components/layout/Header'
-import { tasks, deliverables, meetings, issues, team, scenarios } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 
 function getDaysRemaining(target: string): number {
   const now = new Date('2026-05-31')
@@ -13,6 +13,7 @@ function getDaysRemaining(target: string): number {
 }
 
 export default function SettingsPage() {
+  const { tasks, deliverables, meetings, issues, team, scenarios, ready } = useData()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -37,6 +38,14 @@ export default function SettingsPage() {
     showToast('功能开发中')
   }
 
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    )
+  }
+
   const projectInfo = [
     { label: '项目名称', value: '国微电子 HIAgent AI 智能体项目' },
     { label: '合同签订', value: '2026-05-15' },
@@ -46,7 +55,7 @@ export default function SettingsPage() {
     { label: '平台', value: 'HIAgent v2.5.1' },
     { label: 'LLM', value: 'Qwen 3.5-397B-A17B' },
     { label: '总工作量', value: '326 人天' },
-    { label: '交付物', value: '141 项' },
+    { label: '交付物', value: `${deliverables.length} 项` },
   ]
 
   const stats = [
@@ -245,7 +254,7 @@ export default function SettingsPage() {
                 </a>
               </div>
               <div className="pt-3 mt-3 border-t border-gray-100 px-3">
-                <p className="text-sm text-gray-400">伊登软件 × 火山引擎</p>
+                <p className="text-sm text-gray-400">伊登软件 x 火山引擎</p>
               </div>
             </div>
           </section>

@@ -6,7 +6,7 @@ import Header from '@/components/layout/Header'
 import IssueSummary from '@/components/issues/IssueSummary'
 import IssueList from '@/components/issues/IssueList'
 import IssueModal from '@/components/issues/IssueModal'
-import { issues as storeIssues, team, scenarios } from '@/lib/store'
+import { useData } from '@/lib/data-context'
 import type { Issue, IssueStatus, IssueSeverity, IssueSource } from '@/lib/types'
 
 const statusOptions: IssueStatus[] = ['待处理', '处理中', '已解决', '已关闭', '已驳回']
@@ -14,7 +14,7 @@ const severityOptions: IssueSeverity[] = ['严重', '一般', '轻微', '建议'
 const sourceOptions: IssueSource[] = ['甲方反馈', 'UAT测试', '内部发现', '平台问题']
 
 export default function IssuesPage() {
-  const [issues, setIssues] = useState<Issue[]>(storeIssues)
+  const { issues, addIssue, updateIssue, team, scenarios, tasks, ready } = useData()
   const [modalOpen, setModalOpen] = useState(false)
   const [editIssue, setEditIssue] = useState<Issue | undefined>(undefined)
 
@@ -38,15 +38,13 @@ export default function IssuesPage() {
   }
 
   function handleSave(saved: Issue) {
-    setIssues(prev => {
-      const idx = prev.findIndex(i => i.id === saved.id)
-      if (idx >= 0) {
-        const next = [...prev]
-        next[idx] = saved
-        return next
-      }
-      return [...prev, saved]
-    })
+    const exists = issues.some(i => i.id === saved.id)
+    if (exists) {
+      updateIssue(saved.id, saved)
+    } else {
+      const { id, createdAt, updatedAt, ...rest } = saved
+      addIssue(rest)
+    }
   }
 
   const filtered = useMemo(() => {
@@ -66,6 +64,14 @@ export default function IssuesPage() {
   // Unique scenarios from current issues
   const scenarioIds = [...new Set(issues.map(i => i.scenarioId).filter(Boolean))] as string[]
   const issueScenarios = scenarioIds.map(id => scenarios.find(s => s.id === id)).filter(Boolean)
+
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -153,6 +159,7 @@ export default function IssuesPage() {
           onEdit={handleEdit}
           team={team}
           scenarios={scenarios}
+          tasks={tasks}
         />
       </div>
 
