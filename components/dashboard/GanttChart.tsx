@@ -74,6 +74,14 @@ const MONTH_DEFS = [
   { label: '8月', start: '2026-08-01', end: '2026-08-15' },
 ]
 
+const STATUS_WEIGHTS: Record<string, number> = {
+  '待编制': 0,
+  '编制中': 0.25,
+  '待审核': 0.5,
+  '待签字': 0.75,
+  '已归档': 1,
+}
+
 const BATCH_ORDER: Record<string, number> = { '一批': 0, '二批（提前）': 1, '二批': 1, '待定': 2 }
 
 const LABEL_WIDTH = 250
@@ -117,7 +125,7 @@ export default function GanttChart() {
       const tasks = getTasksByScenario(sc.id)
       const issues = getIssuesByScenario(sc.id)
       map[sc.id] = {
-        progress: dels.length > 0 ? archived / dels.length : 0,
+        progress: dels.length > 0 ? dels.reduce((sum, d) => sum + (STATUS_WEIGHTS[d.status] ?? 0), 0) / dels.length : 0,
         taskCount: tasks.length,
         issueCount: issues.length,
         totalDel: dels.length,

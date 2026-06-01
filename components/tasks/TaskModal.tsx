@@ -31,6 +31,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
   const [priority, setPriority] = useState<TaskPriority>('中')
   const [category, setCategory] = useState<TaskCategory>('project')
   const [assigneeId, setAssigneeId] = useState('')
+  const [contactId, setContactId] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [scenarioId, setScenarioId] = useState('')
   const [tagsInput, setTagsInput] = useState('')
@@ -43,6 +44,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
       setPriority(task.priority)
       setCategory(task.category || 'project')
       setAssigneeId(task.assigneeId)
+      setContactId(task.contactId || '')
       setDueDate(task.dueDate)
       setScenarioId(task.scenarioId || '')
       setTagsInput(task.tags.join(', '))
@@ -53,6 +55,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
       setPriority('中')
       setCategory('project')
       setAssigneeId('')
+      setContactId('')
       setDueDate('')
       setScenarioId('')
       setTagsInput('')
@@ -80,6 +83,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
       priority,
       category,
       assigneeId,
+      contactId: contactId || undefined,
       dueDate,
       scenarioId: category === 'scenario' ? scenarioId || undefined : undefined,
       tags,
@@ -181,6 +185,35 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
                 {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}</option>)}
               </select>
             </div>
+          </div>
+
+          {/* Contact (external) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">对接人（甲方/火山）</label>
+            <select
+              value={contactId}
+              onChange={e => setContactId(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            >
+              <option value="">无</option>
+              {team.filter(m => m.organization && m.organization !== '乙方').map(m => (
+                <option key={m.id} value={m.id}>{m.name} - {m.role}</option>
+              ))}
+            </select>
+            {contactId && (() => {
+              const contact = team.find(m => m.id === contactId)
+              if (!contact) return null
+              const orgColor = contact.organization === '甲方' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'
+              return (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${orgColor}`}>
+                    {contact.name[0]}
+                  </span>
+                  <span className="text-sm text-gray-700">{contact.name}</span>
+                  <span className="text-xs text-gray-400">{contact.organization}</span>
+                </div>
+              )
+            })()}
           </div>
 
           {/* Scenario (only if category = scenario) */}

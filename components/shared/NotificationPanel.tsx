@@ -5,6 +5,7 @@ import { useData } from '@/lib/data-context'
 import {
   X, CheckSquare, FileText, Bug, Calendar, Flag,
   Plus, RefreshCw, Trash2, ArrowRightLeft,
+  AlertTriangle,
 } from 'lucide-react'
 
 interface NotificationPanelProps {
@@ -54,8 +55,95 @@ function relativeTime(timestamp: string): string {
   return timestamp.slice(0, 10)
 }
 
+function addDays(dateStr: string, n: number): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const dt = new Date(y, m - 1, d + n)
+  const yy = dt.getFullYear()
+  const mm = String(dt.getMonth() + 1).padStart(2, '0')
+  const dd = String(dt.getDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+const syntheticActionLabels: Record<string, string> = {
+  overdue: '逾期提醒',
+  upcoming: '即将开始',
+  severe: '严重问题',
+}
+
 export default function NotificationPanel({ onClose }: NotificationPanelProps) {
-  const { activities, tasks, deliverables, issues, meetings } = useData()
+  const { activities, tasks, deliverables, issues, meetings, today } = useData()
+
+  // Generate synthetic system notifications from live data
+  const systemNotifications = useMemo(() => {
+    const items: Array<{
+      id: string
+      entityType: string
+      entityId: string
+      action: string
+      timestamp: string
+      details?: Record<string, unknown>
+      _synthetic: true
+      _label: string
+      _severity: 'warning' | 'info' | 'error'
+    }> = []
+
+    // 1. Overdue tasks
+    for (const t of tasks) {
+      if (t.status !== '已完成' && t.dueDate && t.dueDate < today) {
+        items.push({
+          id: `sys-overdue-${t.id}`,
+          entityType: 'task',
+          entityId: t.id,
+          action: 'overdue',
+          timestamp: t.dueDate,
+          _synthetic: true,
+          _label: `逾期 ${t.dueDate}`,
+          _severity: 'error',
+        })
+      }
+    }
+
+    // 2. Upcoming meetings (within 3 days)
+    for (const m of meetings) {
+      if (!m.date) continue
+      const meetingDate = m.date
+      // Compare strings directly — YYYY-MM-DD format is sortable
+      if (meetingDate >= today && meetingDate <= addDays(today, 3)) {
+        items.push({
+          id: `sys-meeting-${m.id}`,
+          entityType: 'meeting',
+          entityId: m.id,
+          action: 'upcoming',
+          timestamp: m.date,
+          _synthetic: true,
+          _label: meetingDate === today ? '今天' : `${m.date}`,
+          _severity: 'info',
+        })
+      }
+    }
+
+    // 3. Severe unresolved issues
+    for (const i of issues) {
+      if (
+        i.severity === '严重' &&
+        i.status !== '已解决' &&
+        i.status !== '已关闭'
+      ) {
+        items.push({
+          id: `sys-issue-${i.id}`,
+          entityType: 'issue',
+          entityId: i.id,
+          action: 'severe',
+          timestamp: i.createdAt || today,
+          _synthetic: true,
+          _label: '严重未解决',
+          _severity: 'error',
+        })
+      }
+    }
+
+    return items
+  }, [tasks, meetings, issues, today])
 
   const entries = useMemo(() => {
     const sorted = [...activities].sort((a, b) =>
@@ -114,7 +202,55 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {entries.length === 0 ? (
+        {/* System notifications (synthetic) — always shown when present */}
+        {systemNotifications.length > 0 && (
+          <>
+            <div className="px-4 py-2 bg-amber-50/60 border-b border-amber-100">
+              <span className="text-[11px] font-semibold text-amber-700">系统提醒</span>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {systemNotifications.map(sn => {
+                const EntityIcon = entityTypeIcons[sn.entityType] || Flag
+                const entityName = getEntityName(sn.entityType, sn.entityId)
+
+                const iconBg =
+                  sn._severity === 'error' ? 'bg-red-50 text-red-500' :
+                  sn._severity === 'warning' ? 'bg-amber-50 text-amber-500' :
+                  'bg-blue-50 text-blue-500'
+
+                return (
+                  <div
+                    key={sn.id}
+                    className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors"
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                      <EntityIcon size={14} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <AlertTriangle size={11} className="text-amber-500 flex-shrink-0" />
+                        <span className="text-xs text-gray-500">
+                          {syntheticActionLabels[sn.action] || sn.action}
+                        </span>
+                        <span className="text-[10px] text-gray-400">{sn._label}</span>
+                      </div>
+                      <div className="text-sm text-gray-800 mt-0.5 truncate">{entityName}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Activity-based notifications */}
+        {entries.length > 0 && systemNotifications.length > 0 && (
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
+            <span className="text-[11px] font-semibold text-gray-500">动态</span>
+          </div>
+        )}
+
+        {entries.length === 0 && systemNotifications.length === 0 ? (
           <div className="py-12 text-center text-sm text-gray-400">暂无新通知</div>
         ) : (
           <div className="divide-y divide-gray-50">

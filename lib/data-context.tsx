@@ -3,25 +3,28 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import type {
   Task, Deliverable, DeliverableVersion, Meeting, Issue,
-  TeamMember, ExternalContact, Scenario, Milestone, ActivityLog,
+  TeamMember, Scenario, Milestone, ActivityLog, ProjectFile,
   DashboardStats, PersonAggregation, TaskStatus, DeliverableStatus, IssueStatus,
+  FileCategory,
 } from './types'
-import { SCENARIOS, EXTERNAL_CONTACTS, generateDeliverables } from './seed-generator'
+import { SCENARIOS, generateDeliverables } from './seed-generator'
+import { generateFileMetadata } from './data/files-seed'
 import seedTasks from './data/tasks.json'
 import seedTeam from './data/team.json'
 import seedMilestones from './data/milestones.json'
 import seedMeetings from './data/meetings.json'
 import seedIssues from './data/issues.json'
 
-const DATA_VERSION = '4'
+const DATA_VERSION = '5'
 const KEYS = {
-  tasks: 'gwdz-v4-tasks',
-  deliverables: 'gwdz-v4-deliverables',
-  meetings: 'gwdz-v4-meetings',
-  issues: 'gwdz-v4-issues',
-  activities: 'gwdz-v4-activities',
-  versions: 'gwdz-v4-del-versions',
-  version: 'gwdz-v4-version',
+  tasks: 'gwdz-v5-tasks',
+  deliverables: 'gwdz-v5-deliverables',
+  meetings: 'gwdz-v5-meetings',
+  issues: 'gwdz-v5-issues',
+  activities: 'gwdz-v5-activities',
+  versions: 'gwdz-v5-del-versions',
+  files: 'gwdz-v5-files',
+  version: 'gwdz-v5-version',
 }
 
 function load<T>(key: string, fallback: T[]): T[] {
@@ -45,15 +48,18 @@ function genId(prefix: string): string {
 }
 
 function now(): string {
-  return typeof window !== 'undefined'
-    ? (() => { const d = new window.Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })()
-    : '2026-06-01'
+  if (typeof window === 'undefined') return '2026-06-01'
+  const d = new window.Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
+function nowISO(): string {
+  return typeof window !== 'undefined' ? new window.Date().toISOString() : ''
 }
 
 // ===== Context Interface =====
 
 interface DataContextValue {
-  // 数据
   tasks: Task[]
   deliverables: Deliverable[]
   meetings: Meeting[]
@@ -61,46 +67,46 @@ interface DataContextValue {
   team: TeamMember[]
   scenarios: Scenario[]
   milestones: Milestone[]
-  externalContacts: ExternalContact[]
   activities: ActivityLog[]
   deliverableVersions: DeliverableVersion[]
+  files: ProjectFile[]
 
-  // Task CRUD
   addTask: (t: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateTask: (id: string, u: Partial<Task>) => void
   deleteTask: (id: string) => void
 
-  // Deliverable CRUD
   addDeliverable: (d: Omit<Deliverable, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateDeliverable: (id: string, u: Partial<Deliverable>) => void
   deleteDeliverable: (id: string) => void
   addDeliverableVersion: (v: Omit<DeliverableVersion, 'id' | 'uploadedAt'>) => void
 
-  // Meeting CRUD
   addMeeting: (m: Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateMeeting: (id: string, u: Partial<Meeting>) => void
   deleteMeeting: (id: string) => void
 
-  // Issue CRUD
   addIssue: (i: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateIssue: (id: string, u: Partial<Issue>) => void
   deleteIssue: (id: string) => void
 
-  // 查询
+  addFile: (f: Omit<ProjectFile, 'id' | 'uploadedAt'>) => string
+  updateFile: (id: string, u: Partial<ProjectFile>) => void
+  deleteFile: (id: string) => void
+
   getMember: (id: string) => TeamMember | undefined
   getScenario: (id: string) => Scenario | undefined
-  getExtContact: (id: string) => ExternalContact | undefined
+  getExternalMembers: () => TeamMember[]
   getTasksByScenario: (scenarioId: string) => Task[]
   getIssuesByScenario: (scenarioId: string) => Issue[]
   getDeliverablesByScenario: (scenarioId: string) => Deliverable[]
   getDeliverablesByCategory: () => Record<string, Deliverable[]>
   getOverdueTasks: () => Task[]
   getPersonAggregation: (memberId: string) => PersonAggregation
+  getFilesByEntity: (entityType: 'deliverable' | 'task' | 'issue' | 'meeting', entityId: string) => ProjectFile[]
+  getFilesByCategory: () => Record<string, ProjectFile[]>
 
-  // Dashboard
   getDashboardStats: () => DashboardStats
+  importData: (json: string) => boolean
   today: string
-
   ready: boolean
 }
 
@@ -122,21 +128,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [issues, setIssues] = useState<Issue[]>([])
   const [activities, setActivities] = useState<ActivityLog[]>([])
   const [deliverableVersions, setDeliverableVersions] = useState<DeliverableVersion[]>([])
+  const [files, setFiles] = useState<ProjectFile[]>([])
 
   const team = useMemo(() => seedTeam as TeamMember[], [])
   const scenarios = useMemo(() => SCENARIOS, [])
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
-  const externalContacts = useMemo(() => EXTERNAL_CONTACTS, [])
   const todayStr = useMemo(() => now(), [])
 
   // 初始化
   useEffect(() => {
     const storedVer = localStorage.getItem(KEYS.version)
     if (storedVer !== DATA_VERSION) {
-      Object.values(KEYS).forEach(k => localStorage.removeItem(k))
+      // Clear old v4 keys as well
+      const allKeys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-v'))
+      for (const k of allKeys) localStorage.removeItem(k)
       localStorage.setItem(KEYS.version, DATA_VERSION)
     }
-    // 增强种子任务：添加 category 字段
+
     const rawTasks = seedTasks as Record<string, unknown>[]
     const enhancedTasks: Task[] = rawTasks.map(t => ({
       id: t.id as string,
@@ -146,13 +154,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       priority: t.priority as Task['priority'],
       category: (t.scenarioId ? 'scenario' : 'project') as Task['category'],
       assigneeId: t.assigneeId as string,
+      contactId: t.contactId as string | undefined,
       scenarioId: t.scenarioId as string | undefined,
       dueDate: t.dueDate as string,
       tags: (t.tags as string[]) || [],
       createdAt: t.createdAt as string,
       updatedAt: t.updatedAt as string,
     }))
-    // 增强种子 issues：添加 category + linkedTaskIds
+
     const rawIssues = seedIssues as Record<string, unknown>[]
     const enhancedIssues: Issue[] = rawIssues.map(i => ({
       id: i.id as string,
@@ -164,20 +173,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
       category: (i.scenarioId ? 'scenario' : 'project') as Issue['category'],
       reporterId: i.reporterId as string,
       assigneeId: i.assigneeId as string,
+      contactId: i.contactId as string | undefined,
       scenarioId: i.scenarioId as string | undefined,
       dueDate: i.dueDate as string | undefined,
-      linkedTaskIds: i.linkedTaskId ? [i.linkedTaskId as string] : (i.linkedTaskIds as string[] || []),
+      linkedTaskIds: i.linkedTaskIds ? (i.linkedTaskIds as string[]) : i.linkedTaskId ? [i.linkedTaskId as string] : [],
       resolution: i.resolution as string | undefined,
       createdAt: i.createdAt as string,
       updatedAt: i.updatedAt as string,
       resolvedAt: i.resolvedAt as string | undefined,
     }))
+
     setTasks(load<Task>(KEYS.tasks, enhancedTasks))
     setDeliverables(load<Deliverable>(KEYS.deliverables, generateDeliverables()))
     setMeetings(load<Meeting>(KEYS.meetings, seedMeetings as unknown as Meeting[]))
     setIssues(load<Issue>(KEYS.issues, enhancedIssues))
     setActivities(load<ActivityLog>(KEYS.activities, []))
     setDeliverableVersions(load<DeliverableVersion>(KEYS.versions, []))
+    setFiles(load<ProjectFile>(KEYS.files, generateFileMetadata()))
     setReady(true)
   }, [])
 
@@ -188,8 +200,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (ready) save(KEYS.issues, issues) }, [issues, ready])
   useEffect(() => { if (ready) save(KEYS.activities, activities) }, [activities, ready])
   useEffect(() => { if (ready) save(KEYS.versions, deliverableVersions) }, [deliverableVersions, ready])
+  useEffect(() => { if (ready) save(KEYS.files, files) }, [files, ready])
 
-  // 日志记录
   const logActivity = useCallback((entityType: ActivityLog['entityType'], entityId: string, action: ActivityLog['action'], details?: Record<string, unknown>) => {
     setActivities(prev => [{
       id: genId('log'),
@@ -197,8 +209,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       entityId,
       action,
       details,
-      timestamp: typeof window !== 'undefined' ? new window.Date().toISOString() : '',
-    }, ...prev].slice(0, 200)) // 保留最近 200 条
+      timestamp: nowISO(),
+    }, ...prev].slice(0, 200))
   }, [])
 
   // ===== Task CRUD =====
@@ -254,7 +266,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addDeliverableVersion = useCallback((v: Omit<DeliverableVersion, 'id' | 'uploadedAt'>) => {
     const id = genId('dv')
     setDeliverableVersions(prev => [...prev, { ...v, id, uploadedAt: now() }])
-    // 同步更新交付物的当前版本号
     setDeliverables(prev => prev.map(d =>
       d.id === v.deliverableId ? { ...d, currentVersion: v.versionNumber, updatedAt: now() } : d
     ))
@@ -304,10 +315,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
     logActivity('issue', id, 'deleted')
   }, [logActivity])
 
+  // ===== File CRUD =====
+  const addFile = useCallback((f: Omit<ProjectFile, 'id' | 'uploadedAt'>) => {
+    const id = genId('f')
+    setFiles(prev => [...prev, { ...f, id, uploadedAt: now() }])
+    logActivity('file', id, 'uploaded', { name: f.name })
+    return id
+  }, [logActivity])
+
+  const updateFile = useCallback((id: string, u: Partial<ProjectFile>) => {
+    setFiles(prev => prev.map(f => f.id === id ? { ...f, ...u } : f))
+    logActivity('file', id, 'updated')
+  }, [logActivity])
+
+  const deleteFile = useCallback((id: string) => {
+    setFiles(prev => prev.filter(f => f.id !== id))
+    logActivity('file', id, 'deleted')
+  }, [logActivity])
+
   // ===== 查询 =====
   const getMember = useCallback((id: string) => team.find(m => m.id === id), [team])
   const getScenario = useCallback((id: string) => scenarios.find(s => s.id === id), [scenarios])
-  const getExtContact = useCallback((id: string) => externalContacts.find(c => c.id === id), [externalContacts])
+  const getExternalMembers = useCallback(() => team.filter(m => (m as TeamMember).organization !== '乙方' && (m as TeamMember).organization), [team])
 
   const getTasksByScenario = useCallback((sid: string) => tasks.filter(t => t.scenarioId === sid), [tasks])
   const getIssuesByScenario = useCallback((sid: string) => issues.filter(i => i.scenarioId === sid), [issues])
@@ -330,12 +359,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const getPersonAggregation = useCallback((memberId: string): PersonAggregation => {
     return {
       memberId,
-      tasks: tasks.filter(t => t.assigneeId === memberId),
+      tasks: tasks.filter(t => t.assigneeId === memberId || t.contactId === memberId),
       deliverables: deliverables.filter(d => d.ownerId === memberId),
-      issues: issues.filter(i => i.assigneeId === memberId || i.reporterId === memberId),
+      issues: issues.filter(i => i.assigneeId === memberId || i.reporterId === memberId || i.contactId === memberId),
       scenarios: scenarios.filter(s => s.ownerId === memberId),
+      files: files.filter(f => f.uploadedBy === memberId),
     }
-  }, [tasks, deliverables, issues, scenarios])
+  }, [tasks, deliverables, issues, scenarios, files])
+
+  const getFilesByEntity = useCallback((entityType: 'deliverable' | 'task' | 'issue' | 'meeting', entityId: string): ProjectFile[] => {
+    return files.filter(f => {
+      switch (entityType) {
+        case 'deliverable': return f.linkedDeliverableIds.includes(entityId)
+        case 'task': return f.linkedTaskIds.includes(entityId)
+        case 'issue': return f.linkedIssueIds.includes(entityId)
+        case 'meeting': return f.linkedMeetingId === entityId
+      }
+    })
+  }, [files])
+
+  const getFilesByCategory = useCallback(() => {
+    const cats: Record<string, ProjectFile[]> = {}
+    for (const f of files) {
+      if (!cats[f.category]) cats[f.category] = []
+      cats[f.category].push(f)
+    }
+    return cats
+  }, [files])
 
   // ===== Dashboard Stats =====
   const getDashboardStats = useCallback((): DashboardStats => {
@@ -344,7 +394,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const tasksInProgress = tasks.filter(tk => tk.status === '进行中').length
     const issuesSevere = issues.filter(i => i.severity === '严重' && i.status !== '已解决' && i.status !== '已关闭').length
 
-    // 项目进度 = 交付物加权完成率
     const statusWeights: Record<string, number> = { '待编制': 0, '编制中': 0.25, '待审核': 0.5, '待签字': 0.75, '已归档': 1 }
     const totalWeight = deliverables.reduce((sum, d) => sum + (statusWeights[d.status] ?? 0), 0)
     const projectProgress = deliverables.length > 0 ? Math.round((totalWeight / deliverables.length) * 100) : 0
@@ -360,23 +409,43 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     return {
       tasksInProgress, tasksOverdue, issuesSevere, projectProgress,
-      totalTasks: tasks.length, totalDeliverables: deliverables.length, totalIssues: issues.length,
+      totalTasks: tasks.length, totalDeliverables: deliverables.length,
+      totalIssues: issues.length, totalFiles: files.length,
       tasksByStatus, deliverablesByStatus, issuesByStatus,
     }
-  }, [tasks, deliverables, issues, todayStr])
+  }, [tasks, deliverables, issues, files, todayStr])
+
+  // ===== Data Import =====
+  const importData = useCallback((json: string): boolean => {
+    try {
+      const data = JSON.parse(json)
+      if (data.tasks) setTasks(data.tasks)
+      if (data.deliverables) setDeliverables(data.deliverables)
+      if (data.meetings) setMeetings(data.meetings)
+      if (data.issues) setIssues(data.issues)
+      if (data.activities) setActivities(data.activities)
+      if (data.deliverableVersions) setDeliverableVersions(data.deliverableVersions)
+      if (data.files) setFiles(data.files)
+      return true
+    } catch {
+      return false
+    }
+  }, [])
 
   return (
     <DataContext.Provider value={{
       tasks, deliverables, meetings, issues, team, scenarios, milestones,
-      externalContacts, activities, deliverableVersions,
+      activities, deliverableVersions, files,
       addTask, updateTask, deleteTask,
       addDeliverable, updateDeliverable, deleteDeliverable, addDeliverableVersion,
       addMeeting, updateMeeting, deleteMeeting,
       addIssue, updateIssue, deleteIssue,
-      getMember, getScenario, getExtContact,
+      addFile, updateFile, deleteFile,
+      getMember, getScenario, getExternalMembers,
       getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
       getDeliverablesByCategory, getOverdueTasks, getPersonAggregation,
-      getDashboardStats,
+      getFilesByEntity, getFilesByCategory,
+      getDashboardStats, importData,
       today: todayStr,
       ready,
     }}>

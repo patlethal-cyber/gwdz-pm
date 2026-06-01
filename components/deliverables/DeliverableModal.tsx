@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { X, ChevronRight, Upload, Info, Download, FileText, Link2, Bug, CheckSquare } from 'lucide-react'
+import { X, ChevronRight, Upload, Info, Download, FileText, Link2, Bug, CheckSquare, CheckCircle2, AlertTriangle, Paperclip } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
+import { uploadFile, formatFileSize } from '@/lib/file-utils'
 import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
 interface DeliverableModalProps {
@@ -25,14 +26,16 @@ const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: s
 
 export default function DeliverableModal({ isOpen, onClose, deliverable, onSave }: DeliverableModalProps) {
   const router = useRouter()
-  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today } = useData()
+  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today, addFile, getFilesByEntity } = useData()
 
   const [status, setStatus] = useState<DeliverableStatus>('待编制')
   const [showUploadForm, setShowUploadForm] = useState(false)
   const [uploadVersion, setUploadVersion] = useState('')
   const [uploadNotes, setUploadNotes] = useState('')
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadMessage, setUploadMessage] = useState('')
+  const [uploadMessageType, setUploadMessageType] = useState<'success' | 'warning' | 'error'>('warning')
+  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -44,8 +47,10 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
     setShowUploadForm(false)
     setUploadVersion('')
     setUploadNotes('')
-    setUploadFile(null)
+    setSelectedFile(null)
     setUploadMessage('')
+    setUploadMessageType('warning')
+    setUploading(false)
   }, [deliverable, isOpen])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -70,24 +75,74 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
     onSave({ status })
   }
 
-  function handleUploadSubmit() {
+  async function handleUploadSubmit() {
     if (!deliverable || !uploadVersion.trim()) return
+    setUploading(true)
+    setUploadMessage('')
 
-    // Simulate version creation (Vercel Blob not configured)
+    const fileName = selectedFile?.name || `${deliverable.code}-${uploadVersion.trim()}.docx`
+    let fileUrl = ''
+    let fileSize = selectedFile?.size || 0
+    let fileType = selectedFile?.type || 'application/octet-stream'
+    let uploadSucceeded = false
+
+    if (selectedFile) {
+      try {
+        const result = await uploadFile(selectedFile, `deliverables/${deliverable.code}/${selectedFile.name}`)
+        fileUrl = result.url
+        fileSize = result.size
+        fileType = result.contentType
+        uploadSucceeded = true
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : '上传失败'
+        setUploadMessage(`文件上传失败: ${errMsg}。版本已记录但无文件附件。`)
+        setUploadMessageType('error')
+      }
+    }
+
     addDeliverableVersion({
       deliverableId: deliverable.id,
       versionNumber: uploadVersion.trim(),
-      fileName: uploadFile?.name || `${deliverable.code}-${uploadVersion.trim()}.docx`,
-      fileUrl: '',
-      fileSize: uploadFile?.size || 0,
-      fileType: uploadFile?.type || 'application/octet-stream',
+      fileName,
+      fileUrl,
+      fileSize,
+      fileType,
       notes: uploadNotes.trim() || undefined,
     })
 
-    setUploadMessage('版本已记录。文件存储需配置 Vercel Blob 后生效。')
+    // Create a ProjectFile entry when upload succeeded
+    if (uploadSucceeded && fileUrl) {
+      addFile({
+        name: fileName,
+        originalName: fileName,
+        path: `deliverables/${deliverable.code}/${fileName}`,
+        category: '交付物模板',
+        fileUrl,
+        fileSize,
+        fileType,
+        uploadedBy: deliverable.ownerId,
+        linkedDeliverableIds: [deliverable.id],
+        linkedTaskIds: [],
+        linkedIssueIds: [],
+        tags: [deliverable.code, uploadVersion.trim()],
+        notes: uploadNotes.trim() || undefined,
+      })
+    }
+
+    if (!uploadMessage) {
+      if (uploadSucceeded) {
+        setUploadMessage('版本已上传')
+        setUploadMessageType('success')
+      } else if (!selectedFile) {
+        setUploadMessage('版本已记录（未选择文件）')
+        setUploadMessageType('warning')
+      }
+    }
+
     setUploadVersion('')
     setUploadNotes('')
-    setUploadFile(null)
+    setSelectedFile(null)
+    setUploading(false)
 
     setTimeout(() => setUploadMessage(''), 4000)
   }
@@ -247,7 +302,10 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                         <span className="text-sm font-mono font-medium text-gray-900">{v.versionNumber}</span>
                         <span className="text-xs text-gray-400">{v.uploadedAt}</span>
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{v.fileName}</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {v.fileName}
+                        {v.fileSize > 0 && <span className="ml-1.5 text-gray-400">({formatFileSize(v.fileSize)})</span>}
+                      </p>
                       {v.notes && <p className="text-xs text-gray-400 mt-0.5">{v.notes}</p>}
                     </div>
                     {v.fileUrl ? (
@@ -287,7 +345,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                   <input
                     ref={fileInputRef}
                     type="file"
-                    onChange={e => setUploadFile(e.target.files?.[0] || null)}
+                    onChange={e => setSelectedFile(e.target.files?.[0] || null)}
                     className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
                   />
                 </div>
@@ -304,10 +362,10 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleUploadSubmit}
-                    disabled={!uploadVersion.trim()}
+                    disabled={!uploadVersion.trim() || uploading}
                     className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
                   >
-                    提交版本
+                    {uploading ? '上传中...' : '提交版本'}
                   </button>
                   <button
                     onClick={() => setShowUploadForm(false)}
@@ -317,14 +375,72 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                   </button>
                 </div>
                 {uploadMessage && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <Info size={14} className="text-amber-600 shrink-0" />
-                    <span className="text-xs text-amber-700">{uploadMessage}</span>
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+                    uploadMessageType === 'success' ? 'bg-green-50 border-green-200' :
+                    uploadMessageType === 'error' ? 'bg-red-50 border-red-200' :
+                    'bg-amber-50 border-amber-200'
+                  }`}>
+                    {uploadMessageType === 'success' ? (
+                      <CheckCircle2 size={14} className="text-green-600 shrink-0" />
+                    ) : uploadMessageType === 'error' ? (
+                      <AlertTriangle size={14} className="text-red-600 shrink-0" />
+                    ) : (
+                      <Info size={14} className="text-amber-600 shrink-0" />
+                    )}
+                    <span className={`text-xs ${
+                      uploadMessageType === 'success' ? 'text-green-700' :
+                      uploadMessageType === 'error' ? 'text-red-700' :
+                      'text-amber-700'
+                    }`}>{uploadMessage}</span>
                   </div>
                 )}
               </div>
             )}
           </div>
+
+          {/* Linked files */}
+          {(() => {
+            const linkedFiles = getFilesByEntity('deliverable', deliverable.id)
+            if (linkedFiles.length === 0) return null
+            return (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <span className="flex items-center gap-1.5">
+                    <Paperclip size={14} />
+                    关联文件
+                    <span className="text-xs font-normal text-gray-400 ml-1">({linkedFiles.length})</span>
+                  </span>
+                </label>
+                <div className="space-y-1.5">
+                  {linkedFiles.map(f => (
+                    <div key={f.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50">
+                      <FileText size={14} className="text-gray-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 truncate">{f.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {f.fileSize > 0 && formatFileSize(f.fileSize)}
+                          {f.fileSize > 0 && f.uploadedAt && ' · '}
+                          {f.uploadedAt}
+                        </p>
+                      </div>
+                      {f.fileUrl ? (
+                        <a
+                          href={f.fileUrl}
+                          download={f.originalName}
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          <Download size={14} />
+                        </a>
+                      ) : (
+                        <span className="text-[10px] text-gray-300 px-1.5 py-0.5 bg-gray-100 rounded">暂无文件</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Related links */}
           <div>

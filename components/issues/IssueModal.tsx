@@ -31,6 +31,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
   const [source, setSource] = useState<IssueSource>('内部发现')
   const [category, setCategory] = useState<IssueCategory>('scenario')
   const [assigneeId, setAssigneeId] = useState('')
+  const [contactId, setContactId] = useState('')
   const [scenarioId, setScenarioId] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [linkedTaskIds, setLinkedTaskIds] = useState<string[]>([])
@@ -51,6 +52,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
       setSource(issue.source)
       setCategory(issue.category || 'scenario')
       setAssigneeId(issue.assigneeId)
+      setContactId(issue.contactId || '')
       setScenarioId(issue.scenarioId || '')
       setDueDate(issue.dueDate || '')
       setLinkedTaskIds(issue.linkedTaskIds || [])
@@ -63,6 +65,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
       setSource('内部发现')
       setCategory('scenario')
       setAssigneeId('')
+      setContactId('')
       setScenarioId('')
       setDueDate('')
       setLinkedTaskIds([])
@@ -131,6 +134,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
       category,
       reporterId: issue?.reporterId || 'm01',
       assigneeId,
+      contactId: contactId || undefined,
       scenarioId: category === 'scenario' ? (scenarioId || undefined) : undefined,
       dueDate: dueDate || undefined,
       linkedTaskIds,
@@ -239,14 +243,16 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
           {/* Assignee + Due Date row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">负责人</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">负责人（乙方）</label>
               <select
                 value={assigneeId}
                 onChange={e => setAssigneeId(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">选择负责人...</option>
-                {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}</option>)}
+                {team.filter(m => m.organization === '乙方').map(m => (
+                  <option key={m.id} value={m.id}>{m.name} - {m.role}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -258,6 +264,35 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               />
             </div>
+          </div>
+
+          {/* Contact (external) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">对接人（甲方/火山）</label>
+            <select
+              value={contactId}
+              onChange={e => setContactId(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            >
+              <option value="">无</option>
+              {team.filter(m => m.organization && m.organization !== '乙方').map(m => (
+                <option key={m.id} value={m.id}>{m.name} - {m.role}</option>
+              ))}
+            </select>
+            {contactId && (() => {
+              const contact = team.find(m => m.id === contactId)
+              if (!contact) return null
+              const orgColor = contact.organization === '甲方' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'
+              return (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${orgColor}`}>
+                    {contact.name[0]}
+                  </span>
+                  <span className="text-sm text-gray-700">{contact.name}</span>
+                  <span className="text-xs text-gray-400">{contact.organization}</span>
+                </div>
+              )
+            })()}
           </div>
 
           {/* Scenario (conditional) */}

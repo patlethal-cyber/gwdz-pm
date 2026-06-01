@@ -14,9 +14,9 @@
 | GitHub | https://github.com/patlethal-cyber/gwdz-pm |
 | 登录密码 | `gwdz2026`（环境变量 `SITE_PASSWORD`） |
 | 技术栈 | Next.js 16 + Tailwind CSS v4 + Recharts + Lucide React + Zod |
-| 数据存储 | localStorage（v4 当前）→ 计划升级 Vercel Postgres |
-| 文件存储 | @vercel/blob（已安装未接通，需 BLOB_READ_WRITE_TOKEN） |
-| 代码规模 | 42 个源文件，8692 行代码 |
+| 数据存储 | localStorage（v5 当前）→ 计划升级 Vercel Postgres |
+| 文件存储 | @vercel/blob（v5 已接通，需 BLOB_READ_WRITE_TOKEN） |
+| 代码规模 | 56 个源文件，~10,256 行代码 |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
 ---
@@ -44,7 +44,7 @@
 - 报告页面（日报/周报文字生成 + 复制到剪贴板）
 - Issue-Task 双向链接
 
-### v4（commit bef01ca）— 全面重构 ★ 当前版本
+### v4（commit bef01ca）— 全面重构
 基于逐页 UX 审查的 29 条反馈，完整重写：
 
 **数据层：**
@@ -66,6 +66,41 @@
 - Reports：日报(docx 格式) + 周报(Excel 格式) + 可视化周报
 - Settings：JSON 导出 + 数据重置
 
+### v5 — 文件管理 + 生产就绪 ★ 当前版本
+
+**文件管理系统（核心新增）：**
+- 新增 ProjectFile 实体类型 + 86 项预填充文件元数据（01_-07_ 目录映射）
+- Vercel Blob 文件存储接通：/api/upload（上传）+ /api/files（删除）
+- 完整文件管理页面 /files：目录树 + 文件列表 + 分类筛选 + 搜索 + 拖拽上传
+- 文件详情面板：预览 / 下载 / 实体关联 / 标签
+- DeliverableModal 版本上传接通真实 Blob 存储 + 关联文件展示
+- lib/file-utils.ts 客户端上传/删除/分类工具
+
+**角色模型升级：**
+- TeamMember 新增 organization / contactFor 字段（TypeScript 补齐，数据已有）
+- Task / Issue 新增 contactId（对接人 = 甲方/火山联系人，区别于 assigneeId 负责人）
+- TaskModal / IssueModal 新增"对接人"下拉选择，按组织过滤
+- 合并 ExternalContact 到 TeamMember，消除冗余实体
+
+**数据层升级：**
+- DATA_VERSION v4 → v5，localStorage key 命名空间隔离
+- 15 条任务增加 contactId 映射（7 条关联甲方对接人）
+- 7 条 Issue 增加 contactId
+- DashboardStats 增加 totalFiles
+- PersonAggregation 增加 files 维度
+- Settings 新增 JSON 数据导入 + 文件统计
+
+**P1/P2 修复：**
+- 甘特图进度从二值(已归档/总数)改为加权平均（5 级状态权重），场景间有差异化
+- 通知面板空白修复：新装时自动生成逾期/会议/严重问题提醒
+- 密码修改 UI 替换为 Vercel 环境变量说明
+- 删除 4 个废弃组件 + store.ts
+
+**外部团队展示升级：**
+- Team 页面外部成员从 ExternalContact 迁移到 TeamMember 筛选
+- 外部成员可点击打开 PersonDetail
+- 显示 contactId 关联计数
+
 ---
 
 ## 三、文件结构
@@ -75,20 +110,24 @@ gwdz-pm/
 ├── app/
 │   ├── layout.tsx                    # Root layout（不含 Sidebar）
 │   ├── login/page.tsx                # 登录页
-│   ├── api/auth/route.ts             # 密码验证 API
+│   ├── api/
+│   │   ├── auth/route.ts             # 密码验证 API
+│   │   ├── upload/route.ts           # ★ Vercel Blob 文件上传
+│   │   └── files/route.ts            # ★ 文件删除
 │   └── (app)/                        # 需登录的页面（含 Sidebar + DataProvider）
 │       ├── layout.tsx                # AppLayout: DataProvider + Sidebar + Suspense
 │       ├── page.tsx                  # Dashboard 总览
 │       ├── tasks/page.tsx            # 任务管理
 │       ├── deliverables/page.tsx     # 交付物管理
+│       ├── files/page.tsx            # ★ 文件管理（v5 新增，1173行）
 │       ├── meetings/page.tsx         # 会议纪要
 │       ├── issues/page.tsx           # 问题跟踪
-│       ├── team/page.tsx             # 团队
+│       ├── team/page.tsx             # 团队（v5 重写，统一 TeamMember）
 │       ├── reports/page.tsx          # 报告（日报/周报/可视化）
-│       └── settings/page.tsx         # 设置
+│       └── settings/page.tsx         # 设置（v5 增加导入 + 密码说明改）
 ├── components/
 │   ├── layout/
-│   │   ├── Sidebar.tsx               # 侧边栏（7 导航项 + 设置 + 用户卡）
+│   │   ├── Sidebar.tsx               # 侧边栏（8 导航项 + 设置 + 用户卡）
 │   │   └── Header.tsx                # 顶栏（搜索 + 通知铃铛）
 │   ├── dashboard/
 │   │   ├── StatsCards.tsx            # 4 个 KPI 卡片

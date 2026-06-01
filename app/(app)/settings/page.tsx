@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import {
-  Info, Shield, Database, HelpCircle, Eye, EyeOff, Download, RefreshCcw,
+  Info, Shield, Database, HelpCircle, Download, Upload, RefreshCcw,
   ExternalLink, CheckSquare, FileText, Calendar, AlertTriangle, Users, Cpu,
-  Clock
+  Clock, FolderOpen
 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import { useData } from '@/lib/data-context'
@@ -12,17 +12,10 @@ import { useData } from '@/lib/data-context'
 export default function SettingsPage() {
   const {
     tasks, deliverables, meetings, issues, team, scenarios, milestones,
-    externalContacts, activities, deliverableVersions,
-    today, ready,
+    activities, deliverableVersions, files,
+    today, ready, importData,
   } = useData()
 
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showCurrent, setShowCurrent] = useState(false)
-  const [showNew, setShowNew] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -40,51 +33,33 @@ export default function SettingsPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  async function handlePasswordSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setPasswordMsg(null)
-
-    if (!currentPassword.trim()) {
-      setPasswordMsg({ type: 'error', text: '请输入当前密码' })
-      return
-    }
-    if (!newPassword.trim()) {
-      setPasswordMsg({ type: 'error', text: '请输入新密码' })
-      return
-    }
-    if (newPassword.length < 6) {
-      setPasswordMsg({ type: 'error', text: '新密码至少需要 6 个字符' })
-      return
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordMsg({ type: 'error', text: '两次输入的密码不一致' })
-      return
-    }
-
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      })
-      if (res.ok) {
-        setPasswordMsg({ type: 'success', text: '密码修改成功' })
-        setCurrentPassword('')
-        setNewPassword('')
-        setConfirmPassword('')
-      } else {
-        const data = await res.json().catch(() => ({}))
-        setPasswordMsg({ type: 'error', text: data.error || '密码修改失败，请检查当前密码是否正确' })
+  function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = async (evt) => {
+      try {
+        const json = JSON.parse(evt.target?.result as string)
+        const ok = importData(json)
+        if (ok) {
+          showToast('数据导入成功，页面将刷新')
+          setTimeout(() => window.location.reload(), 1000)
+        } else {
+          showToast('数据导入失败，请检查文件格式')
+        }
+      } catch {
+        showToast('JSON 解析失败，请检查文件内容')
       }
-    } catch {
-      setPasswordMsg({ type: 'error', text: '网络错误，请稍后重试' })
     }
+    reader.readAsText(file)
+    // Reset input so re-selecting the same file triggers onChange
+    e.target.value = ''
   }
 
   function handleExportJSON() {
     const data = {
       exportedAt: new Date().toISOString(),
-      version: 'v4.0',
+      version: 'v5.0',
       tasks,
       deliverables,
       meetings,
@@ -92,7 +67,7 @@ export default function SettingsPage() {
       team,
       scenarios,
       milestones,
-      externalContacts,
+      files,
       activities,
       deliverableVersions,
     }
@@ -110,7 +85,7 @@ export default function SettingsPage() {
 
   function handleResetData() {
     // Clear all gwdz-v4 keys from localStorage
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-v4'))
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-v'))
     for (const k of keys) {
       localStorage.removeItem(k)
     }
@@ -149,6 +124,7 @@ export default function SettingsPage() {
     { label: '问题', count: issues.length, icon: AlertTriangle, color: 'text-amber-600 bg-amber-50' },
     { label: '团队', count: team.length, icon: Users, color: 'text-rose-600 bg-rose-50' },
     { label: '场景', count: scenarios.length, icon: Cpu, color: 'text-cyan-600 bg-cyan-50' },
+    { label: '文件', count: files.length, icon: FolderOpen, color: 'text-indigo-600 bg-indigo-50' },
   ]
 
   // Find milestones for display
@@ -240,82 +216,20 @@ export default function SettingsPage() {
               </span>
               安全设置
             </h3>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">当前密码</label>
-                <div className="relative">
-                  <input
-                    type={showCurrent ? 'text' : 'password'}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="输入当前密码"
-                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">新密码</label>
-                <div className="relative">
-                  <input
-                    type={showNew ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="输入新密码（至少 6 个字符）"
-                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNew(!showNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">确认新密码</label>
-                <div className="relative">
-                  <input
-                    type={showConfirm ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="再次输入新密码"
-                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              {passwordMsg && (
-                <div className={`text-sm px-3 py-2 rounded-lg ${
-                  passwordMsg.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-red-50 text-red-700'
-                }`}>
-                  {passwordMsg.text}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 max-w-md">
+              <p className="text-sm text-gray-600 leading-relaxed">
+                站点密码通过 Vercel 环境变量 <code className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">SITE_PASSWORD</code> 管理。如需修改，请前往 Vercel Dashboard → Settings → Environment Variables。
+              </p>
+              <a
+                href="https://vercel.com/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 text-sm font-medium text-blue-600 bg-white hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors"
               >
-                保存密码
-              </button>
-            </form>
+                前往 Vercel Dashboard
+                <ExternalLink size={14} />
+              </a>
+            </div>
           </section>
 
           {/* c) 数据管理 */}
@@ -355,6 +269,16 @@ export default function SettingsPage() {
                 <Download size={16} />
                 导出 JSON 数据
               </button>
+              <label className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors cursor-pointer">
+                <Upload size={16} />
+                导入 JSON 数据
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportJSON}
+                  className="hidden"
+                />
+              </label>
               <button
                 onClick={() => setShowResetConfirm(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
@@ -376,7 +300,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">版本</span>
-                <span className="text-sm font-medium text-gray-900">v4.0</span>
+                <span className="text-sm font-medium text-gray-900">v5.0</span>
               </div>
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">技术栈</span>

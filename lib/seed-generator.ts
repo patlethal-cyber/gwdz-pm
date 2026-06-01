@@ -1,11 +1,5 @@
-/**
- * 种子数据生成器 — 生成完整 141 项交付物 + 外部团队 + 增强场景
- * 运行方式：在 data-context.tsx 初始化时调用
- */
+import type { Deliverable, Scenario } from './types'
 
-import type { Deliverable, ExternalContact, Scenario } from './types'
-
-// 12 个场景的完整信息（含时间范围）
 export const SCENARIOS: Scenario[] = [
   { id: 's02', code: 'S02', name: '失效器件信息查询与追踪', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'green', dataNote: '20文件 14.5MB，最充分', ownerId: 'm06', startDate: '2026-05-25', endDate: '2026-06-18' },
   { id: 's100', code: 'S100', name: '质量文档审核', department: '客户质量部', type: '审核校验', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'red', dataNote: '1文件 18KB，严重缺样本', ownerId: 'm07', startDate: '2026-05-25', endDate: '2026-06-18' },
@@ -21,24 +15,6 @@ export const SCENARIOS: Scenario[] = [
   { id: 's99', code: '99', name: 'QA问题记录检索', department: '测试二部', type: '知识检索', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '1000+条QA记录', ownerId: 'm05', startDate: '2026-06-03', endDate: '2026-06-30' },
 ]
 
-// 甲方 + 火山引擎外部团队
-export const EXTERNAL_CONTACTS: ExternalContact[] = [
-  { id: 'ext01', name: '江冰桂', role: '项目管理小组组长', organization: '甲方', department: '项目管理', contactFor: '项目整体统筹、验收签字' },
-  { id: 'ext02', name: '朱国鹏', role: '项目管理小组副组长', organization: '甲方', department: '项目管理', contactFor: '项目协调' },
-  { id: 'ext03', name: '冯悦', role: '项目经理', organization: '甲方', department: '项目管理', contactFor: '日常对接、进度跟踪' },
-  { id: 'ext04', name: '林俊逸', role: 'IT资源保障', organization: '甲方', department: 'IT运维', contactFor: '服务器/网络/权限/环境' },
-  { id: 'ext05', name: '龚源', role: '业务接口人', organization: '甲方', department: '客户质量部', contactFor: '客质部7场景需求对接、UAT验收' },
-  { id: 'ext06', name: '陈云', role: '业务接口人', organization: '甲方', department: '客户质量部', contactFor: '客质部数据提供、蓝图签字' },
-  { id: 'ext07', name: '宦承永', role: '业务接口人', organization: '甲方', department: '测试一部', contactFor: '测试一部S37/S38需求、验收' },
-  { id: 'ext08', name: '李昊宸', role: '业务接口人', organization: '甲方', department: '测试一部', contactFor: '测试一部数据提供' },
-  { id: 'ext09', name: '李宪全', role: '业务接口人', organization: '甲方', department: '测试二部', contactFor: '测试二部S53/S95/S99需求、验收' },
-  { id: 'ext10', name: '李煜', role: '业务接口人', organization: '甲方', department: '测试二部', contactFor: '测试二部数据提供' },
-  { id: 'ext11', name: '龚钰凰', role: '项目经理', organization: '火山引擎', contactFor: '平台部署协调、技术支撑' },
-  { id: 'ext12', name: '符胜军', role: '技术支持组长', organization: '火山引擎', contactFor: 'HIAgent平台技术问题' },
-  { id: 'ext13', name: '沈杰', role: '实施部署组长', organization: '火山引擎', contactFor: 'K8s集群部署、环境运维' },
-]
-
-// 交付物模板定义
 const TEMPLATE_DEFS: { code: string; name: string; perScenario: boolean; defaultStatus: string; duePhase: string }[] = [
   { code: 'T01', name: '业务调研表', perScenario: true, defaultStatus: '已归档', duePhase: '2026-04-29' },
   { code: 'T02', name: '蓝图设计文档', perScenario: true, defaultStatus: '待签字', duePhase: '2026-05-22' },
@@ -61,7 +37,6 @@ const PROJECT_DOCS: { code: string; name: string; status: string; version: strin
   { code: 'P04', name: '交付物清单', status: '已归档', version: 'v1.4', dueDate: '2026-05-15' },
 ]
 
-// 场景对应的负责人 + 蓝图状态覆盖
 const SCENARIO_OVERRIDES: Record<string, { t02Status: string; t02Version: string; t03Status: string }> = {
   's02': { t02Status: '待签字', t02Version: 'v2', t03Status: '编制中' },
   's04': { t02Status: '待签字', t02Version: 'v2', t03Status: '编制中' },
@@ -81,7 +56,6 @@ export function generateDeliverables(): Deliverable[] {
   const deliverables: Deliverable[] = []
   let idx = 1
 
-  // 场景级交付物（T01-T06 × 12 = 72）+ T06 总体 1 项
   for (const tmpl of TEMPLATE_DEFS) {
     if (tmpl.perScenario) {
       for (const sc of SCENARIOS) {
@@ -116,7 +90,6 @@ export function generateDeliverables(): Deliverable[] {
         })
         idx++
       }
-      // T06 额外加一个总体
       if (tmpl.code === 'T06') {
         deliverables.push({
           id: `d${String(idx).padStart(3, '0')}`,
@@ -133,7 +106,6 @@ export function generateDeliverables(): Deliverable[] {
         idx++
       }
     } else {
-      // 项目级交付物（T07-T12）
       deliverables.push({
         id: `d${String(idx).padStart(3, '0')}`,
         name: tmpl.name,
@@ -150,7 +122,6 @@ export function generateDeliverables(): Deliverable[] {
     }
   }
 
-  // P01-P04 项目级文档
   for (const pd of PROJECT_DOCS) {
     deliverables.push({
       id: `d${String(idx).padStart(3, '0')}`,
@@ -171,7 +142,6 @@ export function generateDeliverables(): Deliverable[] {
   return deliverables
 }
 
-// 生成统计：按模板分组
 export function getDeliverableStats(deliverables: Deliverable[]) {
   const byCategory: Record<string, Deliverable[]> = {}
   for (const d of deliverables) {

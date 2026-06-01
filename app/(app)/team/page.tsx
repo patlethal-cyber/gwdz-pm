@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Users, Building2, Globe } from 'lucide-react'
+import { Building2, Globe } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import MemberCard from '@/components/team/MemberCard'
 import PersonDetail from '@/components/team/PersonDetail'
@@ -12,17 +12,17 @@ const EDEN_GROUPS = new Set(['项目管理', '第二执行组', '第一执行组
 const GROUP_ORDER = ['项目管理', '第二执行组', '第一执行组', '专项支持', '领导委员会']
 
 export default function TeamPage() {
-  const { team, externalContacts, tasks, issues, scenarios, ready } = useData()
+  const { team, getExternalMembers, tasks, issues, scenarios, ready } = useData()
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
-  // Filter Eden members (those in known Eden groups)
   const edenMembers = useMemo(() => team.filter(m => EDEN_GROUPS.has(m.group)), [team])
+  const externalMembers = useMemo(() => getExternalMembers(), [getExternalMembers])
 
-  // Count helpers
   const memberTaskCounts = useMemo(() => {
     const map: Record<string, number> = {}
     for (const t of tasks) {
       if (t.assigneeId) map[t.assigneeId] = (map[t.assigneeId] || 0) + 1
+      if (t.contactId) map[t.contactId] = (map[t.contactId] || 0) + 1
     }
     return map
   }, [tasks])
@@ -31,6 +31,7 @@ export default function TeamPage() {
     const map: Record<string, number> = {}
     for (const i of issues) {
       if (i.assigneeId) map[i.assigneeId] = (map[i.assigneeId] || 0) + 1
+      if (i.contactId) map[i.contactId] = (map[i.contactId] || 0) + 1
     }
     return map
   }, [issues])
@@ -43,7 +44,6 @@ export default function TeamPage() {
     return map
   }, [scenarios])
 
-  // Group Eden members by group
   const edenGroups = useMemo(() => {
     const groups = new Map<string, TeamMember[]>()
     for (const m of edenMembers) {
@@ -51,31 +51,28 @@ export default function TeamPage() {
       list.push(m)
       groups.set(m.group, list)
     }
-    // Sort by predefined order
     const sorted: [string, TeamMember[]][] = []
     for (const g of GROUP_ORDER) {
       const members = groups.get(g)
       if (members) sorted.push([g, members])
     }
-    // Add any remaining groups not in ORDER
     for (const [g, members] of groups) {
       if (!GROUP_ORDER.includes(g)) sorted.push([g, members])
     }
     return sorted
   }, [edenMembers])
 
-  // Group external contacts by organization then department
   const extGrouped = useMemo(() => {
-    const orgs: Record<string, Record<string, typeof externalContacts>> = {}
-    for (const c of externalContacts) {
-      const org = c.organization
-      const dept = c.department || '其他'
+    const orgs: Record<string, Record<string, TeamMember[]>> = {}
+    for (const m of externalMembers) {
+      const org = m.organization || '其他'
+      const dept = m.department || m.group || '其他'
       if (!orgs[org]) orgs[org] = {}
       if (!orgs[org][dept]) orgs[org][dept] = []
-      orgs[org][dept].push(c)
+      orgs[org][dept].push(m)
     }
     return orgs
-  }, [externalContacts])
+  }, [externalMembers])
 
   if (!ready) {
     return (
@@ -101,7 +98,7 @@ export default function TeamPage() {
     <>
       <Header
         title="团队"
-        subtitle={`共 ${edenMembers.length + externalContacts.length} 名项目成员`}
+        subtitle={`共 ${edenMembers.length + externalMembers.length} 名项目成员`}
       />
 
       <div className="flex-1 overflow-y-auto bg-gray-50 p-6 space-y-8">
@@ -142,14 +139,14 @@ export default function TeamPage() {
           </div>
         </section>
 
-        {/* External Contacts */}
+        {/* External Team */}
         <section>
           <div className="flex items-center gap-2 mb-4">
             <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600">
               <Globe size={15} />
             </span>
             <h2 className="text-base font-semibold text-gray-900">外部团队</h2>
-            <span className="text-xs text-gray-400 ml-1">{externalContacts.length} 人</span>
+            <span className="text-xs text-gray-400 ml-1">{externalMembers.length} 人</span>
           </div>
 
           <div className="space-y-4">
@@ -161,32 +158,41 @@ export default function TeamPage() {
                       ? 'bg-emerald-50 text-emerald-700'
                       : 'bg-orange-50 text-orange-700'
                   }`}>
-                    {org === '甲方' ? '甲方 - 国微电子' : '火山引擎'}
+                    {org === '甲方' ? '甲方 - 国微电子' : org === '火山引擎' ? '火山引擎' : org}
                   </span>
                 </div>
 
                 <div className="space-y-4">
-                  {Object.entries(depts).map(([dept, contacts]) => (
+                  {Object.entries(depts).map(([dept, members]) => (
                     <div key={dept}>
                       <h4 className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-2">
                         {dept}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                        {contacts.map(contact => (
+                        {members.map(member => (
                           <div
-                            key={contact.id}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                            key={member.id}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => setSelectedMember(member)}
                           >
-                            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 flex-shrink-0">
-                              {contact.name.slice(0, 1)}
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                              style={{ backgroundColor: member.color }}
+                            >
+                              {member.initials[0]}
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-900">{contact.name}</span>
-                                <span className="text-[11px] text-gray-400 truncate">{contact.role}</span>
+                                <span className="text-sm font-medium text-gray-900">{member.name}</span>
+                                <span className="text-[11px] text-gray-400 truncate">{member.role}</span>
                               </div>
-                              {contact.contactFor && (
-                                <p className="text-[11px] text-gray-400 truncate mt-0.5">{contact.contactFor}</p>
+                              {member.contactFor && (
+                                <p className="text-[11px] text-gray-400 truncate mt-0.5">{member.contactFor}</p>
+                              )}
+                              {(memberTaskCounts[member.id] || 0) > 0 && (
+                                <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">
+                                  {memberTaskCounts[member.id]} 项关联
+                                </span>
                               )}
                             </div>
                           </div>
@@ -201,7 +207,6 @@ export default function TeamPage() {
         </section>
       </div>
 
-      {/* Person Detail Slide-over */}
       {selectedMember && (
         <PersonDetail
           member={selectedMember}

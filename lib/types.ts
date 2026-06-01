@@ -9,6 +9,8 @@ export type IssueStatus = '待处理' | '处理中' | '已解决' | '已关闭' 
 export type IssueSeverity = '严重' | '一般' | '轻微' | '建议'
 export type IssueSource = '甲方反馈' | 'UAT测试' | '内部发现' | '平台问题'
 export type IssueCategory = 'scenario' | 'project'
+export type FileCategory = '合同与商务' | '需求与方案' | '项目计划' | '交付物模板'
+  | '内部管理' | '财务预算' | '方案蓝图' | '样本数据' | '会议纪要' | '其他'
 
 // ===== 核心实体 =====
 
@@ -36,12 +38,12 @@ export interface Task {
   priority: TaskPriority
   category: TaskCategory
   assigneeId: string
+  contactId?: string
   scenarioId?: string
   dueDate: string
   tags: string[]
   createdAt: string
   updatedAt: string
-  // 关联统计（前端计算）
   linkedIssueCount?: number
 }
 
@@ -59,7 +61,6 @@ export interface Deliverable {
   dueDate: string
   createdAt: string
   updatedAt: string
-  // 关联
   versions?: DeliverableVersion[]
   linkedTaskCount?: number
   linkedIssueCount?: number
@@ -87,9 +88,10 @@ export interface Issue {
   category: IssueCategory
   reporterId: string
   assigneeId: string
+  contactId?: string
   scenarioId?: string
-  dueDate?: string           // ★ 计划解决时间
-  linkedTaskIds: string[]     // ★ M:N 关联任务
+  dueDate?: string
+  linkedTaskIds: string[]
   resolution?: string
   createdAt: string
   updatedAt: string
@@ -107,7 +109,7 @@ export interface Meeting {
   scenarioId?: string
   attendeeIds: string[]
   minutes: string
-  fileUrl?: string            // ★ 纪要附件
+  fileUrl?: string
   actionItems: MeetingActionItem[]
   createdAt: string
   updatedAt: string
@@ -117,7 +119,7 @@ export interface MeetingActionItem {
   id: string
   text: string
   assigneeId: string
-  taskId?: string             // ★ 关联任务
+  taskId?: string
   dueDate?: string
   done: boolean
 }
@@ -127,19 +129,33 @@ export interface TeamMember {
   name: string
   role: string
   group: string
+  organization?: '乙方' | '甲方' | '火山引擎'
+  department?: string
+  contactFor?: string
   email?: string
   phone?: string
   initials: string
   color: string
 }
 
-export interface ExternalContact {
+export interface ProjectFile {
   id: string
   name: string
-  role: string
-  organization: '甲方' | '火山引擎'
-  department?: string
-  contactFor?: string
+  originalName: string
+  path: string
+  category: FileCategory
+  fileUrl: string
+  fileSize: number
+  fileType: string
+  uploadedAt: string
+  uploadedBy: string
+  linkedDeliverableIds: string[]
+  linkedTaskIds: string[]
+  linkedIssueIds: string[]
+  linkedMeetingId?: string
+  scenarioId?: string
+  tags: string[]
+  notes?: string
 }
 
 export interface Milestone {
@@ -153,12 +169,11 @@ export interface Milestone {
 
 export interface ActivityLog {
   id: string
-  entityType: 'task' | 'deliverable' | 'issue' | 'meeting' | 'milestone'
+  entityType: 'task' | 'deliverable' | 'issue' | 'meeting' | 'milestone' | 'file'
   entityId: string
-  action: 'created' | 'updated' | 'deleted' | 'status_changed'
+  action: 'created' | 'updated' | 'deleted' | 'status_changed' | 'uploaded'
   details?: Record<string, unknown>
   timestamp: string
-  // ★ 无 userId — 单用户系统
 }
 
 // ===== 聚合统计 =====
@@ -167,10 +182,11 @@ export interface DashboardStats {
   tasksInProgress: number
   tasksOverdue: number
   issuesSevere: number
-  projectProgress: number // 0-100 百分比
+  projectProgress: number
   totalTasks: number
   totalDeliverables: number
   totalIssues: number
+  totalFiles: number
   deliverablesByStatus: Record<DeliverableStatus, number>
   tasksByStatus: Record<TaskStatus, number>
   issuesByStatus: Record<IssueStatus, number>
@@ -182,4 +198,5 @@ export interface PersonAggregation {
   deliverables: Deliverable[]
   issues: Issue[]
   scenarios: Scenario[]
+  files: ProjectFile[]
 }
