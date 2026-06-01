@@ -1,137 +1,127 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { useData } from '@/lib/data-context'
 import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
-import MilestoneTimeline from '@/components/dashboard/MilestoneTimeline'
-import GanttChart from '@/components/dashboard/GanttChart'
-import TaskDistribution from '@/components/dashboard/TaskDistribution'
-import DepartmentProgress from '@/components/dashboard/DepartmentProgress'
-import RiskAlerts from '@/components/dashboard/RiskAlerts'
-import ActivityFeed from '@/components/dashboard/ActivityFeed'
-import { Calendar, Clock, AlertTriangle, Target } from 'lucide-react'
+import { Calendar, Clock, AlertTriangle, Target, ArrowRight } from 'lucide-react'
 
-const TODAY = '2026-05-31'
+function daysBetween(a: string, b: string): number {
+  const da = new Date(a + 'T00:00:00')
+  const db = new Date(b + 'T00:00:00')
+  return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24))
+}
 
-function daysBetweenStrings(a: string, b: string) {
-  const pa = a.split('-').map(Number)
-  const pb = b.split('-').map(Number)
-  const monthDays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-  function toDayCount(parts: number[]) {
-    let total = 0
-    for (let m = 1; m < parts[1]; m++) total += monthDays[m]
-    total += parts[2]
-    total += (parts[0] - 2026) * 365
-    return total
-  }
-  return toDayCount(pb) - toDayCount(pa)
+function getWeekEnd(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  const dayOfWeek = d.getDay() // 0=Sun
+  const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek
+  const end = new Date(d.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000)
+  const y = end.getFullYear()
+  const m = String(end.getMonth() + 1).padStart(2, '0')
+  const dd = String(end.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dd}`
 }
 
 export default function DashboardPage() {
   const {
     tasks,
-    deliverables,
     meetings,
     issues,
     milestones,
-    activities,
     ready,
     getMember,
     getScenario,
     getOverdueTasks,
+    getDashboardStats,
+    today,
   } = useData()
+
+  // --- Dashboard stats ---
+  const stats = useMemo(() => getDashboardStats(), [getDashboardStats])
 
   // --- Today focus bar ---
   const todayFocus = useMemo(() => {
     const m4 = milestones.find(m => m.code === 'M4')
-    const daysToM4 = m4 ? daysBetweenStrings(TODAY, m4.date) : 0
+    const daysToM4 = m4 ? daysBetween(today, m4.date) : 0
     const overdueCount = getOverdueTasks().length
 
-    // Meetings this week: 5/31 (Sat) to 6/6 (Fri)
-    const weekEnd = '2026-06-06'
-    const meetingsThisWeek = meetings.filter(m => {
-      return m.date >= TODAY && m.date <= weekEnd && m.status !== '已取消'
-    }).length
+    const weekEnd = getWeekEnd(today)
+    const meetingsThisWeek = meetings.filter(m => m.date >= today && m.date <= weekEnd).length
 
     const severeIssues = issues.filter(
       i => i.severity === '严重' && i.status !== '已解决' && i.status !== '已关闭'
     ).length
 
     return { daysToM4, overdueCount, meetingsThisWeek, severeIssues }
-  }, [milestones, meetings, issues, getOverdueTasks])
+  }, [milestones, meetings, issues, getOverdueTasks, today])
 
-  // --- Risk items ---
+  // --- Risk items: overdue tasks + severe issues ---
   const riskItems = useMemo(() => {
     const overdueTasks = getOverdueTasks()
     const urgentTasks = tasks.filter(
       t => t.priority === '紧急' && t.status !== '已完成'
     )
 
-    const riskMap = new Map<string, {
+    const taskRisks: Array<{
       id: string
       title: string
       assignee: string
       dueDate: string
       scenario?: string
       type: 'overdue' | 'urgent'
-    }>()
+      entityType: 'task'
+    }> = []
 
+    const seen = new Set<string>()
     for (const t of overdueTasks) {
       const member = getMember(t.assigneeId)
       const scenario = t.scenarioId ? getScenario(t.scenarioId) : undefined
-      riskMap.set(t.id, {
+      seen.add(t.id)
+      taskRisks.push({
         id: t.id,
         title: t.title,
         assignee: member?.name ?? t.assigneeId,
         dueDate: t.dueDate,
         scenario: scenario?.code,
         type: 'overdue',
+        entityType: 'task',
+      })
+    }
+    for (const t of urgentTasks) {
+      if (seen.has(t.id)) continue
+      const member = getMember(t.assigneeId)
+      const scenario = t.scenarioId ? getScenario(t.scenarioId) : undefined
+      taskRisks.push({
+        id: t.id,
+        title: t.title,
+        assignee: member?.name ?? t.assigneeId,
+        dueDate: t.dueDate,
+        scenario: scenario?.code,
+        type: 'urgent',
+        entityType: 'task',
       })
     }
 
-    for (const t of urgentTasks) {
-      if (!riskMap.has(t.id)) {
-        const member = getMember(t.assigneeId)
-        const scenario = t.scenarioId ? getScenario(t.scenarioId) : undefined
-        riskMap.set(t.id, {
-          id: t.id,
-          title: t.title,
-          assignee: member?.name ?? t.assigneeId,
-          dueDate: t.dueDate,
+    const issueRisks = issues
+      .filter(i => i.severity === '严重' && i.status !== '已解决' && i.status !== '已关闭')
+      .map(i => {
+        const member = getMember(i.assigneeId)
+        const scenario = i.scenarioId ? getScenario(i.scenarioId) : undefined
+        return {
+          id: i.id,
+          title: i.title,
+          assignee: member?.name ?? i.assigneeId,
+          dueDate: i.dueDate ?? i.createdAt,
           scenario: scenario?.code,
-          type: 'urgent',
-        })
-      }
-    }
+          type: 'severe' as const,
+          entityType: 'issue' as const,
+        }
+      })
 
-    return Array.from(riskMap.values()).sort((a, b) => {
-      if (a.type === 'overdue' && b.type !== 'overdue') return -1
-      if (a.type !== 'overdue' && b.type === 'overdue') return 1
-      return a.dueDate.localeCompare(b.dueDate)
-    })
-  }, [tasks, getMember, getScenario, getOverdueTasks])
-
-  // --- Activity feed ---
-  const activityItems = useMemo(() => {
-    const sorted = [...activities].sort((a, b) =>
-      b.timestamp.localeCompare(a.timestamp)
-    ).slice(0, 8)
-
-    return sorted.map(act => {
-      const member = getMember(act.userId)
-      return {
-        id: act.id,
-        type: act.type,
-        action: act.action,
-        subject: act.subject,
-        userName: member?.name ?? act.userId,
-        userInitials: member?.initials ?? '??',
-        userColor: member?.color ?? '#6b7280',
-        timestamp: act.timestamp,
-      }
-    })
-  }, [activities, getMember])
+    return { taskRisks: taskRisks.sort((a, b) => a.dueDate.localeCompare(b.dueDate)), issueRisks }
+  }, [tasks, issues, getMember, getScenario, getOverdueTasks])
 
   // --- Loading skeleton ---
   if (!ready) {
@@ -139,21 +129,18 @@ export default function DashboardPage() {
       <>
         <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
         <div className="p-6 space-y-6">
+          <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
           <div className="grid grid-cols-4 gap-5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-32 rounded-xl bg-gray-100 animate-pulse" />
             ))}
           </div>
-          <div className="h-40 rounded-xl bg-gray-100 animate-pulse" />
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2 h-[520px] rounded-xl bg-gray-100 animate-pulse" />
-            <div className="col-span-1 h-[300px] rounded-xl bg-gray-100 animate-pulse" />
-          </div>
+          <div className="h-[400px] rounded-xl bg-gray-100 animate-pulse" />
+          <div className="h-[300px] rounded-xl bg-gray-100 animate-pulse" />
           <div className="grid grid-cols-2 gap-6">
             <div className="h-[300px] rounded-xl bg-gray-100 animate-pulse" />
             <div className="h-[300px] rounded-xl bg-gray-100 animate-pulse" />
           </div>
-          <div className="h-60 rounded-xl bg-gray-100 animate-pulse" />
         </div>
       </>
     )
@@ -176,63 +163,174 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-1.5">
                   <Clock size={14} className="text-blue-500" />
                   <span className="text-gray-700">
-                    距 M4 一批UAT <span className="font-bold text-blue-700">{todayFocus.daysToM4}</span> 天
+                    距 M4{' '}
+                    <span className={`font-bold ${todayFocus.daysToM4 <= 7 ? 'text-red-600' : 'text-blue-700'}`}>
+                      {todayFocus.daysToM4}
+                    </span>{' '}
+                    天
                   </span>
                 </div>
                 <div className="h-4 w-px bg-blue-200" />
                 <div className="flex items-center gap-1.5">
-                  <AlertTriangle size={14} className={todayFocus.overdueCount > 0 ? 'text-red-500' : 'text-gray-400'} />
+                  <AlertTriangle
+                    size={14}
+                    className={todayFocus.overdueCount > 0 ? 'text-red-500' : 'text-gray-400'}
+                  />
                   <span className="text-gray-700">
-                    逾期 <span className={`font-bold ${todayFocus.overdueCount > 0 ? 'text-red-600' : 'text-gray-700'}`}>{todayFocus.overdueCount}</span> 项
+                    逾期任务{' '}
+                    <span
+                      className={`font-bold ${
+                        todayFocus.overdueCount > 0 ? 'text-red-600' : 'text-gray-700'
+                      }`}
+                    >
+                      {todayFocus.overdueCount}
+                    </span>{' '}
+                    项
                   </span>
                 </div>
                 <div className="h-4 w-px bg-blue-200" />
                 <div className="flex items-center gap-1.5">
                   <Calendar size={14} className="text-blue-500" />
                   <span className="text-gray-700">
-                    本周会议 <span className="font-bold text-blue-700">{todayFocus.meetingsThisWeek}</span> 场
+                    本周会议{' '}
+                    <span className="font-bold text-blue-700">{todayFocus.meetingsThisWeek}</span>{' '}
+                    场
                   </span>
                 </div>
-                {todayFocus.severeIssues > 0 && (
-                  <>
-                    <div className="h-4 w-px bg-blue-200" />
-                    <div className="flex items-center gap-1.5">
-                      <AlertTriangle size={14} className="text-red-500" />
-                      <span className="text-gray-700">
-                        严重问题 <span className="font-bold text-red-600">{todayFocus.severeIssues}</span> 个
-                      </span>
-                    </div>
-                  </>
-                )}
+                <div className="h-4 w-px bg-blue-200" />
+                <div className="flex items-center gap-1.5">
+                  <AlertTriangle
+                    size={14}
+                    className={todayFocus.severeIssues > 0 ? 'text-red-500' : 'text-gray-400'}
+                  />
+                  <span className="text-gray-700">
+                    严重问题{' '}
+                    <span
+                      className={`font-bold ${
+                        todayFocus.severeIssues > 0 ? 'text-red-600' : 'text-gray-700'
+                      }`}
+                    >
+                      {todayFocus.severeIssues}
+                    </span>{' '}
+                    个
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Row 1: KPI Cards */}
-        <StatsCards />
+        {/* KPI Cards */}
+        <StatsCards stats={stats} />
 
-        {/* Row 2: Milestone Timeline */}
-        <MilestoneTimeline />
-
-        {/* Row 3: Gantt Chart + Task Distribution */}
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2">
-            <GanttChart />
-          </div>
-          <div className="col-span-1">
-            <TaskDistribution />
-          </div>
+        {/* GanttChart placeholder */}
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm min-h-[400px] flex items-center justify-center text-gray-400 text-sm">
+          {/* <GanttChart /> - built by Agent 2 */}
+          Gantt Chart
         </div>
 
-        {/* Row 4: Department Progress + Risk Alerts */}
+        {/* ScenarioGrid placeholder */}
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm min-h-[300px] flex items-center justify-center text-gray-400 text-sm">
+          {/* <ScenarioGrid /> - built by Agent 2 */}
+          Scenario Grid
+        </div>
+
+        {/* Risk Alerts (inline) */}
         <div className="grid grid-cols-2 gap-6">
-          <DepartmentProgress />
-          <RiskAlerts items={riskItems} />
-        </div>
+          {/* Overdue / Urgent Tasks */}
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <h3 className="text-sm font-semibold text-gray-900">风险任务</h3>
+              <Link
+                href="/tasks?status=overdue"
+                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                查看全部 <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {riskItems.taskRisks.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm text-gray-400">
+                  暂无风险任务
+                </div>
+              ) : (
+                riskItems.taskRisks.slice(0, 6).map(item => (
+                  <Link
+                    key={item.id}
+                    href="/tasks"
+                    className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            item.type === 'overdue'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}
+                        >
+                          {item.type === 'overdue' ? '逾期' : '紧急'}
+                        </span>
+                        {item.scenario && (
+                          <span className="text-[10px] text-gray-400">{item.scenario}</span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-900 truncate">{item.title}</p>
+                    </div>
+                    <div className="ml-4 text-right shrink-0">
+                      <p className="text-xs text-gray-500">{item.assignee}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{item.dueDate}</p>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
 
-        {/* Row 5: Activity Feed */}
-        <ActivityFeed items={activityItems} />
+          {/* Severe Issues */}
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <h3 className="text-sm font-semibold text-gray-900">严重问题</h3>
+              <Link
+                href="/issues?severity=严重"
+                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                查看全部 <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {riskItems.issueRisks.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm text-gray-400">
+                  暂无严重问题
+                </div>
+              ) : (
+                riskItems.issueRisks.slice(0, 6).map(item => (
+                  <Link
+                    key={item.id}
+                    href="/issues"
+                    className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-red-100 text-red-700">
+                          严重
+                        </span>
+                        {item.scenario && (
+                          <span className="text-[10px] text-gray-400">{item.scenario}</span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-gray-900 truncate">{item.title}</p>
+                    </div>
+                    <div className="ml-4 text-right shrink-0">
+                      <p className="text-xs text-gray-500">{item.assignee}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{item.dueDate}</p>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )

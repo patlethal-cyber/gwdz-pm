@@ -1,7 +1,9 @@
 'use client'
 
+// Legacy component — team page now uses MemberCard directly.
+// Kept for backward compatibility if referenced elsewhere.
+
 import type { TeamMember } from '@/lib/types'
-import { tasks } from '@/lib/store'
 import MemberCard from './MemberCard'
 
 interface TeamDirectoryProps {
@@ -9,16 +11,7 @@ interface TeamDirectoryProps {
   showWorkload?: boolean
 }
 
-function getTaskCountForMember(memberId: string) {
-  const memberTasks = tasks.filter(t => t.assigneeId === memberId)
-  return {
-    total: memberTasks.length,
-    inProgress: memberTasks.filter(t => t.status === '进行中' || t.status === '审核中').length,
-    done: memberTasks.filter(t => t.status === '已完成').length,
-  }
-}
-
-export default function TeamDirectory({ members, showWorkload = false }: TeamDirectoryProps) {
+export default function TeamDirectory({ members }: TeamDirectoryProps) {
   const groups = new Map<string, TeamMember[]>()
   for (const member of members) {
     const list = groups.get(member.group) || []
@@ -43,7 +36,6 @@ export default function TeamDirectory({ members, showWorkload = false }: TeamDir
               <MemberCard
                 key={member.id}
                 member={member}
-                taskCount={showWorkload ? getTaskCountForMember(member.id) : undefined}
               />
             ))}
           </div>

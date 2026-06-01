@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import IssueSummary from '@/components/issues/IssueSummary'
 import IssueList from '@/components/issues/IssueList'
@@ -14,7 +15,10 @@ const severityOptions: IssueSeverity[] = ['严重', '一般', '轻微', '建议'
 const sourceOptions: IssueSource[] = ['甲方反馈', 'UAT测试', '内部发现', '平台问题']
 
 export default function IssuesPage() {
-  const { issues, addIssue, updateIssue, team, scenarios, tasks, ready } = useData()
+  const { issues, addIssue, updateIssue, team, scenarios, tasks, today, ready } = useData()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
   const [modalOpen, setModalOpen] = useState(false)
   const [editIssue, setEditIssue] = useState<Issue | undefined>(undefined)
 
@@ -24,6 +28,18 @@ export default function IssuesPage() {
   const [filterSource, setFilterSource] = useState<string>('')
   const [filterScenario, setFilterScenario] = useState<string>('')
   const [filterAssignee, setFilterAssignee] = useState<string>('')
+
+  // Read URL params on mount for dashboard drill-down
+  useEffect(() => {
+    const urlSeverity = searchParams.get('severity')
+    const urlStatus = searchParams.get('status')
+    if (urlSeverity && severityOptions.includes(urlSeverity as IssueSeverity)) {
+      setFilterSeverity(urlSeverity)
+    }
+    if (urlStatus && statusOptions.includes(urlStatus as IssueStatus)) {
+      setFilterStatus(urlStatus)
+    }
+  }, [searchParams])
 
   const hasFilters = filterStatus || filterSeverity || filterSource || filterScenario || filterAssignee
 
@@ -45,6 +61,10 @@ export default function IssuesPage() {
       const { id, createdAt, updatedAt, ...rest } = saved
       addIssue(rest)
     }
+  }
+
+  function handleStatusFilter(status: IssueStatus | null) {
+    setFilterStatus(status || '')
   }
 
   const filtered = useMemo(() => {
@@ -90,8 +110,12 @@ export default function IssuesPage() {
       />
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Summary */}
-        <IssueSummary issues={issues} />
+        {/* Summary with clickable status pills */}
+        <IssueSummary
+          issues={issues}
+          onStatusFilter={handleStatusFilter}
+          activeStatus={(filterStatus as IssueStatus) || null}
+        />
 
         {/* Filter bar */}
         <div className="flex items-center gap-3 flex-wrap">
@@ -160,6 +184,7 @@ export default function IssuesPage() {
           team={team}
           scenarios={scenarios}
           tasks={tasks}
+          today={today}
         />
       </div>
 

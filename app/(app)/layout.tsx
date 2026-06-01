@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import Sidebar from "@/components/layout/Sidebar";
 import { DataProvider } from "@/lib/data-context";
 
@@ -12,7 +13,14 @@ export default function AppLayout({
     <DataProvider>
       <Sidebar />
       <main className="ml-[240px] min-h-screen transition-all duration-300">
-        {children}
+        <Suspense fallback={
+          <div className="p-6">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+            <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
+          </div>
+        }>
+          {children}
+        </Suspense>
       </main>
     </DataProvider>
   );

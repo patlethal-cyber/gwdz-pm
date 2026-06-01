@@ -8,21 +8,17 @@ import MeetingModal from '@/components/meetings/MeetingModal'
 import { useData } from '@/lib/data-context'
 import type { Meeting } from '@/lib/types'
 
-type Tab = 'upcoming' | 'past'
-
 export default function MeetingsPage() {
-  const { meetings, addMeeting, updateMeeting, ready } = useData()
-  const [activeTab, setActiveTab] = useState<Tab>('upcoming')
+  const { meetings, addMeeting, updateMeeting, deleteMeeting, ready } = useData()
   const [modalMeeting, setModalMeeting] = useState<Meeting | null | undefined>(undefined)
   // undefined = closed, null = create mode, Meeting = view/edit mode
 
-  const upcoming = useMemo(
-    () => meetings.filter(m => m.status === '即将召开').sort((a, b) => a.date.localeCompare(b.date)),
-    [meetings]
-  )
-
-  const past = useMemo(
-    () => meetings.filter(m => m.status === '已结束').sort((a, b) => b.date.localeCompare(a.date)),
+  const sorted = useMemo(
+    () => [...meetings].sort((a, b) => {
+      const dateCmp = b.date.localeCompare(a.date)
+      if (dateCmp !== 0) return dateCmp
+      return (b.time || '').localeCompare(a.time || '')
+    }),
     [meetings]
   )
 
@@ -43,83 +39,60 @@ export default function MeetingsPage() {
     if (exists) {
       updateMeeting(meeting.id, meeting)
     } else {
-      const { id, createdAt, ...rest } = meeting
+      const { id, createdAt, updatedAt, ...rest } = meeting
       addMeeting(rest)
     }
     closeModal()
   }
 
+  function handleDelete(id: string) {
+    deleteMeeting(id)
+    closeModal()
+  }
+
   if (!ready) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-sm text-gray-400">Loading...</div>
+      <div className="flex flex-col h-screen">
+        <div className="h-16 border-b border-gray-200 bg-white" />
+        <div className="flex-1 px-6 py-6 space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-3" />
+              <div className="h-3 bg-gray-100 rounded w-1/2 mb-3" />
+              <div className="h-3 bg-gray-100 rounded w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
-  const tabs: { key: Tab; label: string; count: number }[] = [
-    { key: 'upcoming', label: '即将召开', count: upcoming.length },
-    { key: 'past', label: '历史会议', count: past.length },
-  ]
-
   return (
     <div className="flex flex-col h-screen">
       <Header
-        title="会议"
-        subtitle={`共 ${upcoming.length + past.length} 场会议`}
+        title="会议纪要"
+        subtitle={`共 ${meetings.length} 份纪要`}
         actions={
           <button
             onClick={openCreate}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
           >
             <Plus size={16} />
-            新建会议
+            新建会议纪要
           </button>
         }
       />
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        {/* Tab bar */}
-        <div className="flex items-center gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab.label}
-              <span
-                className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.key
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Meeting lists */}
-        {activeTab === 'upcoming' && (
-          <MeetingList meetings={upcoming} variant="upcoming" onSelect={openView} />
-        )}
-        {activeTab === 'past' && (
-          <MeetingList meetings={past} variant="past" onSelect={openView} />
-        )}
+        <MeetingList meetings={sorted} onSelect={openView} />
       </div>
 
-      {/* Modal */}
       {modalMeeting !== undefined && (
         <MeetingModal
           meeting={modalMeeting}
           onClose={closeModal}
           onSave={handleSave}
+          onDelete={handleDelete}
         />
       )}
     </div>

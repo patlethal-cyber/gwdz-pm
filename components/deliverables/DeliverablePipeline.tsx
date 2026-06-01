@@ -27,7 +27,9 @@ interface DeliverablePipelineProps {
 function DeliverableCard({ d, onSelect }: { d: Deliverable; onSelect: (d: Deliverable) => void }) {
   const { getMember } = useData()
   const owner = getMember(d.ownerId)
-  const updatedDate = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : ''
+  const updatedDate = d.updatedAt
+    ? new Date(d.updatedAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+    : ''
 
   return (
     <div
@@ -40,17 +42,14 @@ function DeliverableCard({ d, onSelect }: { d: Deliverable; onSelect: (d: Delive
         </h4>
       </div>
       <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-600">
-          {d.code}
-        </span>
         {d.scenarioCode && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600">
             {d.scenarioCode}
           </span>
         )}
-        {d.version && (
+        {d.currentVersion && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-500">
-            {d.version}
+            {d.currentVersion}
           </span>
         )}
       </div>
@@ -77,42 +76,44 @@ function DeliverableCard({ d, onSelect }: { d: Deliverable; onSelect: (d: Delive
 
 export default function DeliverablePipeline({ filteredDeliverables, onSelect }: DeliverablePipelineProps) {
   return (
-    <div className="flex gap-0 overflow-x-auto pb-4 px-6 pt-4 min-h-0 flex-1">
-      {STATUS_COLUMNS.map((col, idx) => {
-        const items = filteredDeliverables.filter(d => d.status === col.status)
-        return (
-          <div key={col.status} className="flex items-stretch">
-            <div className={`flex flex-col min-w-[260px] max-w-[280px] rounded-xl ${col.colBg}`}>
-              {/* Column header */}
-              <div className={`flex items-center justify-between px-3 py-2.5 rounded-t-xl ${col.headerBg}`}>
-                <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
-                  <span className={`text-sm font-semibold ${col.headerText}`}>{col.label}</span>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${col.headerBg} ${col.headerText}`}>
-                  {items.length}
-                </span>
-              </div>
-              {/* Card list */}
-              <div className="flex-1 overflow-y-auto p-2 space-y-2 max-h-[calc(100vh-260px)]">
-                {items.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-gray-400">
-                    暂无交付物
+    <div className="flex-1 overflow-x-auto px-6 pt-4 pb-4 min-h-0">
+      <div className="flex gap-0" style={{ minWidth: `${STATUS_COLUMNS.length * 270}px` }}>
+        {STATUS_COLUMNS.map((col, idx) => {
+          const items = filteredDeliverables.filter(d => d.status === col.status)
+          return (
+            <div key={col.status} className="flex items-stretch">
+              <div className={`flex flex-col min-w-[250px] w-[250px] rounded-xl ${col.colBg}`}>
+                {/* Column header */}
+                <div className={`flex items-center justify-between px-3 py-2.5 rounded-t-xl ${col.headerBg}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${col.dotColor}`} />
+                    <span className={`text-sm font-semibold ${col.headerText}`}>{col.label}</span>
                   </div>
-                ) : (
-                  items.map(d => <DeliverableCard key={d.id} d={d} onSelect={onSelect} />)
-                )}
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${col.headerBg} ${col.headerText}`}>
+                    {items.length}
+                  </span>
+                </div>
+                {/* Card list */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-2 max-h-[calc(100vh-260px)]">
+                  {items.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-gray-400">
+                      暂无交付物
+                    </div>
+                  ) : (
+                    items.map(d => <DeliverableCard key={d.id} d={d} onSelect={onSelect} />)
+                  )}
+                </div>
               </div>
+              {/* Arrow between columns */}
+              {idx < STATUS_COLUMNS.length - 1 && (
+                <div className="flex items-center justify-center w-6 shrink-0">
+                  <ChevronRight size={18} className="text-gray-300" />
+                </div>
+              )}
             </div>
-            {/* Arrow between columns */}
-            {idx < STATUS_COLUMNS.length - 1 && (
-              <div className="flex items-center justify-center w-6 shrink-0">
-                <ChevronRight size={18} className="text-gray-300" />
-              </div>
-            )}
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

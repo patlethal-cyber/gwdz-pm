@@ -1,12 +1,12 @@
 'use client'
 
-import { Clock, MapPin, ListChecks, CheckCircle2 } from 'lucide-react'
+import { Clock, MapPin, FileText, CheckCircle2, ListChecks } from 'lucide-react'
 import type { Meeting } from '@/lib/types'
 import { useData } from '@/lib/data-context'
 
-type MeetingType = Meeting['type']
+type MeetingTypeKey = Meeting['type']
 
-const typeBadgeColors: Record<MeetingType, string> = {
+const typeBadgeColors: Record<MeetingTypeKey, string> = {
   '周会': 'bg-blue-50 text-blue-700 border-blue-200',
   '里程碑评审': 'bg-purple-50 text-purple-700 border-purple-200',
   '部门对接': 'bg-green-50 text-green-700 border-green-200',
@@ -15,7 +15,6 @@ const typeBadgeColors: Record<MeetingType, string> = {
 
 interface MeetingListProps {
   meetings: Meeting[]
-  variant: 'upcoming' | 'past'
   onSelect: (meeting: Meeting) => void
 }
 
@@ -28,16 +27,14 @@ function formatDate(dateStr: string): string {
   return `${month}月${day}日 周${weekday}`
 }
 
-export default function MeetingList({ meetings, variant, onSelect }: MeetingListProps) {
+export default function MeetingList({ meetings, onSelect }: MeetingListProps) {
   const { getMember } = useData()
 
   if (meetings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-        <ListChecks size={40} className="mb-3 text-gray-300" />
-        <p className="text-sm">
-          {variant === 'upcoming' ? '暂无即将召开的会议' : '暂无历史会议'}
-        </p>
+        <FileText size={40} className="mb-3 text-gray-300" />
+        <p className="text-sm">暂无会议纪要</p>
       </div>
     )
   }
@@ -45,7 +42,6 @@ export default function MeetingList({ meetings, variant, onSelect }: MeetingList
   return (
     <div className="space-y-3">
       {meetings.map(meeting => {
-        const isPast = variant === 'past'
         const doneActions = meeting.actionItems.filter(a => a.done).length
         const totalActions = meeting.actionItems.length
 
@@ -53,18 +49,16 @@ export default function MeetingList({ meetings, variant, onSelect }: MeetingList
           <button
             key={meeting.id}
             onClick={() => onSelect(meeting)}
-            className={`w-full text-left bg-white rounded-xl shadow-sm p-5 transition-all hover:shadow-md hover:-translate-y-0.5 ${
-              !isPast ? 'border-l-4 border-l-blue-500' : 'opacity-90'
-            }`}
+            className="w-full text-left bg-white rounded-xl shadow-sm border border-gray-200 p-5 transition-all hover:shadow-md hover:-translate-y-0.5"
           >
             {/* Top row: title + type badge */}
             <div className="flex items-start justify-between gap-3 mb-3">
-              <h3 className={`text-sm font-semibold ${isPast ? 'text-gray-500' : 'text-gray-900'}`}>
+              <h3 className="text-sm font-semibold text-gray-900 line-clamp-1">
                 {meeting.title}
               </h3>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${
-                  typeBadgeColors[meeting.type]
+                  typeBadgeColors[meeting.type] || 'bg-gray-100 text-gray-600 border-gray-200'
                 }`}
               >
                 {meeting.type}
@@ -89,7 +83,14 @@ export default function MeetingList({ meetings, variant, onSelect }: MeetingList
               )}
             </div>
 
-            {/* Bottom row: avatars + agenda count + action item ratio */}
+            {/* Minutes preview */}
+            {meeting.minutes && (
+              <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+                {meeting.minutes}
+              </p>
+            )}
+
+            {/* Bottom row: avatars + action item stats */}
             <div className="flex items-center justify-between">
               {/* Attendee avatars */}
               <div className="flex items-center">
@@ -116,22 +117,24 @@ export default function MeetingList({ meetings, variant, onSelect }: MeetingList
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Agenda count */}
-                {meeting.agendaItems.length > 0 && (
-                  <span className="text-xs text-gray-400">
-                    {meeting.agendaItems.length} 项议程
+              {/* Action items badge */}
+              {totalActions > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                  <ListChecks size={13} className="text-gray-400" />
+                  <span>
+                    {totalActions - doneActions > 0 && (
+                      <span className="text-amber-600 font-medium">{totalActions - doneActions} 项待办</span>
+                    )}
+                    {totalActions - doneActions > 0 && doneActions > 0 && ' / '}
+                    {doneActions > 0 && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <CheckCircle2 size={11} className="text-green-500 inline" />
+                        {doneActions} 项已完成
+                      </span>
+                    )}
                   </span>
-                )}
-
-                {/* Action item completion (past only) */}
-                {isPast && totalActions > 0 && (
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                    <CheckCircle2 size={12} className={doneActions === totalActions ? 'text-green-500' : 'text-gray-400'} />
-                    {doneActions}/{totalActions} 已完成
-                  </span>
-                )}
-              </div>
+                </span>
+              )}
             </div>
           </button>
         )

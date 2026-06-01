@@ -4,12 +4,12 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Search, Bell, FileText, CheckSquare, Bug, Calendar } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
+import NotificationPanel from '@/components/shared/NotificationPanel'
 
 interface HeaderProps {
   title: string
   subtitle?: string
   actions?: React.ReactNode
-  onNotificationClick?: () => void
 }
 
 interface SearchResult {
@@ -33,23 +33,33 @@ const groupIcons: Record<SearchResult['group'], React.ReactNode> = {
   meetings: <Calendar size={13} className="text-green-500" />,
 }
 
-export default function Header({ title, subtitle, actions, onNotificationClick }: HeaderProps) {
+export default function Header({ title, subtitle, actions }: HeaderProps) {
   const router = useRouter()
-  const { tasks, deliverables, issues, meetings, ready } = useData()
+  const { tasks, deliverables, issues, meetings, activities, ready } = useData()
 
   const [query, setQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [showNotifications, setShowNotifications] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const bellRef = useRef<HTMLDivElement>(null)
+
+  // Count activities in last 24 hours
+  const unreadCount = useMemo(() => {
+    if (!ready) return 0
+    const cutoff = new Date()
+    cutoff.setHours(cutoff.getHours() - 24)
+    const cutoffISO = cutoff.toISOString()
+    return activities.filter(a => a.timestamp >= cutoffISO).length
+  }, [activities, ready])
 
   const results = useMemo(() => {
     if (!query.trim() || !ready) return []
     const q = query.trim().toLowerCase()
     const out: SearchResult[] = []
 
-    // Tasks
     let count = 0
     for (const t of tasks) {
       if (count >= 5) break
@@ -59,7 +69,6 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
       }
     }
 
-    // Deliverables
     count = 0
     for (const d of deliverables) {
       if (count >= 5) break
@@ -69,7 +78,6 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
       }
     }
 
-    // Issues
     count = 0
     for (const i of issues) {
       if (count >= 5) break
@@ -79,7 +87,6 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
       }
     }
 
-    // Meetings
     count = 0
     for (const m of meetings) {
       if (count >= 5) break
@@ -92,7 +99,6 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
     return out
   }, [query, tasks, deliverables, issues, meetings, ready])
 
-  // Group results for display
   const grouped = useMemo(() => {
     const map = new Map<SearchResult['group'], SearchResult[]>()
     for (const r of results) {
@@ -161,6 +167,18 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
     }
   }, [])
 
+  // Close notification panel on outside click
+  useEffect(() => {
+    if (!showNotifications) return
+    function handleClickOutside(e: MouseEvent) {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showNotifications])
+
   return (
     <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6">
       <div>
@@ -169,6 +187,7 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
       </div>
       <div className="flex items-center gap-3">
         {actions}
+        {/* Search */}
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
@@ -222,13 +241,24 @@ export default function Header({ title, subtitle, actions, onNotificationClick }
             </div>
           )}
         </div>
-        <button
-          onClick={onNotificationClick}
-          className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
+
+        {/* Notification bell */}
+        <div ref={bellRef} className="relative">
+          <button
+            onClick={() => setShowNotifications(prev => !prev)}
+            className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+          {showNotifications && (
+            <NotificationPanel onClose={() => setShowNotifications(false)} />
+          )}
+        </div>
       </div>
     </header>
   )

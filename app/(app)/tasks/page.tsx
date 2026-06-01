@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, LayoutGrid, List, Filter } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import KanbanBoard from '@/components/tasks/KanbanBoard'
 import TaskList from '@/components/tasks/TaskList'
@@ -10,13 +11,23 @@ import { useData } from '@/lib/data-context'
 import type { Task, TaskStatus, TaskPriority } from '@/lib/types'
 
 type ViewMode = 'kanban' | 'list'
-type TaskScope = 'all' | 'mine'
 
 const priorityOptions: TaskPriority[] = ['紧急', '高', '中', '低']
+const statusOptions: TaskStatus[] = ['待办', '进行中', '审核中', '已完成']
 const departmentOptions = ['客户质量部', '测试一部', '测试二部']
 
+function getWeekEnd(dateStr: string): string {
+  const d = new Date(dateStr)
+  const day = d.getDay()
+  const diff = 7 - day
+  d.setDate(d.getDate() + diff)
+  return d.toISOString().split('T')[0]
+}
+
 export default function TasksPage() {
-  const { tasks, issues, team, updateTask, addTask, deleteTask, getMember, getScenario, ready } = useData()
+  const { tasks, issues, team, scenarios, updateTask, addTask, deleteTask, getMember, getScenario, today, ready } = useData()
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   const [view, setView] = useState<ViewMode>('kanban')
   const [modalOpen, setModalOpen] = useState(false)
@@ -24,18 +35,63 @@ export default function TasksPage() {
   const [defaultStatus, setDefaultStatus] = useState<TaskStatus>('待办')
 
   // Filter state
-  const [scope, setScope] = useState<TaskScope>('all')
   const [filterAssignee, setFilterAssignee] = useState('')
   const [filterPriority, setFilterPriority] = useState('')
   const [filterDept, setFilterDept] = useState('')
 
-  const edenTeam = useMemo(() => team.filter(m => m.organization === '乙方'), [team])
+  // Summary pill filter (status or "dueThisWeek")
+  const [summaryFilter, setSummaryFilter] = useState<string>('')
+
+  // Read URL params for dashboard drill-down
+  useEffect(() => {
+    const urlStatus = searchParams.get('status')
+    const urlSeverity = searchParams.get('severity')
+    if (urlStatus && statusOptions.includes(urlStatus as TaskStatus)) {
+      setSummaryFilter(urlStatus)
+    }
+    if (urlSeverity && priorityOptions.includes(urlSeverity as TaskPriority)) {
+      setFilterPriority(urlSeverity)
+    }
+  }, [searchParams])
+
+  // Summary stats
+  const stats = useMemo(() => {
+    const weekEnd = getWeekEnd(today)
+    return {
+      total: tasks.length,
+      '待办': tasks.filter(t => t.status === '待办').length,
+      '进行中': tasks.filter(t => t.status === '进行中').length,
+      '审核中': tasks.filter(t => t.status === '审核中').length,
+      '已完成': tasks.filter(t => t.status === '已完成').length,
+      dueThisWeek: tasks.filter(t => t.status !== '已完成' && t.dueDate >= today && t.dueDate <= weekEnd).length,
+    }
+  }, [tasks, today])
+
+  // Unique assignees from tasks
+  const assigneeList = useMemo(() => {
+    const ids = new Set(tasks.map(t => t.assigneeId).filter(Boolean))
+    return Array.from(ids).map(id => getMember(id)).filter(Boolean) as { id: string; name: string }[]
+  }, [tasks, getMember])
+
+  // Department list from scenarios
+  const scenarioDepts = useMemo(() => {
+    const depts = new Set(scenarios.map(s => s.department))
+    return Array.from(depts)
+  }, [scenarios])
 
   const filteredTasks = useMemo(() => {
     let result = tasks
-    if (scope === 'mine') {
-      result = result.filter(t => t.assigneeId === 'm01')
+
+    // Summary pill filter
+    if (summaryFilter) {
+      if (summaryFilter === 'dueThisWeek') {
+        const weekEnd = getWeekEnd(today)
+        result = result.filter(t => t.status !== '已完成' && t.dueDate >= today && t.dueDate <= weekEnd)
+      } else if (statusOptions.includes(summaryFilter as TaskStatus)) {
+        result = result.filter(t => t.status === summaryFilter)
+      }
     }
+
     if (filterAssignee) {
       result = result.filter(t => t.assigneeId === filterAssignee)
     }
@@ -43,12 +99,20 @@ export default function TasksPage() {
       result = result.filter(t => t.priority === filterPriority)
     }
     if (filterDept) {
-      result = result.filter(t => t.department === filterDept)
+      result = result.filter(t => {
+        if (!t.scenarioId) return false
+        const sc = getScenario(t.scenarioId)
+        return sc?.department === filterDept
+      })
     }
     return result
-  }, [tasks, scope, filterAssignee, filterPriority, filterDept])
+  }, [tasks, summaryFilter, filterAssignee, filterPriority, filterDept, today, getScenario])
 
-  const hasActiveFilters = filterAssignee || filterPriority || filterDept
+  const hasActiveFilters = filterAssignee || filterPriority || filterDept || summaryFilter
+
+  function handleSummaryClick(key: string) {
+    setSummaryFilter(prev => prev === key ? '' : key)
+  }
 
   function handleTaskClick(task: Task) {
     setEditTask(task)
@@ -62,18 +126,24 @@ export default function TasksPage() {
     setModalOpen(true)
   }
 
-  function handleSave(saved: Task) {
-    const existing = tasks.find(t => t.id === saved.id)
-    if (existing) {
-      updateTask(saved.id, saved)
+  function handleSave(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) {
+    if (data.id) {
+      updateTask(data.id, data)
     } else {
-      const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = saved
+      const { id: _id, ...rest } = data as Task
       addTask(rest)
     }
   }
 
   function handleStatusChange(taskId: string, newStatus: TaskStatus) {
     updateTask(taskId, { status: newStatus })
+  }
+
+  function clearAllFilters() {
+    setFilterAssignee('')
+    setFilterPriority('')
+    setFilterDept('')
+    setSummaryFilter('')
   }
 
   if (!ready) {
@@ -87,11 +157,19 @@ export default function TasksPage() {
     )
   }
 
+  const summaryPills: { key: string; label: string; count: number; activeColor: string; inactiveColor: string }[] = [
+    { key: '待办', label: '待办', count: stats['待办'], activeColor: 'bg-gray-700 text-white', inactiveColor: 'bg-gray-100 text-gray-600 hover:bg-gray-200' },
+    { key: '进行中', label: '进行中', count: stats['进行中'], activeColor: 'bg-blue-600 text-white', inactiveColor: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
+    { key: '审核中', label: '审核中', count: stats['审核中'], activeColor: 'bg-amber-500 text-white', inactiveColor: 'bg-amber-50 text-amber-700 hover:bg-amber-100' },
+    { key: '已完成', label: '已完成', count: stats['已完成'], activeColor: 'bg-green-600 text-white', inactiveColor: 'bg-green-50 text-green-700 hover:bg-green-100' },
+    { key: 'dueThisWeek', label: '本周到期', count: stats.dueThisWeek, activeColor: 'bg-red-600 text-white', inactiveColor: 'bg-red-50 text-red-600 hover:bg-red-100' },
+  ]
+
   return (
     <div className="flex flex-col h-screen">
       <Header
         title="任务管理"
-        subtitle={`共 ${filteredTasks.length} 项任务${scope === 'mine' ? '（我的）' : ''}`}
+        subtitle={`共 ${filteredTasks.length} 项任务`}
         actions={
           <div className="flex items-center gap-2">
             {/* View toggle */}
@@ -132,34 +210,30 @@ export default function TasksPage() {
         }
       />
 
-      {/* Filter bar */}
-      <div className="flex items-center gap-3 px-6 py-3 bg-white border-b border-gray-100">
-        {/* Scope toggle */}
-        <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
-          <button
-            onClick={() => setScope('all')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-              scope === 'all'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            全部任务
-          </button>
-          <button
-            onClick={() => setScope('mine')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-              scope === 'mine'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            我的任务
-          </button>
-        </div>
-
+      {/* Summary bar */}
+      <div className="flex items-center gap-2 px-6 py-3 bg-white border-b border-gray-100">
+        <span className="text-sm font-semibold text-gray-700 mr-1">
+          共 {stats.total} 项
+        </span>
         <div className="w-px h-5 bg-gray-200" />
+        {summaryPills.map(pill => (
+          <button
+            key={pill.key}
+            onClick={() => handleSummaryClick(pill.key)}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+              summaryFilter === pill.key ? pill.activeColor : pill.inactiveColor
+            }`}
+          >
+            {pill.label}
+            <span className={`font-bold ${summaryFilter === pill.key ? 'opacity-90' : ''}`}>
+              {pill.count}
+            </span>
+          </button>
+        ))}
+      </div>
 
+      {/* Filter bar */}
+      <div className="flex items-center gap-3 px-6 py-2.5 bg-gray-50/50 border-b border-gray-100">
         <Filter size={14} className="text-gray-400" />
 
         <select
@@ -168,7 +242,7 @@ export default function TasksPage() {
           className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">全部负责人</option>
-          {edenTeam.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          {assigneeList.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
 
         <select
@@ -186,17 +260,21 @@ export default function TasksPage() {
           className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">全部部门</option>
-          {departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}
+          {scenarioDepts.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
 
         {hasActiveFilters && (
           <button
-            onClick={() => { setFilterAssignee(''); setFilterPriority(''); setFilterDept('') }}
+            onClick={clearAllFilters}
             className="text-xs text-blue-600 hover:text-blue-700 font-medium"
           >
             清除筛选
           </button>
         )}
+
+        <span className="ml-auto text-xs text-gray-400">
+          {filteredTasks.length !== tasks.length && `已筛选 ${filteredTasks.length} / ${tasks.length}`}
+        </span>
       </div>
 
       {view === 'kanban' ? (
@@ -213,6 +291,10 @@ export default function TasksPage() {
         <TaskList
           tasks={filteredTasks}
           onTaskClick={handleTaskClick}
+          issues={issues}
+          getMember={getMember}
+          getScenario={getScenario}
+          today={today}
         />
       )}
 

@@ -37,6 +37,7 @@ export default function Sidebar() {
         collapsed ? 'w-[68px]' : 'w-[240px]'
       }`}
     >
+      {/* Logo */}
       <div className="flex items-center gap-3 px-5 h-16 border-b border-white/10">
         <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
           <Cpu size={18} />
@@ -49,6 +50,7 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Main nav */}
       <nav className="flex-1 py-4 px-3 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href
@@ -70,16 +72,22 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* Settings at bottom */}
       <div className="px-3 pb-2">
         <Link
           href="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+            pathname === '/settings'
+              ? 'bg-white/10 text-white/80'
+              : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+          }`}
         >
           <Settings size={20} className="flex-shrink-0" />
           {!collapsed && <span>设置</span>}
         </Link>
       </div>
 
+      {/* User info card */}
       <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
           LP
@@ -92,6 +100,7 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-20 w-6 h-6 bg-[#1a2332] border border-white/20 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all"

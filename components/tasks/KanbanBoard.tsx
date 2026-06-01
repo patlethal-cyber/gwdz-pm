@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import type { Task, TaskStatus, Issue } from '@/lib/types'
+import type { Task, TaskStatus, Issue, TeamMember, Scenario } from '@/lib/types'
 import TaskCard from './TaskCard'
 
 const columns: { status: TaskStatus; label: string; headerColor: string; countColor: string }[] = [
@@ -25,20 +25,13 @@ interface KanbanBoardProps {
   onTaskClick: (task: Task) => void
   onAddTask: (status: TaskStatus) => void
   issues?: Issue[]
-  getMember?: (id: string) => { name: string; initials: string; color: string } | undefined
-  getScenario?: (id: string) => { code: string; name: string } | undefined
+  getMember?: (id: string) => TeamMember | undefined
+  getScenario?: (id: string) => Scenario | undefined
 }
 
 export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddTask, issues = [], getMember, getScenario }: KanbanBoardProps) {
   const [dragOverCol, setDragOverCol] = useState<TaskStatus | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-
-  const issueByTaskId = new Map<string, Issue>()
-  for (const iss of issues) {
-    if (iss.linkedTaskId) {
-      issueByTaskId.set(iss.linkedTaskId, iss)
-    }
-  }
 
   function handleDragStart(e: React.DragEvent<HTMLDivElement>, task: Task) {
     e.dataTransfer.setData('text/plain', task.id)
@@ -75,7 +68,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
   }
 
   return (
-    <div className="flex gap-5 p-6 h-[calc(100vh-64px)] overflow-x-auto">
+    <div className="flex gap-5 p-6 flex-1 overflow-x-auto">
       {columns.map(col => {
         const colTasks = tasks.filter(t => t.status === col.status)
         const isOver = dragOverCol === col.status
@@ -113,7 +106,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
                     task={task}
                     onClick={onTaskClick}
                     onDragStart={handleDragStart}
-                    linkedIssue={issueByTaskId.get(task.id)}
+                    issues={issues}
                     getMember={getMember}
                     getScenario={getScenario}
                   />

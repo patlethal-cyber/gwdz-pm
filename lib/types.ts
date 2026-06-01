@@ -1,30 +1,16 @@
+// ===== 枚举类型 =====
 export type TaskStatus = '待办' | '进行中' | '审核中' | '已完成'
 export type TaskPriority = '紧急' | '高' | '中' | '低'
+export type TaskCategory = 'scenario' | 'project' | 'support'
 export type DeliverableStatus = '待编制' | '编制中' | '待审核' | '待签字' | '已归档'
 export type MilestoneStatus = '已完成' | '进行中' | '待开始'
-export type MeetingStatus = '即将召开' | '已结束' | '已取消'
+export type MeetingType = '周会' | '里程碑评审' | '部门对接' | '日常沟通'
+export type IssueStatus = '待处理' | '处理中' | '已解决' | '已关闭' | '已驳回'
+export type IssueSeverity = '严重' | '一般' | '轻微' | '建议'
+export type IssueSource = '甲方反馈' | 'UAT测试' | '内部发现' | '平台问题'
+export type IssueCategory = 'scenario' | 'project'
 
-export interface Task {
-  id: string
-  title: string
-  description: string
-  status: TaskStatus
-  priority: TaskPriority
-  assigneeId: string
-  dueDate: string
-  scenarioId?: string
-  department?: string
-  tags: string[]
-  checklist: ChecklistItem[]
-  createdAt: string
-  updatedAt: string
-}
-
-export interface ChecklistItem {
-  id: string
-  text: string
-  done: boolean
-}
+// ===== 核心实体 =====
 
 export interface Scenario {
   id: string
@@ -37,22 +23,77 @@ export interface Scenario {
   blueprintVersion: string
   dataReadiness: 'green' | 'amber' | 'red'
   dataNote: string
-  owner: string
+  ownerId: string
+  startDate: string
+  endDate: string
+}
+
+export interface Task {
+  id: string
+  title: string
+  description: string
+  status: TaskStatus
+  priority: TaskPriority
+  category: TaskCategory
+  assigneeId: string
+  scenarioId?: string
+  dueDate: string
+  tags: string[]
+  createdAt: string
+  updatedAt: string
+  // 关联统计（前端计算）
+  linkedIssueCount?: number
 }
 
 export interface Deliverable {
   id: string
   name: string
   code: string
+  category: string
   scenarioId?: string
   scenarioCode?: string
   status: DeliverableStatus
-  version: string
+  currentVersion?: string
   ownerId: string
-  templateType: string
   department: string
   dueDate: string
+  createdAt: string
   updatedAt: string
+  // 关联
+  versions?: DeliverableVersion[]
+  linkedTaskCount?: number
+  linkedIssueCount?: number
+}
+
+export interface DeliverableVersion {
+  id: string
+  deliverableId: string
+  versionNumber: string
+  fileName: string
+  fileUrl: string
+  fileSize: number
+  fileType: string
+  notes?: string
+  uploadedAt: string
+}
+
+export interface Issue {
+  id: string
+  title: string
+  description: string
+  status: IssueStatus
+  severity: IssueSeverity
+  source: IssueSource
+  category: IssueCategory
+  reporterId: string
+  assigneeId: string
+  scenarioId?: string
+  dueDate?: string           // ★ 计划解决时间
+  linkedTaskIds: string[]     // ★ M:N 关联任务
+  resolution?: string
+  createdAt: string
+  updatedAt: string
+  resolvedAt?: string
 }
 
 export interface Meeting {
@@ -62,27 +103,22 @@ export interface Meeting {
   time: string
   duration: number
   location: string
+  type: MeetingType
+  scenarioId?: string
   attendeeIds: string[]
-  agendaItems: AgendaItem[]
   minutes: string
-  actionItems: ActionItem[]
-  status: MeetingStatus
-  type: '周会' | '里程碑评审' | '部门对接' | '日常沟通'
+  fileUrl?: string            // ★ 纪要附件
+  actionItems: MeetingActionItem[]
   createdAt: string
+  updatedAt: string
 }
 
-export interface AgendaItem {
-  id: string
-  text: string
-  duration: number
-  presenter: string
-}
-
-export interface ActionItem {
+export interface MeetingActionItem {
   id: string
   text: string
   assigneeId: string
-  dueDate: string
+  taskId?: string             // ★ 关联任务
+  dueDate?: string
   done: boolean
 }
 
@@ -91,12 +127,19 @@ export interface TeamMember {
   name: string
   role: string
   group: string
-  organization: '甲方' | '乙方' | '火山引擎'
-  department?: string
   email?: string
   phone?: string
   initials: string
   color: string
+}
+
+export interface ExternalContact {
+  id: string
+  name: string
+  role: string
+  organization: '甲方' | '火山引擎'
+  department?: string
+  contactFor?: string
 }
 
 export interface Milestone {
@@ -108,32 +151,35 @@ export interface Milestone {
   description: string
 }
 
-export interface Activity {
+export interface ActivityLog {
   id: string
-  type: 'task' | 'deliverable' | 'meeting' | 'milestone' | 'issue'
-  action: string
-  subject: string
-  userId: string
+  entityType: 'task' | 'deliverable' | 'issue' | 'meeting' | 'milestone'
+  entityId: string
+  action: 'created' | 'updated' | 'deleted' | 'status_changed'
+  details?: Record<string, unknown>
   timestamp: string
+  // ★ 无 userId — 单用户系统
 }
 
-export type IssueStatus = '待处理' | '处理中' | '已解决' | '已关闭' | '已驳回'
-export type IssueSeverity = '严重' | '一般' | '轻微' | '建议'
-export type IssueSource = '甲方反馈' | 'UAT测试' | '内部发现' | '平台问题'
+// ===== 聚合统计 =====
 
-export interface Issue {
-  id: string
-  title: string
-  description: string
-  status: IssueStatus
-  severity: IssueSeverity
-  source: IssueSource
-  reporterId: string
-  assigneeId: string
-  scenarioId?: string
-  linkedTaskId?: string
-  resolution?: string
-  createdAt: string
-  updatedAt: string
-  resolvedAt?: string
+export interface DashboardStats {
+  tasksInProgress: number
+  tasksOverdue: number
+  issuesSevere: number
+  projectProgress: number // 0-100 百分比
+  totalTasks: number
+  totalDeliverables: number
+  totalIssues: number
+  deliverablesByStatus: Record<DeliverableStatus, number>
+  tasksByStatus: Record<TaskStatus, number>
+  issuesByStatus: Record<IssueStatus, number>
+}
+
+export interface PersonAggregation {
+  memberId: string
+  tasks: Task[]
+  deliverables: Deliverable[]
+  issues: Issue[]
+  scenarios: Scenario[]
 }

@@ -1,13 +1,17 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { X } from 'lucide-react'
-import type { Issue, IssueStatus, IssueSeverity, IssueSource } from '@/lib/types'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { X, Search, XCircle } from 'lucide-react'
+import type { Issue, IssueStatus, IssueSeverity, IssueSource, IssueCategory } from '@/lib/types'
 import { useData } from '@/lib/data-context'
 
 const statusOptions: IssueStatus[] = ['待处理', '处理中', '已解决', '已关闭', '已驳回']
 const severityOptions: IssueSeverity[] = ['严重', '一般', '轻微', '建议']
 const sourceOptions: IssueSource[] = ['甲方反馈', 'UAT测试', '内部发现', '平台问题']
+const categoryOptions: { value: IssueCategory; label: string }[] = [
+  { value: 'scenario', label: '场景问题' },
+  { value: 'project', label: '项目问题' },
+]
 
 interface IssueModalProps {
   isOpen: boolean
@@ -16,12 +20,8 @@ interface IssueModalProps {
   onSave: (issue: Issue) => void
 }
 
-function generateId() {
-  return 'iss' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
-}
-
 export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModalProps) {
-  const { team, scenarios, tasks } = useData()
+  const { team, scenarios, tasks, today } = useData()
   const isEdit = !!issue
 
   const [title, setTitle] = useState('')
@@ -29,10 +29,18 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
   const [status, setStatus] = useState<IssueStatus>('待处理')
   const [severity, setSeverity] = useState<IssueSeverity>('一般')
   const [source, setSource] = useState<IssueSource>('内部发现')
+  const [category, setCategory] = useState<IssueCategory>('scenario')
   const [assigneeId, setAssigneeId] = useState('')
   const [scenarioId, setScenarioId] = useState('')
-  const [linkedTaskId, setLinkedTaskId] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [linkedTaskIds, setLinkedTaskIds] = useState<string[]>([])
   const [resolution, setResolution] = useState('')
+
+  // Task search state
+  const [taskSearch, setTaskSearch] = useState('')
+  const [showTaskDropdown, setShowTaskDropdown] = useState(false)
+  const taskSearchRef = useRef<HTMLInputElement>(null)
+  const taskDropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (issue) {
@@ -41,9 +49,11 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
       setStatus(issue.status)
       setSeverity(issue.severity)
       setSource(issue.source)
+      setCategory(issue.category || 'scenario')
       setAssigneeId(issue.assigneeId)
       setScenarioId(issue.scenarioId || '')
-      setLinkedTaskId(issue.linkedTaskId || '')
+      setDueDate(issue.dueDate || '')
+      setLinkedTaskIds(issue.linkedTaskIds || [])
       setResolution(issue.resolution || '')
     } else {
       setTitle('')
@@ -51,11 +61,15 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
       setStatus('待处理')
       setSeverity('一般')
       setSource('内部发现')
+      setCategory('scenario')
       setAssigneeId('')
       setScenarioId('')
-      setLinkedTaskId('')
+      setDueDate('')
+      setLinkedTaskIds([])
       setResolution('')
     }
+    setTaskSearch('')
+    setShowTaskDropdown(false)
   }, [issue, isOpen])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -69,25 +83,61 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
     }
   }, [isOpen, handleKeyDown])
 
+  // Close task dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        taskDropdownRef.current && !taskDropdownRef.current.contains(e.target as Node) &&
+        taskSearchRef.current && !taskSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowTaskDropdown(false)
+      }
+    }
+    if (showTaskDropdown) {
+      document.addEventListener('mousedown', handleClick)
+      return () => document.removeEventListener('mousedown', handleClick)
+    }
+  }, [showTaskDropdown])
+
+  const filteredTasks = useMemo(() => {
+    const q = taskSearch.trim().toLowerCase()
+    return tasks.filter(t => {
+      if (linkedTaskIds.includes(t.id)) return false
+      if (!q) return true
+      return t.title.toLowerCase().includes(q)
+    }).slice(0, 10)
+  }, [tasks, taskSearch, linkedTaskIds])
+
+  function addLinkedTask(taskId: string) {
+    setLinkedTaskIds(prev => [...prev, taskId])
+    setTaskSearch('')
+    setShowTaskDropdown(false)
+  }
+
+  function removeLinkedTask(taskId: string) {
+    setLinkedTaskIds(prev => prev.filter(id => id !== taskId))
+  }
+
   function handleSave() {
     if (!title.trim()) return
-    const now = '2026-05-31'
     const showResolution = status === '已解决' || status === '已关闭'
     const saved: Issue = {
-      id: issue?.id || generateId(),
+      id: issue?.id || ('iss' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)),
       title: title.trim(),
       description: description.trim(),
       status,
       severity,
       source,
+      category,
       reporterId: issue?.reporterId || 'm01',
       assigneeId,
-      scenarioId: scenarioId || undefined,
-      linkedTaskId: linkedTaskId || undefined,
+      scenarioId: category === 'scenario' ? (scenarioId || undefined) : undefined,
+      dueDate: dueDate || undefined,
+      linkedTaskIds,
       resolution: showResolution ? resolution.trim() || undefined : undefined,
-      createdAt: issue?.createdAt || now,
-      updatedAt: now,
-      resolvedAt: (status === '已解决' || status === '已关闭') ? (issue?.resolvedAt || now) : undefined,
+      createdAt: issue?.createdAt || today,
+      updatedAt: today,
+      resolvedAt: (status === '已解决' || status === '已关闭') ? (issue?.resolvedAt || today) : undefined,
     }
     onSave(saved)
     onClose()
@@ -133,7 +183,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="问题详细描述..."
-              rows={4}
+              rows={3}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
           </div>
@@ -162,7 +212,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
             </div>
           </div>
 
-          {/* Source + Assignee row */}
+          {/* Source + Category row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">来源</label>
@@ -175,6 +225,20 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">分类</label>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value as IssueCategory)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                {categoryOptions.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Assignee + Due Date row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">负责人</label>
               <select
                 value={assigneeId}
@@ -182,13 +246,22 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">选择负责人...</option>
-                {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}({m.organization})</option>)}
+                {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}</option>)}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">计划解决日期</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              />
             </div>
           </div>
 
-          {/* Scenario + Linked Task row */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Scenario (conditional) */}
+          {category === 'scenario' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">关联场景</label>
               <select
@@ -200,16 +273,70 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
                 {scenarios.map(s => <option key={s.id} value={s.id}>{s.code} {s.name}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">关联任务</label>
-              <select
-                value={linkedTaskId}
-                onChange={e => setLinkedTaskId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="">无</option>
-                {tasks.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
-              </select>
+          )}
+
+          {/* Linked Tasks - multi-select with search */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              关联任务
+              {linkedTaskIds.length > 0 && (
+                <span className="ml-1.5 text-xs text-gray-400 font-normal">({linkedTaskIds.length})</span>
+              )}
+            </label>
+
+            {/* Selected task chips */}
+            {linkedTaskIds.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {linkedTaskIds.map(tid => {
+                  const t = tasks.find(tk => tk.id === tid)
+                  if (!t) return null
+                  return (
+                    <span
+                      key={tid}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md border border-blue-200"
+                    >
+                      <span className="max-w-[160px] truncate">{t.title}</span>
+                      <button
+                        onClick={() => removeLinkedTask(tid)}
+                        className="text-blue-400 hover:text-blue-600 flex-shrink-0"
+                      >
+                        <XCircle size={14} />
+                      </button>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Task search input */}
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                ref={taskSearchRef}
+                type="text"
+                value={taskSearch}
+                onChange={e => { setTaskSearch(e.target.value); setShowTaskDropdown(true) }}
+                onFocus={() => setShowTaskDropdown(true)}
+                placeholder="搜索任务名称..."
+                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+
+              {showTaskDropdown && filteredTasks.length > 0 && (
+                <div
+                  ref={taskDropdownRef}
+                  className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10 max-h-[200px] overflow-y-auto"
+                >
+                  {filteredTasks.map(t => (
+                    <button
+                      key={t.id}
+                      onMouseDown={e => { e.preventDefault(); addLinkedTask(t.id) }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                    >
+                      <span className="line-clamp-1">{t.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

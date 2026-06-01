@@ -1,113 +1,108 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useData } from '@/lib/data-context'
-import { AlertTriangle, Clock, AlertCircle, CalendarClock, X } from 'lucide-react'
-
-interface Notification {
-  id: string
-  type: 'red' | 'amber' | 'blue'
-  icon: typeof AlertTriangle
-  title: string
-  detail: string
-}
-
-const TODAY = '2026-05-31'
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
-const typeOrder: Record<Notification['type'], number> = { red: 0, amber: 1, blue: 2 }
-
-const typeBg: Record<Notification['type'], string> = {
-  red: 'bg-red-50 border-red-200',
-  amber: 'bg-amber-50 border-amber-200',
-  blue: 'bg-blue-50 border-blue-200',
-}
-
-const typeIcon: Record<Notification['type'], string> = {
-  red: 'text-red-500',
-  amber: 'text-amber-500',
-  blue: 'text-blue-500',
-}
+import {
+  X, CheckSquare, FileText, Bug, Calendar, Flag,
+  Plus, RefreshCw, Trash2, ArrowRightLeft,
+} from 'lucide-react'
 
 interface NotificationPanelProps {
-  isOpen: boolean
   onClose: () => void
 }
 
-export default function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
-  const { tasks, issues, meetings } = useData()
+const entityTypeIcons: Record<string, typeof CheckSquare> = {
+  task: CheckSquare,
+  deliverable: FileText,
+  issue: Bug,
+  meeting: Calendar,
+  milestone: Flag,
+}
 
-  if (!isOpen) return null
+const entityTypeLabels: Record<string, string> = {
+  task: '任务',
+  deliverable: '交付物',
+  issue: '问题',
+  meeting: '会议',
+  milestone: '里程碑',
+}
 
-  const notifications: Notification[] = []
+const actionIcons: Record<string, typeof Plus> = {
+  created: Plus,
+  updated: RefreshCw,
+  deleted: Trash2,
+  status_changed: ArrowRightLeft,
+}
 
-  const threeDaysLater = addDays(TODAY, 3)
-  const twoDaysLater = addDays(TODAY, 2)
+const actionLabels: Record<string, string> = {
+  created: '创建',
+  updated: '更新',
+  deleted: '删除',
+  status_changed: '状态变更',
+}
 
-  // Overdue tasks (red)
-  tasks.forEach(t => {
-    if (t.status !== '已完成' && t.dueDate < TODAY) {
-      notifications.push({
-        id: `overdue-${t.id}`,
-        type: 'red',
-        icon: AlertTriangle,
-        title: '任务逾期',
-        detail: `${t.title}（截止 ${t.dueDate}）`,
-      })
+function relativeTime(timestamp: string): string {
+  const now = Date.now()
+  const ts = new Date(timestamp).getTime()
+  if (isNaN(ts)) return ''
+  const diff = Math.floor((now - ts) / 1000)
+
+  if (diff < 60) return '刚刚'
+  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`
+  if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`
+  return timestamp.slice(0, 10)
+}
+
+export default function NotificationPanel({ onClose }: NotificationPanelProps) {
+  const { activities, tasks, deliverables, issues, meetings } = useData()
+
+  const entries = useMemo(() => {
+    const sorted = [...activities].sort((a, b) =>
+      b.timestamp.localeCompare(a.timestamp)
+    )
+    return sorted.slice(0, 20)
+  }, [activities])
+
+  function getEntityName(entityType: string, entityId: string): string {
+    switch (entityType) {
+      case 'task': {
+        const t = tasks.find(x => x.id === entityId)
+        return t?.title || entityId
+      }
+      case 'deliverable': {
+        const d = deliverables.find(x => x.id === entityId)
+        return d ? `${d.code} ${d.name}` : entityId
+      }
+      case 'issue': {
+        const i = issues.find(x => x.id === entityId)
+        return i?.title || entityId
+      }
+      case 'meeting': {
+        const m = meetings.find(x => x.id === entityId)
+        return m?.title || entityId
+      }
+      default:
+        return entityId
     }
-  })
+  }
 
-  // Due within 3 days (amber)
-  tasks.forEach(t => {
-    if (t.status !== '已完成' && t.dueDate >= TODAY && t.dueDate <= threeDaysLater) {
-      notifications.push({
-        id: `due-soon-${t.id}`,
-        type: 'amber',
-        icon: Clock,
-        title: '即将到期',
-        detail: `${t.title}（截止 ${t.dueDate}）`,
-      })
+  function buildDescription(entry: (typeof entries)[0]): string {
+    const typeLabel = entityTypeLabels[entry.entityType] || entry.entityType
+    const actionLabel = actionLabels[entry.action] || entry.action
+
+    if (entry.action === 'status_changed' && entry.details?.statusChange) {
+      const sc = entry.details.statusChange as { from: string; to: string }
+      return `${typeLabel}${actionLabel}: ${sc.from} -> ${sc.to}`
     }
-  })
 
-  // Severe unresolved issues (red)
-  issues.forEach(i => {
-    if (i.severity === '严重' && i.status !== '已解决' && i.status !== '已关闭') {
-      notifications.push({
-        id: `issue-${i.id}`,
-        type: 'red',
-        icon: AlertCircle,
-        title: '严重问题未解决',
-        detail: i.title,
-      })
-    }
-  })
-
-  // Upcoming meetings within 2 days (blue)
-  meetings.forEach(m => {
-    if (m.status === '即将召开' && m.date >= TODAY && m.date <= twoDaysLater) {
-      notifications.push({
-        id: `meeting-${m.id}`,
-        type: 'blue',
-        icon: CalendarClock,
-        title: '即将召开会议',
-        detail: `${m.title}（${m.date} ${m.time}）`,
-      })
-    }
-  })
-
-  // Sort: red first, then amber, then blue
-  notifications.sort((a, b) => typeOrder[a.type] - typeOrder[b.type])
-
-  const display = notifications.slice(0, 10)
+    return `${typeLabel}${actionLabel}`
+  }
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] max-h-96 overflow-y-auto">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+    <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-[100] max-h-[480px] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
         <h3 className="text-sm font-semibold text-gray-800">通知</h3>
         <button
           onClick={onClose}
@@ -117,33 +112,48 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
         </button>
       </div>
 
-      {display.length === 0 ? (
-        <div className="py-10 text-center text-sm text-gray-400">暂无通知</div>
-      ) : (
-        <div className="p-2 space-y-1.5">
-          {display.map(n => {
-            const Icon = n.icon
-            return (
-              <div
-                key={n.id}
-                className={`flex items-start gap-3 px-3 py-2.5 rounded-lg border ${typeBg[n.type]}`}
-              >
-                <Icon size={16} className={`mt-0.5 flex-shrink-0 ${typeIcon[n.type]}`} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-semibold text-gray-700">{n.title}</div>
-                  <div className="text-xs text-gray-500 mt-0.5 truncate">{n.detail}</div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {entries.length === 0 ? (
+          <div className="py-12 text-center text-sm text-gray-400">暂无新通知</div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {entries.map(entry => {
+              const EntityIcon = entityTypeIcons[entry.entityType] || Flag
+              const ActionIcon = actionIcons[entry.action] || RefreshCw
+              const entityName = getEntityName(entry.entityType, entry.entityId)
+              const description = buildDescription(entry)
+              const time = relativeTime(entry.timestamp)
 
-      {notifications.length > 10 && (
-        <div className="px-4 py-2 border-t border-gray-100 text-center">
-          <span className="text-xs text-gray-400">还有 {notifications.length - 10} 条通知</span>
-        </div>
-      )}
+              const iconBg =
+                entry.entityType === 'task' ? 'bg-blue-50 text-blue-500' :
+                entry.entityType === 'deliverable' ? 'bg-violet-50 text-violet-500' :
+                entry.entityType === 'issue' ? 'bg-red-50 text-red-500' :
+                entry.entityType === 'meeting' ? 'bg-green-50 text-green-500' :
+                'bg-gray-50 text-gray-500'
+
+              return (
+                <div
+                  key={entry.id}
+                  className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors"
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                    <EntityIcon size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <ActionIcon size={11} className="text-gray-400 flex-shrink-0" />
+                      <span className="text-xs text-gray-500">{description}</span>
+                    </div>
+                    <div className="text-sm text-gray-800 mt-0.5 truncate">{entityName}</div>
+                    <div className="text-[10px] text-gray-400 mt-1">{time}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

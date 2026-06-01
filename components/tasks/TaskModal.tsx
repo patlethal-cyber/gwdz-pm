@@ -1,40 +1,39 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { X, Plus, Trash2, Check } from 'lucide-react'
-import type { Task, TaskStatus, TaskPriority, ChecklistItem } from '@/lib/types'
-import { team, scenarios } from '@/lib/store'
+import { X } from 'lucide-react'
+import { useData } from '@/lib/data-context'
+import type { Task, TaskStatus, TaskPriority, TaskCategory } from '@/lib/types'
 
 const statusOptions: TaskStatus[] = ['待办', '进行中', '审核中', '已完成']
 const priorityOptions: TaskPriority[] = ['紧急', '高', '中', '低']
-const departmentOptions = ['客户质量部', '测试一部', '测试二部']
+const categoryOptions: { value: TaskCategory; label: string }[] = [
+  { value: 'scenario', label: '场景' },
+  { value: 'project', label: '项目' },
+  { value: 'support', label: '支持' },
+]
 
 interface TaskModalProps {
   isOpen: boolean
   onClose: () => void
   task?: Task
-  onSave: (task: Task) => void
+  onSave: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => void
   defaultStatus?: TaskStatus
 }
 
-function generateId() {
-  return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
-}
-
 export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus }: TaskModalProps) {
+  const { team, scenarios } = useData()
   const isEdit = !!task
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState<TaskStatus>('待办')
   const [priority, setPriority] = useState<TaskPriority>('中')
+  const [category, setCategory] = useState<TaskCategory>('project')
   const [assigneeId, setAssigneeId] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [scenarioId, setScenarioId] = useState('')
-  const [department, setDepartment] = useState('')
   const [tagsInput, setTagsInput] = useState('')
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([])
-  const [newCheckItem, setNewCheckItem] = useState('')
 
   useEffect(() => {
     if (task) {
@@ -42,25 +41,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
       setDescription(task.description)
       setStatus(task.status)
       setPriority(task.priority)
+      setCategory(task.category || 'project')
       setAssigneeId(task.assigneeId)
       setDueDate(task.dueDate)
       setScenarioId(task.scenarioId || '')
-      setDepartment(task.department || '')
       setTagsInput(task.tags.join(', '))
-      setChecklist([...task.checklist])
     } else {
       setTitle('')
       setDescription('')
       setStatus(defaultStatus || '待办')
       setPriority('中')
+      setCategory('project')
       setAssigneeId('')
       setDueDate('')
       setScenarioId('')
-      setDepartment('')
       setTagsInput('')
-      setChecklist([])
     }
-    setNewCheckItem('')
   }, [task, isOpen, defaultStatus])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -76,48 +72,26 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
 
   function handleSave() {
     if (!title.trim()) return
-    const now = '2026-05-31'
     const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-    const saved: Task = {
-      id: task?.id || generateId(),
+    const data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> & { id?: string } = {
       title: title.trim(),
       description: description.trim(),
       status,
       priority,
+      category,
       assigneeId,
       dueDate,
-      scenarioId: scenarioId || undefined,
-      department: department || undefined,
+      scenarioId: category === 'scenario' ? scenarioId || undefined : undefined,
       tags,
-      checklist,
-      createdAt: task?.createdAt || now,
-      updatedAt: now,
     }
-    onSave(saved)
+    if (task) {
+      data.id = task.id
+    }
+    onSave(data)
     onClose()
   }
 
-  function addCheckItem() {
-    if (!newCheckItem.trim()) return
-    setChecklist(prev => [...prev, {
-      id: 'cl' + Date.now().toString(36),
-      text: newCheckItem.trim(),
-      done: false,
-    }])
-    setNewCheckItem('')
-  }
-
-  function toggleCheckItem(id: string) {
-    setChecklist(prev => prev.map(c => c.id === id ? { ...c, done: !c.done } : c))
-  }
-
-  function removeCheckItem(id: string) {
-    setChecklist(prev => prev.filter(c => c.id !== id))
-  }
-
   if (!isOpen) return null
-
-  const edenTeam = team.filter(m => m.organization === '乙方')
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -184,8 +158,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
             </div>
           </div>
 
-          {/* Assignee + Due Date row */}
+          {/* Category + Assignee row */}
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">分类</label>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value as TaskCategory)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                {categoryOptions.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">负责人</label>
               <select
@@ -194,44 +178,35 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">选择负责人...</option>
-                {edenTeam.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}</option>)}
+                {team.map(m => <option key={m.id} value={m.id}>{m.name} - {m.role}</option>)}
               </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">截止日期</label>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
             </div>
           </div>
 
-          {/* Scenario + Department row */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Scenario (only if category = scenario) */}
+          {category === 'scenario' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">场景</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">关联场景</label>
               <select
                 value={scenarioId}
                 onChange={e => setScenarioId(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                <option value="">无</option>
+                <option value="">选择场景...</option>
                 {scenarios.map(s => <option key={s.id} value={s.id}>{s.code} {s.name}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">部门</label>
-              <select
-                value={department}
-                onChange={e => setDepartment(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="">无</option>
-                {departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
+          )}
+
+          {/* Due Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">截止日期</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
           {/* Tags */}
@@ -244,54 +219,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, defaultStatus
               placeholder="用逗号分隔，如：数据, 客户依赖"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </div>
-
-          {/* Checklist */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">检查清单</label>
-            {checklist.length > 0 && (
-              <div className="space-y-1.5 mb-3">
-                {checklist.map(item => (
-                  <div key={item.id} className="flex items-center gap-2 group/item">
-                    <button
-                      onClick={() => toggleCheckItem(item.id)}
-                      className={`w-4.5 h-4.5 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-                        item.done
-                          ? 'bg-blue-500 border-blue-500 text-white'
-                          : 'border-gray-300 hover:border-blue-400'
-                      }`}
-                    >
-                      {item.done && <Check size={10} />}
-                    </button>
-                    <span className={`flex-1 text-sm ${item.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                      {item.text}
-                    </span>
-                    <button
-                      onClick={() => removeCheckItem(item.id)}
-                      className="p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-all"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCheckItem}
-                onChange={e => setNewCheckItem(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCheckItem() } }}
-                placeholder="添加检查项..."
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <button
-                onClick={addCheckItem}
-                className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
           </div>
         </div>
 

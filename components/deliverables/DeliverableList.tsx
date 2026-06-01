@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useData } from '@/lib/data-context'
 import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
@@ -13,140 +13,165 @@ const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: s
   '已归档': { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
 }
 
-type SortField = 'name' | 'code' | 'scenarioCode' | 'department' | 'status' | 'version' | 'ownerId' | 'dueDate'
-type SortDir = 'asc' | 'desc'
+// Ordered category keys for display
+const CATEGORY_ORDER = [
+  '业务调研表',
+  '蓝图设计文档',
+  '数据工程实施报告',
+  '智能体操作手册',
+  'UAT反馈报告',
+  '智能体验收确认表',
+  '缺陷记录和跟踪文档',
+  '需求变更登记表',
+  '培训计划',
+  '培训签到表',
+  '项目日报',
+  '项目周报',
+  '项目级文档',
+]
 
 interface DeliverableListProps {
-  filteredDeliverables: Deliverable[]
+  deliverables: Deliverable[]
+  categoryGrouped: Record<string, Deliverable[]>
   onSelect: (d: Deliverable) => void
 }
 
-const STATUS_ORDER: DeliverableStatus[] = ['待编制', '编制中', '待审核', '待签字', '已归档']
+export default function DeliverableList({ deliverables, categoryGrouped, onSelect }: DeliverableListProps) {
+  const { getMember, today } = useData()
 
-export default function DeliverableList({ filteredDeliverables, onSelect }: DeliverableListProps) {
-  const { getMember } = useData()
-  const [sortField, setSortField] = useState<SortField>('code')
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  // All categories expanded by default
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
-  function handleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDir('asc')
-    }
+  function toggleCategory(cat: string) {
+    setCollapsed(prev => ({ ...prev, [cat]: !prev[cat] }))
   }
 
-  const sorted = [...filteredDeliverables].sort((a, b) => {
-    const dir = sortDir === 'asc' ? 1 : -1
-    if (sortField === 'status') {
-      return (STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status)) * dir
-    }
-    const av = (a[sortField] ?? '') as string
-    const bv = (b[sortField] ?? '') as string
-    return av.localeCompare(bv, 'zh-CN') * dir
+  // Sort categories: known order first, then any unknown alphabetically
+  const sortedCategories = Object.keys(categoryGrouped).sort((a, b) => {
+    const ia = CATEGORY_ORDER.indexOf(a)
+    const ib = CATEGORY_ORDER.indexOf(b)
+    if (ia === -1 && ib === -1) return a.localeCompare(b, 'zh-CN')
+    if (ia === -1) return 1
+    if (ib === -1) return -1
+    return ia - ib
   })
 
-  function SortIcon({ field }: { field: SortField }) {
-    if (sortField !== field) return <ArrowUpDown size={12} className="text-gray-300 ml-1" />
-    return sortDir === 'asc'
-      ? <ArrowUp size={12} className="text-blue-500 ml-1" />
-      : <ArrowDown size={12} className="text-blue-500 ml-1" />
+  // Category code prefix mapping
+  function getCategoryCode(cat: string): string {
+    const first = categoryGrouped[cat]?.[0]
+    return first?.code || ''
   }
 
-  const columns: { key: SortField; label: string; className: string }[] = [
-    { key: 'name', label: '名称', className: 'min-w-[200px]' },
-    { key: 'code', label: '模板编号', className: 'w-[100px]' },
-    { key: 'scenarioCode', label: '场景', className: 'w-[80px]' },
-    { key: 'department', label: '部门', className: 'w-[110px]' },
-    { key: 'status', label: '状态', className: 'w-[100px]' },
-    { key: 'version', label: '版本', className: 'w-[80px]' },
-    { key: 'ownerId', label: '负责人', className: 'w-[110px]' },
-    { key: 'dueDate', label: '截止日期', className: 'w-[110px]' },
-  ]
+  if (sortedCategories.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-sm text-gray-400">没有匹配的交付物</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="px-6 pt-4 pb-4 flex-1 overflow-auto">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/80">
-              {columns.map(col => (
-                <th
-                  key={col.key}
-                  className={`px-4 py-3 text-left font-medium text-gray-500 select-none cursor-pointer hover:text-gray-700 hover:bg-gray-100/60 transition-colors ${col.className}`}
-                  onClick={() => handleSort(col.key)}
-                >
-                  <div className="flex items-center">
-                    {col.label}
-                    <SortIcon field={col.key} />
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
-                  没有匹配的交付物
-                </td>
-              </tr>
-            ) : (
-              sorted.map((d, idx) => {
-                const owner = getMember(d.ownerId)
-                const style = STATUS_STYLE[d.status]
-                const isOverdue = d.status !== '已归档' && d.dueDate < '2026-05-31'
-                return (
-                  <tr
-                    key={d.id}
-                    onClick={() => onSelect(d)}
-                    className={`border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/40' : ''}`}
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-900">{d.name}</td>
-                    <td className="px-4 py-3">
-                      <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{d.code}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {d.scenarioCode ? (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-medium">{d.scenarioCode}</span>
-                      ) : (
-                        <span className="text-xs text-gray-400">--</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{d.department}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                        {d.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs font-mono">{d.version || '--'}</td>
-                    <td className="px-4 py-3">
-                      {owner ? (
-                        <div className="flex items-center gap-1.5">
-                          <div
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-medium shrink-0"
-                            style={{ backgroundColor: owner.color }}
-                          >
-                            {owner.initials[0]}
-                          </div>
-                          <span className="text-xs text-gray-600">{owner.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">--</span>
-                      )}
-                    </td>
-                    <td className={`px-4 py-3 text-xs ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
-                      {d.dueDate}
-                    </td>
+    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+      {sortedCategories.map(cat => {
+        const items = categoryGrouped[cat]
+        const isCollapsed = collapsed[cat]
+        const code = getCategoryCode(cat)
+
+        return (
+          <div key={cat} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            {/* Category header */}
+            <button
+              onClick={() => toggleCategory(cat)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+            >
+              <div className={`transition-transform ${isCollapsed ? '' : 'rotate-90'}`}>
+                <ChevronRight size={16} className="text-gray-400" />
+              </div>
+              {code && (
+                <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 shrink-0">
+                  {code}
+                </span>
+              )}
+              <span className="text-sm font-semibold text-gray-900">{cat}</span>
+              <span className="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                {items.length}
+              </span>
+            </button>
+
+            {/* Table content */}
+            {!isCollapsed && (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-t border-gray-100 bg-gray-50/80">
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 min-w-[200px]">名称</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 w-[80px]">场景</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 w-[100px]">状态</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 w-[80px]">版本</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 w-[110px]">负责人</th>
+                    <th className="px-4 py-2 text-left font-medium text-gray-500 w-[110px]">截止日期</th>
                   </tr>
-                )
-              })
+                </thead>
+                <tbody>
+                  {items.map((d, idx) => {
+                    const owner = getMember(d.ownerId)
+                    const style = STATUS_STYLE[d.status]
+                    const isOverdue = d.status !== '已归档' && d.dueDate < today
+
+                    return (
+                      <tr
+                        key={d.id}
+                        onClick={() => onSelect(d)}
+                        className={`border-t border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer ${
+                          idx % 2 === 1 ? 'bg-gray-50/40' : ''
+                        }`}
+                      >
+                        <td className="px-4 py-2.5 font-medium text-gray-900">{d.name}</td>
+                        <td className="px-4 py-2.5">
+                          {d.scenarioCode ? (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-medium">
+                              {d.scenarioCode}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">--</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                            {d.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-500 text-xs font-mono">
+                          {d.currentVersion || '--'}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          {owner ? (
+                            <div className="flex items-center gap-1.5">
+                              <div
+                                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-medium shrink-0"
+                                style={{ backgroundColor: owner.color }}
+                              >
+                                {owner.initials[0]}
+                              </div>
+                              <span className="text-xs text-gray-600">{owner.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">--</span>
+                          )}
+                        </td>
+                        <td className={`px-4 py-2.5 text-xs ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                          {d.dueDate}
+                          {isOverdue && <span className="ml-1 text-red-400">!</span>}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

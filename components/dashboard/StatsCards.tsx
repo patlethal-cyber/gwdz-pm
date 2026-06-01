@@ -1,125 +1,119 @@
 'use client'
 
+import Link from 'next/link'
 import {
-  ListChecks,
   Loader,
   AlertTriangle,
-  PackageCheck,
-  TrendingUp,
-  TrendingDown,
+  BarChart3,
+  ListChecks,
 } from 'lucide-react'
-import { useData } from '@/lib/data-context'
+import type { DashboardStats } from '@/lib/types'
 
-export default function StatsCards() {
-  const { tasks, deliverables, getOverdueTasks, getTasksByStatus } = useData()
+interface StatsCardsProps {
+  stats: DashboardStats
+}
 
-  const totalTasks = tasks.length
-  const inProgress = getTasksByStatus('进行中').length
-  const overdue = getOverdueTasks().length
-  const archivedCount = deliverables.filter(d => d.status === '已归档').length
-  const deliverableRate = deliverables.length > 0
-    ? Math.round((archivedCount / deliverables.length) * 100)
-    : 0
-
+export default function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      key: 'total',
-      label: '总任务数',
-      value: String(totalTasks),
-      icon: ListChecks,
+      key: 'inProgress',
+      label: '进行中任务',
+      value: stats.tasksInProgress,
+      icon: Loader,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
-      border: 'border-blue-100',
-      trend: '+2',
-      trendUp: true,
-    },
-    {
-      key: 'inProgress',
-      label: '进行中',
-      value: String(inProgress),
-      icon: Loader,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      border: 'border-amber-100',
-      trend: '+3',
-      trendUp: true,
+      border: 'border-blue-200',
+      href: '/tasks?status=进行中',
+      highlight: false,
     },
     {
       key: 'overdue',
       label: '逾期任务',
-      value: String(overdue),
+      value: stats.tasksOverdue,
       icon: AlertTriangle,
       color: 'text-red-600',
       bg: 'bg-red-50',
-      border: 'border-red-100',
-      trend: '-1',
-      trendUp: false,
+      border: 'border-red-200',
+      href: '/tasks?status=overdue',
+      highlight: stats.tasksOverdue > 0,
     },
     {
-      key: 'rate',
-      label: '交付物完成率',
-      value: `${deliverableRate}%`,
-      icon: PackageCheck,
+      key: 'severe',
+      label: '严重问题',
+      value: stats.issuesSevere,
+      icon: AlertTriangle,
+      color: 'text-orange-600',
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      href: '/issues?severity=严重',
+      highlight: stats.issuesSevere > 0,
+    },
+    {
+      key: 'progress',
+      label: '项目总体进度',
+      value: stats.projectProgress,
+      icon: BarChart3,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
-      border: 'border-emerald-100',
-      trend: '+5%',
-      trendUp: true,
+      border: 'border-emerald-200',
+      href: '/deliverables',
+      highlight: false,
+      isProgress: true,
     },
   ] as const
 
   return (
     <div className="grid grid-cols-4 gap-5">
-      {cards.map((card) => {
+      {cards.map(card => {
         const Icon = card.icon
-        const isOverdueCard = card.key === 'overdue'
-        const overdueHighlight = isOverdueCard && overdue > 0
+        const isRed = card.highlight
 
         return (
-          <div
+          <Link
             key={card.key}
-            className={`rounded-xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md ${
-              overdueHighlight ? 'border-red-200 ring-1 ring-red-100' : card.border
+            href={card.href}
+            className={`block rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${
+              isRed ? 'border-red-300 ring-1 ring-red-100' : card.border
             }`}
           >
             <div className="flex items-center justify-between">
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bg}`}
-              >
-                <Icon size={20} className={card.color} />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bg}`}>
+                <Icon size={20} className={isRed ? 'text-red-600' : card.color} />
               </div>
-              <div
-                className={`flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  card.trendUp
-                    ? isOverdueCard
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-blue-50 text-blue-600'
-                    : 'bg-emerald-50 text-emerald-600'
-                }`}
-              >
-                {card.trendUp ? (
-                  isOverdueCard ? (
-                    <TrendingDown size={12} />
-                  ) : (
-                    <TrendingUp size={12} />
-                  )
-                ) : (
-                  <TrendingDown size={12} />
-                )}
-                <span>{card.trend}</span>
-              </div>
+              {card.key !== 'progress' && (
+                <div className="flex items-center gap-1">
+                  <ListChecks size={14} className="text-gray-300" />
+                  <span className="text-xs text-gray-400">
+                    / {stats.totalTasks}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="mt-4">
-              <div
-                className={`text-3xl font-bold tracking-tight ${
-                  overdueHighlight ? 'text-red-600' : 'text-gray-900'
-                }`}
-              >
-                {card.value}
-              </div>
+              {card.key === 'progress' ? (
+                <>
+                  <div className="text-3xl font-bold tracking-tight text-gray-900">
+                    {card.value}%
+                  </div>
+                  <div className="mt-2 h-2 w-full rounded-full bg-gray-100">
+                    <div
+                      className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
+                      style={{ width: `${Math.min(card.value, 100)}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div
+                  className={`text-3xl font-bold tracking-tight ${
+                    isRed ? 'text-red-600' : 'text-gray-900'
+                  }`}
+                >
+                  {card.value}
+                </div>
+              )}
               <div className="mt-1 text-sm text-gray-500">{card.label}</div>
             </div>
-          </div>
+          </Link>
         )
       })}
     </div>

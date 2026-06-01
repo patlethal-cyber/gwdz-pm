@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { X, ChevronRight, Upload, Info } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { X, ChevronRight, Upload, Info, Download, FileText, Link2, Bug, CheckSquare } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import type { Deliverable, DeliverableStatus } from '@/lib/types'
 
@@ -23,20 +24,28 @@ const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: s
 }
 
 export default function DeliverableModal({ isOpen, onClose, deliverable, onSave }: DeliverableModalProps) {
-  const { getMember, getScenario } = useData()
-  const [version, setVersion] = useState('')
+  const router = useRouter()
+  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today } = useData()
+
   const [status, setStatus] = useState<DeliverableStatus>('待编制')
-  const [showUploadHint, setShowUploadHint] = useState(false)
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [uploadVersion, setUploadVersion] = useState('')
+  const [uploadNotes, setUploadNotes] = useState('')
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadMessage, setUploadMessage] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (deliverable) {
-      setVersion(deliverable.version || '')
       setStatus(deliverable.status)
     } else {
-      setVersion('')
       setStatus('待编制')
     }
-    setShowUploadHint(false)
+    setShowUploadForm(false)
+    setUploadVersion('')
+    setUploadNotes('')
+    setUploadFile(null)
+    setUploadMessage('')
   }, [deliverable, isOpen])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -58,7 +67,29 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
   }
 
   function handleSave() {
-    onSave({ status, version })
+    onSave({ status })
+  }
+
+  function handleUploadSubmit() {
+    if (!deliverable || !uploadVersion.trim()) return
+
+    // Simulate version creation (Vercel Blob not configured)
+    addDeliverableVersion({
+      deliverableId: deliverable.id,
+      versionNumber: uploadVersion.trim(),
+      fileName: uploadFile?.name || `${deliverable.code}-${uploadVersion.trim()}.docx`,
+      fileUrl: '',
+      fileSize: uploadFile?.size || 0,
+      fileType: uploadFile?.type || 'application/octet-stream',
+      notes: uploadNotes.trim() || undefined,
+    })
+
+    setUploadMessage('版本已记录。文件存储需配置 Vercel Blob 后生效。')
+    setUploadVersion('')
+    setUploadNotes('')
+    setUploadFile(null)
+
+    setTimeout(() => setUploadMessage(''), 4000)
   }
 
   if (!isOpen || !deliverable) return null
@@ -68,8 +99,14 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
   const currentIdx = STATUS_FLOW.indexOf(status)
   const canAdvance = currentIdx < STATUS_FLOW.length - 1
   const nextStatus = canAdvance ? STATUS_FLOW[currentIdx + 1] : null
-  const isOverdue = deliverable.status !== '已归档' && deliverable.dueDate < '2026-05-31'
-  const currentStyle = STATUS_STYLE[status]
+  const isOverdue = deliverable.status !== '已归档' && deliverable.dueDate < today
+
+  // Version history
+  const versions = deliverableVersions.filter(v => v.deliverableId === deliverable.id)
+
+  // Related counts
+  const linkedTaskCount = deliverable.linkedTaskCount ?? 0
+  const linkedIssueCount = deliverable.linkedIssueCount ?? 0
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -82,6 +119,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             <h2 className="text-base font-bold text-gray-900 truncate">{deliverable.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{deliverable.code}</span>
+              <span className="text-xs px-1.5 py-0.5 rounded bg-violet-50 text-violet-600 font-medium">{deliverable.category}</span>
               {deliverable.scenarioCode && (
                 <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-medium">{deliverable.scenarioCode}</span>
               )}
@@ -131,32 +169,30 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             )}
           </div>
 
-          {/* Version */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">版本号</label>
-            <input
-              type="text"
-              value={version}
-              onChange={e => setVersion(e.target.value)}
-              placeholder="例如 v1.0"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          {/* Current version display */}
+          <div className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50">
+            <span className="text-sm text-gray-500">当前版本</span>
+            <span className="text-sm font-mono font-medium text-gray-900">
+              {deliverable.currentVersion || '--'}
+            </span>
           </div>
 
-          {/* Info fields (read-only) */}
+          {/* Info fields */}
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
               <span className="text-sm text-gray-500">部门</span>
               <span className="text-sm font-medium text-gray-900">{deliverable.department}</span>
             </div>
-            <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
-              <span className="text-sm text-gray-500">模板类型</span>
-              <span className="text-sm font-medium text-gray-900">{deliverable.templateType}</span>
-            </div>
             {scenario && (
-              <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
+              <div
+                className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => { onClose(); router.push(`/scenarios/${deliverable.scenarioId}`) }}
+              >
                 <span className="text-sm text-gray-500">关联场景</span>
-                <span className="text-sm font-medium text-gray-900">{scenario.code} {scenario.name}</span>
+                <span className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                  {scenario.code} {scenario.name}
+                  <Link2 size={12} />
+                </span>
               </div>
             )}
             <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
@@ -188,22 +224,133 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             )}
           </div>
 
-          {/* File upload placeholder */}
+          {/* Version history */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">附件</label>
-            <button
-              onClick={() => setShowUploadHint(true)}
-              className="w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed border-gray-200 rounded-lg text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors"
-            >
-              <Upload size={24} />
-              <span className="text-sm">点击上传文件</span>
-            </button>
-            {showUploadHint && (
-              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-                <Info size={14} className="text-amber-600 shrink-0" />
-                <span className="text-xs text-amber-700">文件上传功能开发中</span>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700">版本历史</label>
+              <button
+                onClick={() => setShowUploadForm(!showUploadForm)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              >
+                <Upload size={12} />
+                上传新版本
+              </button>
+            </div>
+
+            {versions.length > 0 ? (
+              <div className="space-y-2">
+                {versions.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)).map(v => (
+                  <div key={v.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50">
+                    <FileText size={14} className="text-gray-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-mono font-medium text-gray-900">{v.versionNumber}</span>
+                        <span className="text-xs text-gray-400">{v.uploadedAt}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{v.fileName}</p>
+                      {v.notes && <p className="text-xs text-gray-400 mt-0.5">{v.notes}</p>}
+                    </div>
+                    {v.fileUrl ? (
+                      <a
+                        href={v.fileUrl}
+                        download={v.fileName}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <Download size={14} />
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-gray-300 px-1.5 py-0.5 bg-gray-100 rounded">暂无文件</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 py-3 text-center">暂无版本记录</p>
+            )}
+
+            {/* Upload form */}
+            {showUploadForm && (
+              <div className="mt-3 p-3 border border-gray-200 rounded-lg space-y-3 bg-white">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">版本号</label>
+                  <input
+                    type="text"
+                    value={uploadVersion}
+                    onChange={e => setUploadVersion(e.target.value)}
+                    placeholder="例如 v1.0"
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">文件 (可选)</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={e => setUploadFile(e.target.files?.[0] || null)}
+                    className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">备注 (可选)</label>
+                  <textarea
+                    value={uploadNotes}
+                    onChange={e => setUploadNotes(e.target.value)}
+                    placeholder="本版本的变更说明..."
+                    rows={2}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleUploadSubmit}
+                    disabled={!uploadVersion.trim()}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  >
+                    提交版本
+                  </button>
+                  <button
+                    onClick={() => setShowUploadForm(false)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    取消
+                  </button>
+                </div>
+                {uploadMessage && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <Info size={14} className="text-amber-600 shrink-0" />
+                    <span className="text-xs text-amber-700">{uploadMessage}</span>
+                  </div>
+                )}
               </div>
             )}
+          </div>
+
+          {/* Related links */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">关联项</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => { onClose(); router.push('/tasks') }}
+                className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+              >
+                <CheckSquare size={14} className="text-blue-500" />
+                <span className="text-sm text-gray-700">关联任务</span>
+                <span className="ml-auto text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
+                  {linkedTaskCount}
+                </span>
+              </button>
+              <button
+                onClick={() => { onClose(); router.push('/issues') }}
+                className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+              >
+                <Bug size={14} className="text-red-500" />
+                <span className="text-sm text-gray-700">关联问题</span>
+                <span className="ml-auto text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
+                  {linkedIssueCount}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 

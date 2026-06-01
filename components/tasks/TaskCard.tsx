@@ -1,104 +1,102 @@
 'use client'
 
-import { Calendar, Tag, Bug } from 'lucide-react'
-import type { Task } from '@/lib/types'
-import type { Issue } from '@/lib/types'
+import { Calendar, Bug } from 'lucide-react'
+import type { Task, Issue, TeamMember, Scenario } from '@/lib/types'
 
-const priorityConfig: Record<Task['priority'], { color: string; dot: string }> = {
-  '紧急': { color: 'text-red-700 bg-red-50', dot: 'bg-red-500' },
-  '高': { color: 'text-orange-700 bg-orange-50', dot: 'bg-orange-500' },
-  '中': { color: 'text-blue-700 bg-blue-50', dot: 'bg-blue-500' },
-  '低': { color: 'text-gray-600 bg-gray-100', dot: 'bg-gray-400' },
+const priorityConfig: Record<Task['priority'], { color: string; dot: string; label: string }> = {
+  '紧急': { color: 'text-red-700', dot: 'bg-red-500', label: '紧急' },
+  '高': { color: 'text-orange-700', dot: 'bg-orange-500', label: '高' },
+  '中': { color: 'text-blue-700', dot: 'bg-blue-500', label: '中' },
+  '低': { color: 'text-gray-500', dot: 'bg-gray-400', label: '低' },
 }
 
 interface TaskCardProps {
   task: Task
   onClick: (task: Task) => void
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, task: Task) => void
-  linkedIssue?: Issue
-  getMember?: (id: string) => { name: string; initials: string; color: string } | undefined
-  getScenario?: (id: string) => { code: string; name: string } | undefined
+  issues: Issue[]
+  getMember?: (id: string) => TeamMember | undefined
+  getScenario?: (id: string) => Scenario | undefined
 }
 
-export default function TaskCard({ task, onClick, onDragStart, linkedIssue, getMember, getScenario }: TaskCardProps) {
+export default function TaskCard({ task, onClick, onDragStart, issues, getMember, getScenario }: TaskCardProps) {
   const member = getMember?.(task.assigneeId)
   const scenario = task.scenarioId ? getScenario?.(task.scenarioId) : undefined
   const prio = priorityConfig[task.priority]
-  const today = '2026-05-31'
-  const isOverdue = task.status !== '已完成' && task.dueDate < today
 
-  const completedChecklist = task.checklist.filter(c => c.done).length
-  const totalChecklist = task.checklist.length
+  // Count linked issues: issues whose linkedTaskIds array contains this task's id
+  const linkedIssueCount = issues.filter(iss =>
+    iss.linkedTaskIds && iss.linkedTaskIds.includes(task.id)
+  ).length
+
+  // Use a fixed reference date -- in production this comes from context
+  const today = typeof window !== 'undefined'
+    ? (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })()
+    : '2026-06-01'
+  const isOverdue = task.status !== '已完成' && task.dueDate < today
 
   return (
     <div
       draggable="true"
       onDragStart={e => onDragStart?.(e, task)}
       onClick={() => onClick(task)}
-      className="bg-white rounded-lg border border-gray-200 p-3.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group active:cursor-grabbing"
+      className="bg-white rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group active:cursor-grabbing"
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
+      {/* Top row: assignee (left) | scenario badge (right) */}
+      <div className="flex items-center justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
-          {linkedIssue && (
-            <Bug size={13} className="text-red-500 flex-shrink-0" />
+          {member && (
+            <>
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                style={{ backgroundColor: member.color }}
+                title={member.name}
+              >
+                {member.initials}
+              </div>
+              <span className="text-xs text-gray-500 truncate">{member.name}</span>
+            </>
           )}
-          <h4 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
-            {task.title}
-          </h4>
         </div>
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium flex-shrink-0 ${prio.color}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${prio.dot}`} />
-          {task.priority}
-        </span>
+        <div className="flex-shrink-0">
+          {scenario ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-medium">
+              {scenario.code}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] font-medium">
+              项目
+            </span>
+          )}
+        </div>
       </div>
 
-      {scenario && (
-        <div className="mb-2">
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-[11px] font-medium">
-            <Tag size={10} />
-            {scenario.code} {scenario.name}
+      {/* Middle: task title */}
+      <h4 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+        {task.title}
+      </h4>
+
+      {/* Bottom row: priority (left) | due date + issue count (right) */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className={`inline-flex items-center gap-1 text-[11px] font-medium ${prio.color}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${prio.dot}`} />
+            {prio.label}
           </span>
         </div>
-      )}
-
-      {task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2.5">
-          {task.tags.map(tag => (
-            <span key={tag} className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[11px]">
-              {tag}
+        <div className="flex items-center gap-2">
+          {linkedIssueCount > 0 && (
+            <span className="inline-flex items-center gap-0.5 text-[11px] text-red-500 font-medium">
+              <Bug size={11} />
+              {linkedIssueCount}
             </span>
-          ))}
+          )}
+          <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+            <Calendar size={11} />
+            {task.dueDate.slice(5)}
+            {isOverdue && ' 逾期'}
+          </span>
         </div>
-      )}
-
-      {totalChecklist > 0 && (
-        <div className="mb-2.5">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-500 rounded-full transition-all"
-                style={{ width: `${(completedChecklist / totalChecklist) * 100}%` }}
-              />
-            </div>
-            <span className="text-[11px] text-gray-400">{completedChecklist}/{totalChecklist}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
-        <div className={`flex items-center gap-1 text-[11px] ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
-          <Calendar size={11} />
-          <span>{isOverdue && '已逾期 '}{task.dueDate}</span>
-        </div>
-        {member && (
-          <div
-            className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-            style={{ backgroundColor: member.color }}
-            title={member.name}
-          >
-            {member.initials}
-          </div>
-        )}
       </div>
     </div>
   )
