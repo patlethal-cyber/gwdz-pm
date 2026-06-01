@@ -9,13 +9,14 @@ import type {
 } from './types'
 import { SCENARIOS, generateDeliverables } from './seed-generator'
 import { generateFileMetadata } from './data/files-seed'
+import { generateVersions } from './data/versions-seed'
 import seedTasks from './data/tasks.json'
 import seedTeam from './data/team.json'
 import seedMilestones from './data/milestones.json'
 import seedMeetings from './data/meetings.json'
 import seedIssues from './data/issues.json'
 
-const DATA_VERSION = '5'
+const DATA_VERSION = '5.1'
 const KEYS = {
   tasks: 'gwdz-v5-tasks',
   deliverables: 'gwdz-v5-deliverables',
@@ -188,7 +189,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setMeetings(load<Meeting>(KEYS.meetings, seedMeetings as unknown as Meeting[]))
     setIssues(load<Issue>(KEYS.issues, enhancedIssues))
     setActivities(load<ActivityLog>(KEYS.activities, []))
-    setDeliverableVersions(load<DeliverableVersion>(KEYS.versions, []))
+    setDeliverableVersions(load<DeliverableVersion>(KEYS.versions, generateVersions()))
     setFiles(load<ProjectFile>(KEYS.files, generateFileMetadata()))
     setReady(true)
   }, [])
