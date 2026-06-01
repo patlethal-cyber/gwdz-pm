@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useData } from '@/lib/data-context'
 import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
+import GanttChart from '@/components/dashboard/GanttChart'
+import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
 import { Calendar, Clock, AlertTriangle, Target, ArrowRight } from 'lucide-react'
 
 function daysBetween(a: string, b: string): number {
@@ -223,17 +225,11 @@ export default function DashboardPage() {
         {/* KPI Cards */}
         <StatsCards stats={stats} />
 
-        {/* GanttChart placeholder */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm min-h-[400px] flex items-center justify-center text-gray-400 text-sm">
-          {/* <GanttChart /> - built by Agent 2 */}
-          Gantt Chart
-        </div>
+        {/* Gantt Chart */}
+        <GanttChart />
 
-        {/* ScenarioGrid placeholder */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm min-h-[300px] flex items-center justify-center text-gray-400 text-sm">
-          {/* <ScenarioGrid /> - built by Agent 2 */}
-          Scenario Grid
-        </div>
+        {/* Scenario Progress Grid */}
+        <ScenarioGrid />
 
         {/* Risk Alerts (inline) */}
         <div className="grid grid-cols-2 gap-6">
