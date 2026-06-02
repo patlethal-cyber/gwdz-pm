@@ -16,7 +16,7 @@ import seedMilestones from './data/milestones.json'
 import seedMeetings from './data/meetings.json'
 import seedIssues from './data/issues.json'
 
-const DATA_VERSION = '5.1'
+const DATA_VERSION = '5.2'
 const KEYS = {
   tasks: 'gwdz-v5-tasks',
   deliverables: 'gwdz-v5-deliverables',

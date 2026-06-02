@@ -44,8 +44,6 @@ function truncate(s: string, max: number): string {
 const BATCH_COLORS: Record<string, { bg: string; fill: string; border: string; label: string }> = {
   '一批':       { bg: '#ede9fe', fill: '#7c3aed', border: '#a78bfa', label: '一批' },
   '二批':       { bg: '#fce7f3', fill: '#db2777', border: '#f472b6', label: '二批' },
-  '二批（提前）': { bg: '#fce7f3', fill: '#db2777', border: '#f472b6', label: '二批' },
-  '待定':       { bg: '#f3f4f6', fill: '#6b7280', border: '#9ca3af', label: '待定' },
 }
 
 const READINESS: Record<string, { color: string; label: string }> = {
@@ -82,7 +80,7 @@ const STATUS_WEIGHTS: Record<string, number> = {
   '已归档': 1,
 }
 
-const BATCH_ORDER: Record<string, number> = { '一批': 0, '二批（提前）': 1, '二批': 1, '待定': 2 }
+const BATCH_ORDER: Record<string, number> = { '一批': 0, '二批': 1 }
 
 const LABEL_WIDTH = 250
 const RIGHT_INFO_WIDTH = 110

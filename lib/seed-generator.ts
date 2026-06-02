@@ -1,18 +1,22 @@
 import type { Deliverable, Scenario } from './types'
 
+// WBS v1.5 对齐：一批 7 场景 (5/29-6/18) + 二批 5 场景 (6/08-6/30)
+// 人员：石德平(S02+S04) / 温宇恒(S37+S99) / 高泉淙(S01+S95) / 刘建(S53+S38) / 张鹏(S06+S101) / 关晓玄(S100+S98)
 export const SCENARIOS: Scenario[] = [
-  { id: 's02', code: 'S02', name: '失效器件信息查询与追踪', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'green', dataNote: '20文件 14.5MB，最充分', ownerId: 'm06', startDate: '2026-05-25', endDate: '2026-06-18' },
-  { id: 's100', code: 'S100', name: '质量文档审核', department: '客户质量部', type: '审核校验', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'red', dataNote: '1文件 18KB，严重缺样本', ownerId: 'm07', startDate: '2026-05-25', endDate: '2026-06-18' },
-  { id: 's04', code: 'S04', name: '质量履历查询与智能总结', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'amber', dataNote: '2文件 426KB', ownerId: 'm02', startDate: '2026-05-29', endDate: '2026-06-18' },
+  // ===== 一批 (5/29 - 6/18)：客质部5 + 测试一部1 + 测试二部1 =====
   { id: 's06', code: 'S06', name: '失效分析知识库与语义搜索', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'red', dataNote: '卡客户首批入库清单', ownerId: 'm06', startDate: '2026-05-29', endDate: '2026-06-18' },
-  { id: 's01', code: 'S01', name: '质量分析报告生成', department: '客户质量部', type: '文档生成', batch: '二批（提前）', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'green', dataNote: '10文件 41MB', ownerId: 'm04', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { id: 's100', code: 'S100', name: '质量文档审核', department: '客户质量部', type: '审核校验', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'red', dataNote: '1文件 18KB，严重缺样本', ownerId: 'm07', startDate: '2026-05-29', endDate: '2026-06-18' },
+  { id: 's37', code: '37', name: 'ATE固化升级流程文档自动生成', department: '测试一部', type: '文档生成', batch: '一批', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪', ownerId: 'm03', startDate: '2026-05-29', endDate: '2026-06-15' },
+  { id: 's53', code: '53', name: '检查报告错别字优化行文流畅性', department: '测试二部', type: '审核校验', batch: '一批', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪', ownerId: 'm05', startDate: '2026-06-01', endDate: '2026-06-10' },
+  { id: 's02', code: 'S02', name: '失效器件信息查询与追踪', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'green', dataNote: '20文件 14.5MB，最充分', ownerId: 'm02', startDate: '2026-06-01', endDate: '2026-06-18' },
+  { id: 's01', code: 'S01', name: '质量分析报告生成', department: '客户质量部', type: '文档生成', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'green', dataNote: '10文件 41MB', ownerId: 'm04', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { id: 's04', code: 'S04', name: '质量履历查询与智能总结', department: '客户质量部', type: '知识检索', batch: '一批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'amber', dataNote: '2文件 426KB', ownerId: 'm02', startDate: '2026-06-09', endDate: '2026-06-18' },
+  // ===== 二批 (6/08 - 6/30)：客质部2 + 测试一部1 + 测试二部2 =====
+  { id: 's98', code: 'S98', name: '质量问题引发供货管控查询', department: '客户质量部', type: '知识推理', batch: '二批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'amber', dataNote: '1文件 15KB，缺批次编码', ownerId: 'm07', startDate: '2026-06-08', endDate: '2026-06-30' },
   { id: 's101', code: 'S101', name: '失效分析思路助手', department: '客户质量部', type: '知识推理', batch: '二批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'amber', dataNote: '共享库 A1/A2/A3', ownerId: 'm06', startDate: '2026-06-08', endDate: '2026-06-30' },
-  { id: 's98', code: 'S98', name: '质量问题引发供货管控查询', department: '客户质量部', type: '知识推理', batch: '二批', executionGroup: '第二执行组', blueprintVersion: 'v2 (0527)', dataReadiness: 'amber', dataNote: '1文件 15KB，缺批次编码', ownerId: 'm07', startDate: '2026-06-15', endDate: '2026-06-30' },
-  { id: 's37', code: '37', name: 'ATE固化升级流程文档自动生成', department: '测试一部', type: '文档生成', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪', ownerId: 'm04', startDate: '2026-06-03', endDate: '2026-06-30' },
-  { id: 's38', code: '38', name: '测试知识助手', department: '测试一部', type: '知识检索', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '200+文档', ownerId: 'm04', startDate: '2026-06-03', endDate: '2026-06-30' },
-  { id: 's53', code: '53', name: '检查报告错别字优化行文流畅性', department: '测试二部', type: '审核校验', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪', ownerId: 'm04', startDate: '2026-06-03', endDate: '2026-06-30' },
-  { id: 's95', code: '95', name: '测试报告AI生成', department: '测试二部', type: '文档生成', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪，蓝图待评审', ownerId: 'm05', startDate: '2026-06-03', endDate: '2026-06-30' },
-  { id: 's99', code: '99', name: 'QA问题记录检索', department: '测试二部', type: '知识检索', batch: '待定', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '1000+条QA记录', ownerId: 'm05', startDate: '2026-06-03', endDate: '2026-06-30' },
+  { id: 's38', code: '38', name: '测试知识助手', department: '测试一部', type: '知识检索', batch: '二批', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '200+文档', ownerId: 'm05', startDate: '2026-06-09', endDate: '2026-06-30' },
+  { id: 's95', code: '95', name: '测试报告AI生成', department: '测试二部', type: '文档生成', batch: '二批', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '已就绪，蓝图待评审', ownerId: 'm04', startDate: '2026-06-12', endDate: '2026-06-30' },
+  { id: 's99', code: '99', name: 'QA问题记录检索', department: '测试二部', type: '知识检索', batch: '二批', executionGroup: '第一执行组', blueprintVersion: 'v2.2 (0527)', dataReadiness: 'green', dataNote: '1000+条QA记录', ownerId: 'm03', startDate: '2026-06-15', endDate: '2026-06-30' },
 ]
 
 const TEMPLATE_DEFS: { code: string; name: string; perScenario: boolean; defaultStatus: string; duePhase: string }[] = [
