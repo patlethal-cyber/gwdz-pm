@@ -6,7 +6,7 @@ import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
 import GanttChart from '@/components/dashboard/GanttChart'
 import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
-import MilestoneTimeline from '@/components/dashboard/MilestoneTimeline'
+// MilestoneTimeline removed — current phase shown in FocusBar + GanttChart milestones
 import PersonDetail from '@/components/team/PersonDetail'
 import { Calendar, Clock, AlertTriangle, Target, BarChart3, Cpu, Users, FileBox } from 'lucide-react'
 import type { TeamMember, DeliverableStatus } from '@/lib/types'
@@ -417,7 +417,7 @@ export default function DashboardPage() {
         )}
 
         {/* Milestone Timeline — always visible */}
-        <MilestoneTimeline />
+        {/* MilestoneTimeline removed */}
       </div>
 
       {/* PersonDetail slide-over */}
