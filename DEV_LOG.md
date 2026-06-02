@@ -245,6 +245,12 @@ npm run build
 # 部署（push 到 main 自动触发）
 git push origin main
 
+# 备份服务器数据到 backups/<时间戳>/（逐集合 + restore 兼容 export.json + manifest）
+node scripts/backup-data.mjs
+
+# 上线前预检：校验备份数据是否符合 Zod schema（防上线后首次保存 422）
+npx tsx scripts/validate-data.mts backups/<时间戳>
+
 # 从备份恢复数据
 node scripts/restore-backup.mjs
 
@@ -256,7 +262,7 @@ node scripts/bulk-upload.mjs
 
 - **Tailwind CSS v4**：不要创建 tailwind.config.ts
 - **Next.js 16**：middleware.ts 已废弃（有警告但不影响）；params 是 Promise；读 node_modules/next/dist/docs/
-- **数据安全**：代码部署**永不触碰**服务器数据。种子初始化只能通过设置页手动触发。
+- **数据安全**：代码部署**永不触碰**服务器数据。种子初始化只能通过设置页手动触发。重大数据层改动上线前先 `node scripts/backup-data.mjs` 备份 + `validate-data.mts` 预检。
 - **多用户**：Vercel Blob 是 last-write-wins，避免两人同时编辑同一数据集合。改完刷新确认。
 
 ---
