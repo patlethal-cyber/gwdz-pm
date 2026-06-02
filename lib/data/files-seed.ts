@@ -234,7 +234,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d080'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -251,7 +251,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d080'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -268,7 +268,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d080'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -285,7 +285,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d080'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -302,7 +302,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -336,7 +336,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -421,7 +421,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d074'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -438,7 +438,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d075'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -455,7 +455,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d076'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -472,7 +472,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d077'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -489,7 +489,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -506,7 +506,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d079'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -523,7 +523,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d074'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -540,7 +540,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d074'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -557,7 +557,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d079'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -574,7 +574,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d079'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -591,7 +591,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d074'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -608,7 +608,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -625,7 +625,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -642,7 +642,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -659,7 +659,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -676,7 +676,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -693,7 +693,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -710,7 +710,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -727,7 +727,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -744,7 +744,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d078'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -761,7 +761,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d083'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -778,7 +778,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018', 'd006'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's01',
@@ -795,7 +795,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d017', 'd005'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -812,7 +812,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d019', 'd007'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's04',
@@ -829,7 +829,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d013', 'd001'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's06',
@@ -846,7 +846,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d014', 'd002'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's100',
@@ -863,7 +863,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d021', 'd009'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's101',
@@ -880,7 +880,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/markdown",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d020', 'd008'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's98',
@@ -897,7 +897,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's01',
@@ -914,7 +914,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d017'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -931,7 +931,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d019'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's04',
@@ -948,7 +948,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d013'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's06',
@@ -965,7 +965,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d020'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's98',
@@ -982,7 +982,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d014'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's100',
@@ -999,7 +999,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d021'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's101',
@@ -1016,7 +1016,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's01',
@@ -1033,7 +1033,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d017'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1050,7 +1050,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d019'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's04',
@@ -1067,7 +1067,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d013'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's06',
@@ -1084,7 +1084,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d014'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's100',
@@ -1101,7 +1101,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d021'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's101',
@@ -1118,7 +1118,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d020'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's98',
@@ -1254,7 +1254,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d018'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -1305,7 +1305,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d015'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's37',
@@ -1322,7 +1322,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d022'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's38',
@@ -1373,7 +1373,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d015'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's53',
@@ -1390,7 +1390,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d023'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's95',
@@ -1407,7 +1407,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d024'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's99',
@@ -1475,7 +1475,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d016'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -1662,7 +1662,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1679,7 +1679,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1696,7 +1696,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1713,7 +1713,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1730,7 +1730,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1747,7 +1747,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1764,7 +1764,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1781,7 +1781,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1798,7 +1798,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1815,7 +1815,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1832,7 +1832,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1849,7 +1849,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1866,7 +1866,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1883,7 +1883,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1900,7 +1900,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1917,7 +1917,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1934,7 +1934,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1951,7 +1951,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d029'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's02',
@@ -1968,7 +1968,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d031'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's04',
@@ -1985,7 +1985,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d031'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's04',
@@ -2002,7 +2002,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d026'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's100',
@@ -2019,7 +2019,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d032'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     scenarioId: 's98',
@@ -2036,7 +2036,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2053,7 +2053,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2070,7 +2070,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2087,7 +2087,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2104,7 +2104,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2121,7 +2121,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2138,7 +2138,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2155,7 +2155,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2172,7 +2172,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2189,7 +2189,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2206,7 +2206,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2223,7 +2223,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2240,7 +2240,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2257,7 +2257,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2274,7 +2274,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2291,7 +2291,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2308,7 +2308,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2325,7 +2325,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2342,7 +2342,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2359,7 +2359,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2376,7 +2376,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2393,7 +2393,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2410,7 +2410,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2427,7 +2427,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2444,7 +2444,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2461,7 +2461,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2478,7 +2478,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2495,7 +2495,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2512,7 +2512,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2529,7 +2529,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2546,7 +2546,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2563,7 +2563,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2580,7 +2580,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2597,7 +2597,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2614,7 +2614,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2631,7 +2631,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2648,7 +2648,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2665,7 +2665,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2682,7 +2682,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2699,7 +2699,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2716,7 +2716,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2733,7 +2733,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2750,7 +2750,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2767,7 +2767,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2784,7 +2784,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2801,7 +2801,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2818,7 +2818,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2835,7 +2835,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2852,7 +2852,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2869,7 +2869,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2886,7 +2886,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2903,7 +2903,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2920,7 +2920,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2937,7 +2937,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2954,7 +2954,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2971,7 +2971,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -2988,7 +2988,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3005,7 +3005,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3022,7 +3022,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3039,7 +3039,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3056,7 +3056,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/jpeg",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3073,7 +3073,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3090,7 +3090,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3107,7 +3107,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3124,7 +3124,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3141,7 +3141,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3158,7 +3158,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3175,7 +3175,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3192,7 +3192,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3209,7 +3209,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3226,7 +3226,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3243,7 +3243,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3260,7 +3260,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3277,7 +3277,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3294,7 +3294,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3311,7 +3311,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3328,7 +3328,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3345,7 +3345,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3362,7 +3362,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3379,7 +3379,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3396,7 +3396,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/png",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3413,7 +3413,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3430,7 +3430,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/csv",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3447,7 +3447,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3464,7 +3464,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3481,7 +3481,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3498,7 +3498,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3515,7 +3515,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3532,7 +3532,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3549,7 +3549,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3617,7 +3617,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3634,7 +3634,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3651,7 +3651,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3668,7 +3668,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3685,7 +3685,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3702,7 +3702,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3719,7 +3719,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3736,7 +3736,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3753,7 +3753,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3770,7 +3770,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3787,7 +3787,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3804,7 +3804,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3821,7 +3821,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3838,7 +3838,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3855,7 +3855,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3872,7 +3872,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3889,7 +3889,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3906,7 +3906,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3923,7 +3923,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3940,7 +3940,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "image/gif",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3957,7 +3957,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3974,7 +3974,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -3991,7 +3991,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4008,7 +4008,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4025,7 +4025,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4042,7 +4042,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4059,7 +4059,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4076,7 +4076,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4093,7 +4093,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4110,7 +4110,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4127,7 +4127,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4144,7 +4144,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4161,7 +4161,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4178,7 +4178,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4195,7 +4195,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4212,7 +4212,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/xml",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4229,7 +4229,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/json",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4246,7 +4246,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4263,7 +4263,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/x-python",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4280,7 +4280,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/x-python",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4297,7 +4297,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4314,7 +4314,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4331,7 +4331,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4348,7 +4348,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4365,7 +4365,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4382,7 +4382,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4399,7 +4399,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4416,7 +4416,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4433,7 +4433,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4450,7 +4450,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4467,7 +4467,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4484,7 +4484,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4501,7 +4501,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4518,7 +4518,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4535,7 +4535,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4552,7 +4552,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4569,7 +4569,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4586,7 +4586,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4603,7 +4603,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4620,7 +4620,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4637,7 +4637,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4654,7 +4654,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4671,7 +4671,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4688,7 +4688,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4705,7 +4705,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4722,7 +4722,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4739,7 +4739,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4756,7 +4756,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4773,7 +4773,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4790,7 +4790,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4807,7 +4807,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4824,7 +4824,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4841,7 +4841,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4858,7 +4858,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4875,7 +4875,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4892,7 +4892,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4909,7 +4909,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4926,7 +4926,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4943,7 +4943,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4960,7 +4960,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4977,7 +4977,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -4994,7 +4994,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5011,7 +5011,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5028,7 +5028,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5045,7 +5045,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5062,7 +5062,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5079,7 +5079,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5096,7 +5096,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5113,7 +5113,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5130,7 +5130,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5147,7 +5147,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5164,7 +5164,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5181,7 +5181,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5198,7 +5198,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5215,7 +5215,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5232,7 +5232,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5249,7 +5249,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5266,7 +5266,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5283,7 +5283,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5300,7 +5300,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5317,7 +5317,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5334,7 +5334,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5351,7 +5351,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5368,7 +5368,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5385,7 +5385,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5402,7 +5402,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5419,7 +5419,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5436,7 +5436,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5453,7 +5453,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5470,7 +5470,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5487,7 +5487,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5504,7 +5504,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5521,7 +5521,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5538,7 +5538,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5555,7 +5555,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5572,7 +5572,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5589,7 +5589,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5606,7 +5606,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5623,7 +5623,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5640,7 +5640,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5657,7 +5657,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5674,7 +5674,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5691,7 +5691,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5708,7 +5708,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5725,7 +5725,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5742,7 +5742,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5759,7 +5759,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5776,7 +5776,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5793,7 +5793,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5810,7 +5810,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5827,7 +5827,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5844,7 +5844,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5861,7 +5861,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5878,7 +5878,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5895,7 +5895,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5912,7 +5912,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5929,7 +5929,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5946,7 +5946,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5963,7 +5963,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5980,7 +5980,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -5997,7 +5997,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6014,7 +6014,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/pdf",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6031,7 +6031,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6048,7 +6048,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6065,7 +6065,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6082,7 +6082,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6099,7 +6099,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6116,7 +6116,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6133,7 +6133,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6150,7 +6150,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6167,7 +6167,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6184,7 +6184,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6201,7 +6201,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6218,7 +6218,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6235,7 +6235,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6252,7 +6252,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6269,7 +6269,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6286,7 +6286,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6303,7 +6303,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6320,7 +6320,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6337,7 +6337,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6354,7 +6354,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6371,7 +6371,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6388,7 +6388,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6405,7 +6405,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6422,7 +6422,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6439,7 +6439,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6456,7 +6456,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6473,7 +6473,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6490,7 +6490,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6507,7 +6507,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6524,7 +6524,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6541,7 +6541,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6558,7 +6558,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6575,7 +6575,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6592,7 +6592,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6609,7 +6609,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6626,7 +6626,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6643,7 +6643,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6660,7 +6660,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6677,7 +6677,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6694,7 +6694,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6711,7 +6711,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6728,7 +6728,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6745,7 +6745,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6762,7 +6762,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6779,7 +6779,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6796,7 +6796,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6813,7 +6813,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6830,7 +6830,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6847,7 +6847,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6864,7 +6864,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6881,7 +6881,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6898,7 +6898,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6915,7 +6915,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6932,7 +6932,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6949,7 +6949,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6966,7 +6966,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -6983,7 +6983,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7000,7 +7000,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7017,7 +7017,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7034,7 +7034,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7051,7 +7051,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7068,7 +7068,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7085,7 +7085,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7102,7 +7102,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7119,7 +7119,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7136,7 +7136,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7153,7 +7153,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7170,7 +7170,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7187,7 +7187,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7204,7 +7204,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7221,7 +7221,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7238,7 +7238,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7255,7 +7255,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7272,7 +7272,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7306,7 +7306,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7323,7 +7323,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7340,7 +7340,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7357,7 +7357,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d027', 'd034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7391,7 +7391,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7408,7 +7408,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "text/plain",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d034', 'd027'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7442,7 +7442,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d028'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7459,7 +7459,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d028'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7476,7 +7476,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d028'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7493,7 +7493,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d028'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
@@ -7527,7 +7527,7 @@ export function generateFileMetadata(): ProjectFile[] {
     fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     uploadedAt: '2026-06-01',
     uploadedBy: 'm01',
-    linkedDeliverableIds: [],
+    linkedDeliverableIds: ['d036'],
     linkedTaskIds: [],
     linkedIssueIds: [],
     
