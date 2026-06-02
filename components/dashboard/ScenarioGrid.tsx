@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import {
   ChevronDown,
@@ -35,6 +36,7 @@ export default function ScenarioGrid() {
     getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
   } = useData()
 
+  const router = useRouter()
   const [collapsedDepts, setCollapsedDepts] = useState<Record<string, boolean>>({})
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
 
@@ -154,22 +156,24 @@ export default function ScenarioGrid() {
                       <div key={sc.id} className="flex flex-col">
                         {/* Card */}
                         <div
-                          className="rounded-lg border border-gray-200 bg-white hover:shadow-md transition-shadow cursor-pointer"
-                          onClick={() => toggleCard(sc.id)}
+                          className="rounded-lg border border-gray-200 bg-white hover:shadow-md transition-shadow"
                         >
                           {/* Card header */}
                           <div className="p-3">
                             <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-1.5 min-w-0">
+                              <div
+                                className="flex items-center gap-1.5 min-w-0 cursor-pointer hover:opacity-70 transition-opacity"
+                                onClick={() => router.push(`/scenarios/${sc.id}`)}
+                              >
                                 <span
                                   className="inline-block h-2 w-2 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: readinessColor }}
                                   title={`数据: ${sc.dataReadiness}`}
                                 />
-                                <span className="text-xs font-bold text-gray-800 flex-shrink-0">
+                                <span className="text-xs font-bold text-blue-700 flex-shrink-0 hover:underline">
                                   {sc.code}
                                 </span>
-                                <span className="text-xs text-gray-500 truncate" title={sc.name}>
+                                <span className="text-xs text-gray-500 truncate hover:text-blue-600" title={sc.name}>
                                   {truncate(sc.name, 10)}
                                 </span>
                               </div>
@@ -184,6 +188,8 @@ export default function ScenarioGrid() {
                               </span>
                             </div>
 
+                            {/* Expandable area */}
+                            <div className="cursor-pointer" onClick={() => toggleCard(sc.id)}>
                             {/* Owner */}
                             <div className="flex items-center gap-1.5 mb-2.5">
                               {owner && (
@@ -238,6 +244,7 @@ export default function ScenarioGrid() {
                                 {m.issueCount}
                               </span>
                             </div>
+                            </div>{/* close expandable area wrapper */}
                           </div>
                         </div>
 

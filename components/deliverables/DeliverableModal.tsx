@@ -241,9 +241,12 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             {scenario && (
               <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
                 <span className="text-sm text-gray-500">关联场景</span>
-                <span className="text-sm font-medium text-gray-900">
+                <button
+                  onClick={() => { onClose(); router.push(`/scenarios/${deliverable.scenarioId}`) }}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                >
                   {scenario.code} {scenario.name}
-                </span>
+                </button>
               </div>
             )}
             <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { Search, Bell, FileText, CheckSquare, Bug, Calendar } from 'lucide-react'
+import { Search, Bell, FolderOpen, FileText, CheckSquare, Bug, Calendar } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import NotificationPanel from '@/components/shared/NotificationPanel'
+import FileManagerPanel from '@/components/shared/FileManagerPanel'
 
 interface HeaderProps {
   title: string
@@ -35,12 +36,13 @@ const groupIcons: Record<SearchResult['group'], React.ReactNode> = {
 
 export default function Header({ title, subtitle, actions }: HeaderProps) {
   const router = useRouter()
-  const { tasks, deliverables, issues, meetings, activities, ready } = useData()
+  const { tasks, deliverables, issues, meetings, activities, files, ready } = useData()
 
   const [query, setQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showFileManager, setShowFileManager] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -241,6 +243,23 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
             </div>
           )}
         </div>
+
+        {/* File manager button */}
+        <button
+          onClick={() => setShowFileManager(prev => !prev)}
+          className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <FolderOpen size={18} />
+          {files.length > 0 && (
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-blue-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1">
+              {files.length > 99 ? '99+' : files.length}
+            </span>
+          )}
+        </button>
+        <FileManagerPanel
+          isOpen={showFileManager}
+          onClose={() => setShowFileManager(false)}
+        />
 
         {/* Notification bell */}
         <div ref={bellRef} className="relative">

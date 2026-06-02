@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import { ListChecks, AlertCircle, Info } from 'lucide-react'
 
@@ -91,6 +92,7 @@ export default function GanttChart() {
     getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
   } = useData()
 
+  const router = useRouter()
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
 
   // Compute month labels
@@ -231,7 +233,8 @@ export default function GanttChart() {
                   {/* ===== Left label (250px) ===== */}
                   <div
                     style={{ width: LABEL_WIDTH, flexShrink: 0 }}
-                    className="flex items-center gap-1.5 px-2 overflow-hidden"
+                    className="flex items-center gap-1.5 px-2 overflow-hidden cursor-pointer group/label"
+                    onClick={() => router.push(`/scenarios/${sc.id}`)}
                   >
                     {/* Data readiness dot */}
                     <span
@@ -252,12 +255,12 @@ export default function GanttChart() {
                     )}
 
                     {/* Scenario code */}
-                    <span className="text-xs font-semibold text-gray-700 flex-shrink-0">
+                    <span className="text-xs font-semibold text-gray-700 flex-shrink-0 group-hover/label:text-blue-600 transition-colors">
                       {sc.code}
                     </span>
 
                     {/* Scenario name (truncated) */}
-                    <span className="text-xs text-gray-500 truncate" title={sc.name}>
+                    <span className="text-xs text-gray-500 truncate group-hover/label:text-blue-600 transition-colors" title={sc.name}>
                       {truncate(sc.name, 8)}
                     </span>
 

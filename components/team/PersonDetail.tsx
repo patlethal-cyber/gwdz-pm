@@ -136,16 +136,17 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               </h3>
               <div className="space-y-1.5">
                 {agg.scenarios.map(s => (
-                  <div
+                  <Link
                     key={s.id}
-                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50"
+                    href={`/scenarios/${s.id}`}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-xs font-mono text-gray-400">{s.code}</span>
-                      <span className="text-sm text-gray-700 truncate">{s.name}</span>
+                      <span className="text-sm text-gray-700 truncate group-hover:text-blue-600">{s.name}</span>
                     </div>
                     <span className="text-[10px] text-gray-400 flex-shrink-0">{s.department}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </section>
