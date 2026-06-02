@@ -16,7 +16,6 @@ export default function SettingsPage() {
     today, ready, importData, initializeSeedData,
   } = useData()
 
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showSeedConfirm, setShowSeedConfirm] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -61,7 +60,7 @@ export default function SettingsPage() {
   function handleExportJSON() {
     const data = {
       exportedAt: new Date().toISOString(),
-      version: 'v5.0',
+      version: 'v6.0',
       tasks,
       deliverables,
       meetings,
@@ -89,10 +88,6 @@ export default function SettingsPage() {
     await initializeSeedData()
     showToast('种子数据已初始化，页面将刷新')
     setTimeout(() => window.location.reload(), 1000)
-  }
-
-  function handleResetData() {
-    window.location.reload()
   }
 
   if (!ready) {
@@ -303,7 +298,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">版本</span>
-                <span className="text-sm font-medium text-gray-900">v5.0</span>
+                <span className="text-sm font-medium text-gray-900">v6.0</span>
               </div>
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">技术栈</span>
@@ -315,11 +310,11 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">数据存储</span>
-                <span className="text-sm font-medium text-gray-900">浏览器 localStorage</span>
+                <span className="text-sm font-medium text-gray-900">Vercel Blob (服务端共享存储)</span>
               </div>
               <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <span className="text-sm text-gray-500">源代码</span>
-                <a href="#" className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
+                <a href="https://github.com/patlethal-cyber/gwdz-pm" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
                   GitHub
                   <ExternalLink size={14} />
                 </a>
@@ -337,32 +332,6 @@ export default function SettingsPage() {
 
         </div>
       </main>
-
-      {/* Reset confirmation dialog */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">确认重置数据</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              此操作将清除所有本地数据并恢复到初始状态。所有手动修改的任务、交付物、会议和问题记录都将丢失。
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleResetData}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-              >
-                确认重置
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Seed data confirmation dialog */}
       {showSeedConfirm && (

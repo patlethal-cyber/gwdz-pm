@@ -56,6 +56,20 @@ export default function TasksPage() {
     }
   }, [searchParams])
 
+  // Handle ?open=taskId from global search
+  useEffect(() => {
+    if (!ready) return
+    const openId = searchParams.get('open')
+    if (!openId) return
+    const target = tasks.find(t => t.id === openId)
+    if (target) {
+      setEditTask(target)
+      setDefaultStatus(target.status)
+      setModalOpen(true)
+    }
+    router.replace('/tasks', { scroll: false })
+  }, [searchParams, ready, tasks, router])
+
   // Summary stats
   const stats = useMemo(() => {
     const weekEnd = getWeekEnd(today)
@@ -292,6 +306,7 @@ export default function TasksPage() {
           issues={issues}
           getMember={getMember}
           getScenario={getScenario}
+          today={today}
         />
       ) : (
         <TaskList

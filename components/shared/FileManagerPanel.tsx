@@ -136,7 +136,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
           fileUrl: result.url,
           fileSize: result.size,
           fileType: result.contentType,
-          uploadedBy: 'member-lipeisong',
+          uploadedBy: 'm01',
           linkedDeliverableIds: [],
           linkedTaskIds: [],
           linkedIssueIds: [],

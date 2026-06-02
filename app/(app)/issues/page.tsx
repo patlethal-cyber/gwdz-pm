@@ -41,6 +41,19 @@ export default function IssuesPage() {
     }
   }, [searchParams])
 
+  // Handle ?open=issueId from global search
+  useEffect(() => {
+    if (!ready) return
+    const openId = searchParams.get('open')
+    if (!openId) return
+    const target = issues.find(i => i.id === openId)
+    if (target) {
+      setEditIssue(target)
+      setModalOpen(true)
+    }
+    router.replace('/issues', { scroll: false })
+  }, [searchParams, ready, issues, router])
+
   const hasFilters = filterStatus || filterSeverity || filterSource || filterScenario || filterAssignee
 
   function handleEdit(issue: Issue) {

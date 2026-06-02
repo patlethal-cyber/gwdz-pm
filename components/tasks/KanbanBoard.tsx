@@ -27,9 +27,10 @@ interface KanbanBoardProps {
   issues?: Issue[]
   getMember?: (id: string) => TeamMember | undefined
   getScenario?: (id: string) => Scenario | undefined
+  today: string
 }
 
-export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddTask, issues = [], getMember, getScenario }: KanbanBoardProps) {
+export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddTask, issues = [], getMember, getScenario, today }: KanbanBoardProps) {
   const [dragOverCol, setDragOverCol] = useState<TaskStatus | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
 
@@ -109,6 +110,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
                     issues={issues}
                     getMember={getMember}
                     getScenario={getScenario}
+                    today={today}
                   />
                 </div>
               ))}

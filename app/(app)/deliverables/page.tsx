@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { LayoutGrid, List, ChevronDown, FolderOpen } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import DeliverablePipeline from '@/components/deliverables/DeliverablePipeline'
 import DeliverableList from '@/components/deliverables/DeliverableList'
@@ -54,12 +54,26 @@ function FilterDropdown({
 export default function DeliverablesPage() {
   const { deliverables, updateDeliverable, getDeliverablesByCategory, ready } = useData()
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const [viewMode, setViewMode] = useState<ViewMode>('category')
   const [deptFilter, setDeptFilter] = useState('全部')
   const [codeFilter, setCodeFilter] = useState('全部')
   const [selectedDeliverable, setSelectedDeliverable] = useState<Deliverable | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+
+  // Handle ?open=deliverableId from global search
+  useEffect(() => {
+    if (!ready) return
+    const openId = searchParams.get('open')
+    if (!openId) return
+    const target = deliverables.find(d => d.id === openId)
+    if (target) {
+      setSelectedDeliverable(target)
+      setModalOpen(true)
+    }
+    router.replace('/deliverables', { scroll: false })
+  }, [searchParams, ready, deliverables, router])
 
   // Read ?status= from URL for dashboard drill-down
   const urlStatus = searchParams.get('status') as DeliverableStatus | null

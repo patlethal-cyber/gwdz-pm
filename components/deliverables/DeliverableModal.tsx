@@ -26,9 +26,11 @@ const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: s
 
 export default function DeliverableModal({ isOpen, onClose, deliverable, onSave }: DeliverableModalProps) {
   const router = useRouter()
-  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today, addFile, getFilesByEntity } = useData()
+  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today, addFile, getFilesByEntity, team } = useData()
 
   const [status, setStatus] = useState<DeliverableStatus>('待编制')
+  const [ownerId, setOwnerId] = useState('')
+  const [dueDate, setDueDate] = useState('')
   const [showUploadForm, setShowUploadForm] = useState(false)
   const [uploadVersion, setUploadVersion] = useState('')
   const [uploadNotes, setUploadNotes] = useState('')
@@ -38,11 +40,18 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Filter team members to 乙方 only for owner dropdown
+  const internalMembers = team.filter(m => m.organization === '乙方')
+
   useEffect(() => {
     if (deliverable) {
       setStatus(deliverable.status)
+      setOwnerId(deliverable.ownerId)
+      setDueDate(deliverable.dueDate)
     } else {
       setStatus('待编制')
+      setOwnerId('')
+      setDueDate('')
     }
     setShowUploadForm(false)
     setUploadVersion('')
@@ -72,7 +81,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
   }
 
   function handleSave() {
-    onSave({ status })
+    onSave({ status, ownerId, dueDate })
   }
 
   async function handleUploadSubmit() {
@@ -149,19 +158,22 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
 
   if (!isOpen || !deliverable) return null
 
-  const owner = getMember(deliverable.ownerId)
   const scenario = deliverable.scenarioId ? getScenario(deliverable.scenarioId) : undefined
   const currentIdx = STATUS_FLOW.indexOf(status)
   const canAdvance = currentIdx < STATUS_FLOW.length - 1
   const nextStatus = canAdvance ? STATUS_FLOW[currentIdx + 1] : null
-  const isOverdue = deliverable.status !== '已归档' && deliverable.dueDate < today
+  const isOverdue = status !== '已归档' && dueDate < today
 
   // Version history
   const versions = deliverableVersions.filter(v => v.deliverableId === deliverable.id)
 
-  // Related counts
-  const linkedTaskCount = deliverable.linkedTaskCount ?? 0
-  const linkedIssueCount = deliverable.linkedIssueCount ?? 0
+  // Related counts -- computed dynamically from context data
+  const linkedTaskCount = deliverable.scenarioId
+    ? tasks.filter(t => t.scenarioId === deliverable.scenarioId).length
+    : 0
+  const linkedIssueCount = deliverable.scenarioId
+    ? issues.filter(i => i.scenarioId === deliverable.scenarioId).length
+    : 0
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -252,23 +264,40 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
               <span className="text-sm text-gray-500">负责人</span>
               <div className="flex items-center gap-2">
-                {owner && (
-                  <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-                    style={{ backgroundColor: owner.color }}
-                  >
-                    {owner.initials[0]}
-                  </span>
-                )}
-                <span className="text-sm font-medium text-gray-900">{owner?.name || '--'}</span>
+                {(() => {
+                  const selectedMember = getMember(ownerId)
+                  return selectedMember ? (
+                    <span
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
+                      style={{ backgroundColor: selectedMember.color }}
+                    >
+                      {selectedMember.initials[0]}
+                    </span>
+                  ) : null
+                })()}
+                <select
+                  value={ownerId}
+                  onChange={e => setOwnerId(e.target.value)}
+                  className="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded cursor-pointer"
+                >
+                  <option value="">--</option>
+                  {internalMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
               <span className="text-sm text-gray-500">截止日期</span>
-              <span className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
-                {deliverable.dueDate}
-                {isOverdue && <span className="ml-1.5 text-xs text-red-500">(已逾期)</span>}
-              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                  className={`text-sm font-medium bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded cursor-pointer ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}
+                />
+                {isOverdue && <span className="text-xs text-red-500">(已逾期)</span>}
+              </div>
             </div>
             {deliverable.updatedAt && (
               <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">

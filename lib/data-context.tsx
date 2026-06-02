@@ -33,20 +33,37 @@ async function serverLoad<T>(collection: CollectionName): Promise<T[] | null> {
   return null
 }
 
-async function serverSave<T>(collection: CollectionName, data: T[]): Promise<void> {
+type SaveStatus = 'idle' | 'saving' | 'error'
+
+async function serverSave<T>(
+  collection: CollectionName,
+  data: T[],
+  setSaveStatus: (s: SaveStatus) => void,
+): Promise<void> {
+  setSaveStatus('saving')
   try {
-    await fetch(`/api/data/${collection}`, {
+    const res = await fetch(`/api/data/${collection}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-  } catch { /* will retry on next change */ }
+    if (!res.ok) {
+      console.error(`[serverSave] ${collection} failed: HTTP ${res.status}`)
+      setSaveStatus('error')
+      return
+    }
+    setSaveStatus('idle')
+  } catch (err) {
+    console.error(`[serverSave] ${collection} network error:`, err)
+    setSaveStatus('error')
+  }
 }
 
-let idCounter = 0
 function genId(prefix: string): string {
-  idCounter++
-  return `${prefix}_${Date.now().toString(36)}_${idCounter.toString(36)}`
+  const rand = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID().slice(0, 8)
+    : Math.floor((performance.now() * 1e6 + Math.random() * 1e9) >>> 0).toString(36).padStart(8, '0').slice(0, 8)
+  return `${prefix}_${rand}`
 }
 
 function now(): string {
@@ -138,6 +155,7 @@ interface DataContextValue {
   getDashboardStats: () => DashboardStats
   importData: (json: string) => boolean
   initializeSeedData: () => Promise<void>
+  saveStatus: SaveStatus
   today: string
   ready: boolean
 }
@@ -154,6 +172,7 @@ export function useData(): DataContextValue {
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [tasks, setTasks] = useState<Task[]>([])
   const [deliverables, setDeliverables] = useState<Deliverable[]>([])
   const [meetings, setMeetings] = useState<Meeting[]>([])
@@ -162,10 +181,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [deliverableVersions, setDeliverableVersions] = useState<DeliverableVersion[]>([])
   const [files, setFiles] = useState<ProjectFile[]>([])
 
+  // Track which collections have been mutated by CRUD (not by init)
+  const dirty = useRef<Set<CollectionName>>(new Set())
+
   const team = useMemo(() => seedTeam as TeamMember[], [])
   const scenarios = useMemo(() => SCENARIOS, [])
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
   const todayStr = useMemo(() => now(), [])
+
+  // Warn user about unsaved changes on tab close
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (saveStatus === 'saving') {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [saveStatus])
 
   // ===== Initialization: Server only, seed defaults only on first deploy =====
   useEffect(() => {
@@ -195,12 +228,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     init()
   }, [])
 
-  // ===== Persist to server on every change (debounced 500ms) =====
+  // ===== Persist to server on every change (debounced 500ms, only if dirty) =====
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   function debouncedSave<T>(collection: CollectionName, data: T[]) {
+    if (!dirty.current.has(collection)) return
     if (saveTimers.current[collection]) clearTimeout(saveTimers.current[collection])
-    saveTimers.current[collection] = setTimeout(() => serverSave(collection, data), 500)
+    saveTimers.current[collection] = setTimeout(() => {
+      dirty.current.delete(collection)
+      serverSave(collection, data, setSaveStatus)
+    }, 500)
   }
 
   useEffect(() => { if (ready) debouncedSave('tasks', tasks) }, [tasks, ready])
@@ -212,6 +249,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (ready) debouncedSave('files', files) }, [files, ready])
 
   const logActivity = useCallback((entityType: ActivityLog['entityType'], entityId: string, action: ActivityLog['action'], details?: Record<string, unknown>) => {
+    dirty.current.add('activities')
     setActivities(prev => [{
       id: genId('log'),
       entityType,
@@ -226,12 +264,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addTask = useCallback((t: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('t')
     const n = now()
+    dirty.current.add('tasks')
     setTasks(prev => [...prev, { ...t, id, createdAt: n, updatedAt: n }])
     logActivity('task', id, 'created', { title: t.title })
     return id
   }, [logActivity])
 
   const updateTask = useCallback((id: string, u: Partial<Task>) => {
+    dirty.current.add('tasks')
     setTasks(prev => prev.map(t => {
       if (t.id !== id) return t
       const details: Record<string, unknown> = {}
@@ -242,6 +282,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [logActivity])
 
   const deleteTask = useCallback((id: string) => {
+    dirty.current.add('tasks')
     setTasks(prev => prev.filter(t => t.id !== id))
     logActivity('task', id, 'deleted')
   }, [logActivity])
@@ -250,12 +291,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addDeliverable = useCallback((d: Omit<Deliverable, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('d')
     const n = now()
+    dirty.current.add('deliverables')
     setDeliverables(prev => [...prev, { ...d, id, createdAt: n, updatedAt: n }])
     logActivity('deliverable', id, 'created', { name: d.name })
     return id
   }, [logActivity])
 
   const updateDeliverable = useCallback((id: string, u: Partial<Deliverable>) => {
+    dirty.current.add('deliverables')
     setDeliverables(prev => prev.map(d => {
       if (d.id !== id) return d
       if (u.status && u.status !== d.status) {
@@ -268,12 +311,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [logActivity])
 
   const deleteDeliverable = useCallback((id: string) => {
+    dirty.current.add('deliverables')
     setDeliverables(prev => prev.filter(d => d.id !== id))
     logActivity('deliverable', id, 'deleted')
   }, [logActivity])
 
   const addDeliverableVersion = useCallback((v: Omit<DeliverableVersion, 'id' | 'uploadedAt'>) => {
     const id = genId('dv')
+    dirty.current.add('versions')
+    dirty.current.add('deliverables')
     setDeliverableVersions(prev => [...prev, { ...v, id, uploadedAt: now() }])
     setDeliverables(prev => prev.map(d =>
       d.id === v.deliverableId ? { ...d, currentVersion: v.versionNumber, updatedAt: now() } : d
@@ -285,17 +331,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addMeeting = useCallback((m: Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('mt')
     const n = now()
+    dirty.current.add('meetings')
     setMeetings(prev => [...prev, { ...m, id, createdAt: n, updatedAt: n }])
     logActivity('meeting', id, 'created', { title: m.title })
     return id
   }, [logActivity])
 
   const updateMeeting = useCallback((id: string, u: Partial<Meeting>) => {
+    dirty.current.add('meetings')
     setMeetings(prev => prev.map(m => m.id === id ? { ...m, ...u, updatedAt: now() } : m))
     logActivity('meeting', id, 'updated')
   }, [logActivity])
 
   const deleteMeeting = useCallback((id: string) => {
+    dirty.current.add('meetings')
     setMeetings(prev => prev.filter(m => m.id !== id))
     logActivity('meeting', id, 'deleted')
   }, [logActivity])
@@ -304,12 +353,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addIssue = useCallback((i: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('iss')
     const n = now()
+    dirty.current.add('issues')
     setIssues(prev => [...prev, { ...i, id, createdAt: n, updatedAt: n }])
     logActivity('issue', id, 'created', { title: i.title, severity: i.severity })
     return id
   }, [logActivity])
 
   const updateIssue = useCallback((id: string, u: Partial<Issue>) => {
+    dirty.current.add('issues')
     setIssues(prev => prev.map(i => {
       if (i.id !== id) return i
       if (u.status && u.status !== i.status) {
@@ -320,6 +371,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [logActivity])
 
   const deleteIssue = useCallback((id: string) => {
+    dirty.current.add('issues')
     setIssues(prev => prev.filter(i => i.id !== id))
     logActivity('issue', id, 'deleted')
   }, [logActivity])
@@ -327,17 +379,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // ===== File CRUD =====
   const addFile = useCallback((f: Omit<ProjectFile, 'id' | 'uploadedAt'>) => {
     const id = genId('f')
+    dirty.current.add('files')
     setFiles(prev => [...prev, { ...f, id, uploadedAt: now() }])
     logActivity('file', id, 'uploaded', { name: f.name })
     return id
   }, [logActivity])
 
   const updateFile = useCallback((id: string, u: Partial<ProjectFile>) => {
+    dirty.current.add('files')
     setFiles(prev => prev.map(f => f.id === id ? { ...f, ...u } : f))
     logActivity('file', id, 'updated')
   }, [logActivity])
 
   const deleteFile = useCallback((id: string) => {
+    dirty.current.add('files')
     setFiles(prev => prev.filter(f => f.id !== id))
     logActivity('file', id, 'deleted')
   }, [logActivity])
@@ -435,6 +490,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       versions: generateVersions(),
       files: generateFileMetadata(),
     }
+    for (const key of COLLECTIONS) dirty.current.add(key)
     setTasks(seedData.tasks as Task[])
     setDeliverables(seedData.deliverables as Deliverable[])
     setMeetings(seedData.meetings as Meeting[])
@@ -443,7 +499,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setDeliverableVersions(seedData.versions as DeliverableVersion[])
     setFiles(seedData.files as ProjectFile[])
     await Promise.all(
-      Object.entries(seedData).map(([key, data]) => serverSave(key as CollectionName, data))
+      Object.entries(seedData).map(([key, data]) => serverSave(key as CollectionName, data, setSaveStatus))
     )
   }, [])
 
@@ -451,13 +507,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const importData = useCallback((json: string): boolean => {
     try {
       const data = JSON.parse(json)
-      if (data.tasks) setTasks(data.tasks)
-      if (data.deliverables) setDeliverables(data.deliverables)
-      if (data.meetings) setMeetings(data.meetings)
-      if (data.issues) setIssues(data.issues)
-      if (data.activities) setActivities(data.activities)
-      if (data.deliverableVersions) setDeliverableVersions(data.deliverableVersions)
-      if (data.files) setFiles(data.files)
+      if (data.tasks) { dirty.current.add('tasks'); setTasks(data.tasks) }
+      if (data.deliverables) { dirty.current.add('deliverables'); setDeliverables(data.deliverables) }
+      if (data.meetings) { dirty.current.add('meetings'); setMeetings(data.meetings) }
+      if (data.issues) { dirty.current.add('issues'); setIssues(data.issues) }
+      if (data.activities) { dirty.current.add('activities'); setActivities(data.activities) }
+      if (data.deliverableVersions) { dirty.current.add('versions'); setDeliverableVersions(data.deliverableVersions) }
+      if (data.files) { dirty.current.add('files'); setFiles(data.files) }
       return true
     } catch {
       return false
@@ -478,6 +534,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getDeliverablesByCategory, getOverdueTasks, getPersonAggregation,
       getFilesByEntity, getFilesByCategory,
       getDashboardStats, importData, initializeSeedData,
+      saveStatus,
       today: todayStr,
       ready,
     }}>

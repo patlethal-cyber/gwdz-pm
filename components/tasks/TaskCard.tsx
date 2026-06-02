@@ -17,9 +17,10 @@ interface TaskCardProps {
   issues: Issue[]
   getMember?: (id: string) => TeamMember | undefined
   getScenario?: (id: string) => Scenario | undefined
+  today: string
 }
 
-export default function TaskCard({ task, onClick, onDragStart, issues, getMember, getScenario }: TaskCardProps) {
+export default function TaskCard({ task, onClick, onDragStart, issues, getMember, getScenario, today }: TaskCardProps) {
   const member = getMember?.(task.assigneeId)
   const scenario = task.scenarioId ? getScenario?.(task.scenarioId) : undefined
   const prio = priorityConfig[task.priority]
@@ -29,10 +30,6 @@ export default function TaskCard({ task, onClick, onDragStart, issues, getMember
     iss.linkedTaskIds && iss.linkedTaskIds.includes(task.id)
   ).length
 
-  // Use a fixed reference date -- in production this comes from context
-  const today = typeof window !== 'undefined'
-    ? (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })()
-    : '2026-06-01'
   const isOverdue = task.status !== '已完成' && task.dueDate < today
 
   return (
