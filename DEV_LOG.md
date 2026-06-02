@@ -17,7 +17,7 @@
 | 数据存储 | **Vercel Blob**（JSON 文档存储，db/*.json，多用户共享） |
 | 文件存储 | **Vercel Blob**（488 项目文件，gwdz/ 前缀，public URL） |
 | 代码规模 | 47 个源文件（+lib/schemas.ts） |
-| 版本 | **v6.2（2026-06-02）** |
+| 版本 | **v6.3（2026-06-02）** |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
 ---
@@ -98,7 +98,17 @@ localStorage + 拖拽看板 + 搜索 + 通知 + 报告
 - **E recharts 懒加载**：抽 `VizCharts.tsx` + `next/dynamic(ssr:false)`，图表库移出首屏 bundle
 - 新文件：`components/layout/sidebar-context.tsx`、`components/reports/VizCharts.tsx`
 - **校验**：build + tsc + preview 多断点（375 抽屉 / 1280 静态侧栏 / MeetingModal 抽屉）+ 无 console 报错
-- **未做（a11y review 发现的 2 个 blocker）**：B = 卡片/列表行是 `<div onClick>` 键盘打不开 + Modal 无 focus trap/return。本轮范围外，建议下一轮
+- **未做（a11y review 发现的 2 个 blocker）**：B = 卡片/列表行是 `<div onClick>` 键盘打不开 + Modal 无 focus trap/return。~~建议下一轮~~ → **已决定不做**（用户拍板，移出 backlog）
+
+### v6.3 — A3 拆分 DataContext（usePersistedCollection）★ 当前版本（2026-06-02）
+
+纯内部重构，**零用户可见变化、零行为变化**：
+- 抽取通用 hook **`usePersistedCollection<T>(name, ready, setSaveStatus)`**，收敛单集合的 state + 版本号(X-Data-Version 乐观并发) + dirty + debounced serverSave + forceSave。7 个集合各调一次
+- DataProvider 用 `const { items: tasks, setItems: setTasks, load, forceSave } = usePersistedCollection(...)` 解构别名 → 下方 CRUD/查询/value 几乎零改动；删掉所有 `dirty.current.add` + 旧的 dirty/versions/saveTimers ref + 7 个手写 debounce effect + 手写 init
+- **保持全局单一 saveStatus**（Header 四态指示器依赖）；**useData() 接口逐字不变**（46 个调用点零改动）
+- initializeSeedData 用 forceSave（'*' 强制覆写），importData 用 setItems，行为不变
+- 价值：持久化机制 DRY 化，加第 8 个集合从"复制 ~10 处"变成"调一次 hook"
+- **零回归验证**：build + tsc EXIT 0；浏览器读路径正常 + 写路径（拦截 PUT 确认 setTasks→debounce→serverSave 带正确 X-Expected-Version 触发、走完 保存中→已同步，**生产零写入**）；API 401/422/409；saveStatus/种子/导入行为不变
 
 ---
 
@@ -192,7 +202,7 @@ Meeting ──→ MeetingActionItem[] → Task
 |---|---|---|---|
 | A1 | **并发写入覆盖** | 🟡 **v6.1 已缓解**：乐观并发冲突检测（409 + 提示刷新）把静默覆盖变可见。彻底解决仍需行级更新 | 迁移 Vercel Postgres（缓做） |
 | A2 | **无用户身份** | 所有操作归属 m01，无法审计 | 登录时选"我是谁"（已决定不做） |
-| A3 | **DataContext 是 God Object** | ~580 行，7 实体混在一起。**⏸️ 推迟到独立会话**（纯重构 + 回归风险，已建 spawn task） | 抽 usePersistedCollection hook + 拆 per-collection |
+| A3 | ~~**DataContext 是 God Object**~~ | ✅ **v6.3**：抽取 usePersistedCollection hook 收敛持久化机制，useData() 接口不变，零回归 | — |
 | A4 | **数据 JSON 公开 URL** | db/*.json 用 access:public | 评估是否需改 private（当前可接受） |
 | A5 | ~~**无 Zod 校验**~~ | ✅ **v6.1 完成**：lib/schemas.ts，PUT + importData 校验 | — |
 
@@ -231,9 +241,8 @@ Meeting ──→ MeetingActionItem[] → Task
 
 | 优先级 | 需求 | 状态 |
 |---|---|---|
-| **中** | DataContext 拆分（A3） | ⏸️ 推迟到独立会话（已建 spawn task）：抽 usePersistedCollection hook，保持 useData() 接口不变 |
+| ~~中~~ | DataContext 拆分（A3） | ✅ **v6.3 完成**：usePersistedCollection hook，零回归 |
 | ~~后续~~ | UI/UX 设计审查与迭代升级 | ✅ **v6.2 完成**：响应式 / 对比度 / 去重 / 统一 Modal / recharts 懒加载 |
-| **中** | a11y 键盘可达 + Modal focus trap（B） | 🆕 a11y review 发现 2 个 blocker：卡片/行 `<div onClick>` 键盘打不开、Modal 无 focus trap。建议下一轮 |
 | **高** | 迁移 Vercel Postgres（A1） | 缓做：v6.1 冲突检测已缓解 last-write-wins；真出现数据丢失或并发常态化再上 |
 | **中** | 功能补强 | F4 会议真实附件 / F5 场景页可操作 / F6 团队可编辑 / F7 日志上限 / U3 日期函数统一 |
 
@@ -241,6 +250,7 @@ Meeting ──→ MeetingActionItem[] → Task
 - ~~评论/讨论功能（F2）~~（用户决定：没什么用）
 - ~~用户身份选择（A2）~~（共享密码足够；注：若重启 F2 评论需先做此项）
 - ~~文件私有化存储（A4）~~（public URL 可接受）
+- ~~a11y 键盘可达 + Modal focus trap（B）~~（用户决定：不做）
 
 ---
 
@@ -279,4 +289,4 @@ node scripts/bulk-upload.mjs
 
 ---
 
-*最后更新：2026-06-02 by Claude Opus 4.8 — v6.2（UI/UX 审查 + 响应式/对比度/去重/统一Modal/recharts 懒加载；A3 与 a11y-B 待后续）*
+*最后更新：2026-06-02 by Claude Opus 4.8 — v6.3（A3 拆分 DataContext：usePersistedCollection，零回归。a11y-B 已砍出 backlog）*

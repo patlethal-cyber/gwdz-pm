@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode, type SetStateAction } from 'react'
 import type {
   Task, Deliverable, DeliverableVersion, Meeting, Issue,
   TeamMember, Scenario, Milestone, ActivityLog, ProjectFile,
@@ -17,7 +17,6 @@ import seedIssues from './data/issues.json'
 
 // ===== Server-side persistence via Vercel Blob =====
 // Primary: /api/data/[collection] — shared across all users
-// Fallback: localStorage — used as fast cache + offline mode
 
 const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files'] as const
 type CollectionName = typeof COLLECTIONS[number]
@@ -68,6 +67,55 @@ async function serverSave<T>(
     setSaveStatus('error')
     return { ok: false }
   }
+}
+
+// ===== usePersistedCollection (A3) =====
+// 收敛单个集合的：state + 版本号(X-Data-Version 乐观并发) + dirty + debounced 持久化。
+// 7 个集合各调一次，共享同一个全局 setSaveStatus（Header 指示器依赖单一 saveStatus）。
+// 返回的 setItems/load/forceSave 均为稳定引用（useCallback），可安全放进其他 hook 的 deps。
+function usePersistedCollection<T>(
+  name: CollectionName,
+  ready: boolean,
+  setSaveStatus: (s: SaveStatus) => void,
+) {
+  const [items, setItemsRaw] = useState<T[]>([])
+  const dirtyRef = useRef(false)             // 仅 CRUD/导入会置脏 → 仅这些触发保存
+  const versionRef = useRef('')              // 服务器持有的版本号
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 初始化加载：set + 捕获版本号，不置脏（init 调用，不触发保存）
+  const load = useCallback(async () => {
+    const { data, version } = await serverLoad<T>(name)
+    versionRef.current = version
+    setItemsRaw(data || [])
+  }, [name])
+
+  // CRUD/导入用：置脏 + setState（→ 触发下方 debounced 保存）
+  const setItems = useCallback((updater: SetStateAction<T[]>) => {
+    dirtyRef.current = true
+    setItemsRaw(updater)
+  }, [])
+
+  // 种子初始化：强制覆写（'*' 跳过版本比对），不走 dirty/debounce，避免二次写
+  const forceSave = useCallback(async (data: T[]) => {
+    setItemsRaw(data)
+    dirtyRef.current = false
+    const result = await serverSave(name, data, '*', setSaveStatus)
+    if (result.ok && result.version) versionRef.current = result.version
+  }, [name, setSaveStatus])
+
+  // debounced 持久化（500ms）：仅 ready 且 dirty 时
+  useEffect(() => {
+    if (!ready || !dirtyRef.current) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(async () => {
+      dirtyRef.current = false
+      const result = await serverSave(name, items, versionRef.current ?? '', setSaveStatus)
+      if (result.ok && result.version) versionRef.current = result.version
+    }, 500)
+  }, [items, ready, name, setSaveStatus])
+
+  return { items, setItems, load, forceSave }
 }
 
 function genId(prefix: string): string {
@@ -186,21 +234,22 @@ export function useData(): DataContextValue {
 export function DataProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [deliverables, setDeliverables] = useState<Deliverable[]>([])
-  const [meetings, setMeetings] = useState<Meeting[]>([])
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [activities, setActivities] = useState<ActivityLog[]>([])
-  const [deliverableVersions, setDeliverableVersions] = useState<DeliverableVersion[]>([])
-  const [files, setFiles] = useState<ProjectFile[]>([])
 
-  // Track which collections have been mutated by CRUD (not by init)
-  const dirty = useRef<Set<CollectionName>>(new Set())
-
-  // 每个集合的服务器版本号（乐观并发：保存时带上，服务器比对，不匹配则 409 冲突）
-  const versions = useRef<Record<CollectionName, string>>({
-    tasks: '', deliverables: '', meetings: '', issues: '', activities: '', versions: '', files: '',
-  })
+  // 7 个集合各自持久化（共享单一 saveStatus）。items 用于读，set/load/forceSave 稳定。
+  const { items: tasks, setItems: setTasks, load: loadTasks, forceSave: forceSaveTasks } =
+    usePersistedCollection<Task>('tasks', ready, setSaveStatus)
+  const { items: deliverables, setItems: setDeliverables, load: loadDeliverables, forceSave: forceSaveDeliverables } =
+    usePersistedCollection<Deliverable>('deliverables', ready, setSaveStatus)
+  const { items: meetings, setItems: setMeetings, load: loadMeetings, forceSave: forceSaveMeetings } =
+    usePersistedCollection<Meeting>('meetings', ready, setSaveStatus)
+  const { items: issues, setItems: setIssues, load: loadIssues, forceSave: forceSaveIssues } =
+    usePersistedCollection<Issue>('issues', ready, setSaveStatus)
+  const { items: activities, setItems: setActivities, load: loadActivities, forceSave: forceSaveActivities } =
+    usePersistedCollection<ActivityLog>('activities', ready, setSaveStatus)
+  const { items: deliverableVersions, setItems: setDeliverableVersions, load: loadVersions, forceSave: forceSaveVersions } =
+    usePersistedCollection<DeliverableVersion>('versions', ready, setSaveStatus)
+  const { items: files, setItems: setFiles, load: loadFiles, forceSave: forceSaveFiles } =
+    usePersistedCollection<ProjectFile>('files', ready, setSaveStatus)
 
   const team = useMemo(() => seedTeam as TeamMember[], [])
   const scenarios = useMemo(() => SCENARIOS, [])
@@ -218,63 +267,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('beforeunload', handler)
   }, [saveStatus])
 
-  // ===== Initialization: Server only, seed defaults only on first deploy =====
+  // ===== Initialization: 服务器加载全部集合，加载完置 ready =====
+  // 绝不自动推送种子数据 — 种子初始化通过设置页面手动触发
   useEffect(() => {
     async function init() {
-      const [rTasks, rDeliverables, rMeetings, rIssues, rActivities, rVersions, rFiles] = await Promise.all([
-        serverLoad<Task>('tasks'),
-        serverLoad<Deliverable>('deliverables'),
-        serverLoad<Meeting>('meetings'),
-        serverLoad<Issue>('issues'),
-        serverLoad<ActivityLog>('activities'),
-        serverLoad<DeliverableVersion>('versions'),
-        serverLoad<ProjectFile>('files'),
+      await Promise.all([
+        loadTasks(), loadDeliverables(), loadMeetings(), loadIssues(),
+        loadActivities(), loadVersions(), loadFiles(),
       ])
-
-      // 直接使用服务器数据，服务器没有就空数组
-      // 绝不自动推送种子数据 — 种子初始化通过设置页面手动触发
-      setTasks(rTasks.data || [])
-      setDeliverables(rDeliverables.data || [])
-      setMeetings(rMeetings.data || [])
-      setIssues(rIssues.data || [])
-      setActivities(rActivities.data || [])
-      setDeliverableVersions(rVersions.data || [])
-      setFiles(rFiles.data || [])
-
-      // 记录各集合初始版本号，供保存时乐观并发比对
-      versions.current = {
-        tasks: rTasks.version, deliverables: rDeliverables.version, meetings: rMeetings.version,
-        issues: rIssues.version, activities: rActivities.version, versions: rVersions.version, files: rFiles.version,
-      }
-
       setReady(true)
     }
     init()
-  }, [])
-
-  // ===== Persist to server on every change (debounced 500ms, only if dirty) =====
-  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
-
-  function debouncedSave<T>(collection: CollectionName, data: T[]) {
-    if (!dirty.current.has(collection)) return
-    if (saveTimers.current[collection]) clearTimeout(saveTimers.current[collection])
-    saveTimers.current[collection] = setTimeout(async () => {
-      dirty.current.delete(collection)
-      const result = await serverSave(collection, data, versions.current[collection] ?? '', setSaveStatus)
-      if (result.ok && result.version) versions.current[collection] = result.version
-    }, 500)
-  }
-
-  useEffect(() => { if (ready) debouncedSave('tasks', tasks) }, [tasks, ready])
-  useEffect(() => { if (ready) debouncedSave('deliverables', deliverables) }, [deliverables, ready])
-  useEffect(() => { if (ready) debouncedSave('meetings', meetings) }, [meetings, ready])
-  useEffect(() => { if (ready) debouncedSave('issues', issues) }, [issues, ready])
-  useEffect(() => { if (ready) debouncedSave('activities', activities) }, [activities, ready])
-  useEffect(() => { if (ready) debouncedSave('versions', deliverableVersions) }, [deliverableVersions, ready])
-  useEffect(() => { if (ready) debouncedSave('files', files) }, [files, ready])
+  }, [loadTasks, loadDeliverables, loadMeetings, loadIssues, loadActivities, loadVersions, loadFiles])
 
   const logActivity = useCallback((entityType: ActivityLog['entityType'], entityId: string, action: ActivityLog['action'], details?: Record<string, unknown>) => {
-    dirty.current.add('activities')
     setActivities(prev => [{
       id: genId('log'),
       entityType,
@@ -283,20 +289,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       details,
       timestamp: nowISO(),
     }, ...prev].slice(0, 200))
-  }, [])
+  }, [setActivities])
 
   // ===== Task CRUD =====
   const addTask = useCallback((t: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('t')
     const n = now()
-    dirty.current.add('tasks')
     setTasks(prev => [...prev, { ...t, id, createdAt: n, updatedAt: n }])
     logActivity('task', id, 'created', { title: t.title })
     return id
-  }, [logActivity])
+  }, [setTasks, logActivity])
 
   const updateTask = useCallback((id: string, u: Partial<Task>) => {
-    dirty.current.add('tasks')
     setTasks(prev => prev.map(t => {
       if (t.id !== id) return t
       const details: Record<string, unknown> = {}
@@ -304,35 +308,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
       logActivity('task', id, u.status !== t.status ? 'status_changed' : 'updated', details)
       return { ...t, ...u, updatedAt: now() }
     }))
-  }, [logActivity])
+  }, [setTasks, logActivity])
 
   const deleteTask = useCallback((id: string) => {
-    dirty.current.add('tasks')
     setTasks(prev => prev.filter(t => t.id !== id))
     logActivity('task', id, 'deleted')
-  }, [logActivity])
+  }, [setTasks, logActivity])
 
   // F3: 批量更新任务（多选 → 批量改状态/重分配）。一次 setState + 一条聚合日志
   const bulkUpdateTasks = useCallback((ids: string[], patch: Partial<Task>) => {
     if (ids.length === 0) return
     const idSet = new Set(ids)
-    dirty.current.add('tasks')
     setTasks(prev => prev.map(t => idSet.has(t.id) ? { ...t, ...patch, updatedAt: now() } : t))
     logActivity('task', ids[0], 'updated', { bulk: ids.length, ...patch })
-  }, [logActivity])
+  }, [setTasks, logActivity])
 
   // ===== Deliverable CRUD =====
   const addDeliverable = useCallback((d: Omit<Deliverable, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('d')
     const n = now()
-    dirty.current.add('deliverables')
     setDeliverables(prev => [...prev, { ...d, id, createdAt: n, updatedAt: n }])
     logActivity('deliverable', id, 'created', { name: d.name })
     return id
-  }, [logActivity])
+  }, [setDeliverables, logActivity])
 
   const updateDeliverable = useCallback((id: string, u: Partial<Deliverable>) => {
-    dirty.current.add('deliverables')
     setDeliverables(prev => prev.map(d => {
       if (d.id !== id) return d
       if (u.status && u.status !== d.status) {
@@ -342,59 +342,51 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       return { ...d, ...u, updatedAt: now() }
     }))
-  }, [logActivity])
+  }, [setDeliverables, logActivity])
 
   const deleteDeliverable = useCallback((id: string) => {
-    dirty.current.add('deliverables')
     setDeliverables(prev => prev.filter(d => d.id !== id))
     logActivity('deliverable', id, 'deleted')
-  }, [logActivity])
+  }, [setDeliverables, logActivity])
 
   const addDeliverableVersion = useCallback((v: Omit<DeliverableVersion, 'id' | 'uploadedAt'>) => {
     const id = genId('dv')
-    dirty.current.add('versions')
-    dirty.current.add('deliverables')
     setDeliverableVersions(prev => [...prev, { ...v, id, uploadedAt: now() }])
     setDeliverables(prev => prev.map(d =>
       d.id === v.deliverableId ? { ...d, currentVersion: v.versionNumber, updatedAt: now() } : d
     ))
     logActivity('deliverable', v.deliverableId, 'updated', { newVersion: v.versionNumber })
-  }, [logActivity])
+  }, [setDeliverableVersions, setDeliverables, logActivity])
 
   // ===== Meeting CRUD =====
   const addMeeting = useCallback((m: Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('mt')
     const n = now()
-    dirty.current.add('meetings')
     setMeetings(prev => [...prev, { ...m, id, createdAt: n, updatedAt: n }])
     logActivity('meeting', id, 'created', { title: m.title })
     return id
-  }, [logActivity])
+  }, [setMeetings, logActivity])
 
   const updateMeeting = useCallback((id: string, u: Partial<Meeting>) => {
-    dirty.current.add('meetings')
     setMeetings(prev => prev.map(m => m.id === id ? { ...m, ...u, updatedAt: now() } : m))
     logActivity('meeting', id, 'updated')
-  }, [logActivity])
+  }, [setMeetings, logActivity])
 
   const deleteMeeting = useCallback((id: string) => {
-    dirty.current.add('meetings')
     setMeetings(prev => prev.filter(m => m.id !== id))
     logActivity('meeting', id, 'deleted')
-  }, [logActivity])
+  }, [setMeetings, logActivity])
 
   // ===== Issue CRUD =====
   const addIssue = useCallback((i: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = genId('iss')
     const n = now()
-    dirty.current.add('issues')
     setIssues(prev => [...prev, { ...i, id, createdAt: n, updatedAt: n }])
     logActivity('issue', id, 'created', { title: i.title, severity: i.severity })
     return id
-  }, [logActivity])
+  }, [setIssues, logActivity])
 
   const updateIssue = useCallback((id: string, u: Partial<Issue>) => {
-    dirty.current.add('issues')
     setIssues(prev => prev.map(i => {
       if (i.id !== id) return i
       if (u.status && u.status !== i.status) {
@@ -402,34 +394,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       return { ...i, ...u, updatedAt: now(), resolvedAt: u.status === '已解决' ? now() : i.resolvedAt }
     }))
-  }, [logActivity])
+  }, [setIssues, logActivity])
 
   const deleteIssue = useCallback((id: string) => {
-    dirty.current.add('issues')
     setIssues(prev => prev.filter(i => i.id !== id))
     logActivity('issue', id, 'deleted')
-  }, [logActivity])
+  }, [setIssues, logActivity])
 
   // ===== File CRUD =====
   const addFile = useCallback((f: Omit<ProjectFile, 'id' | 'uploadedAt'>) => {
     const id = genId('f')
-    dirty.current.add('files')
     setFiles(prev => [...prev, { ...f, id, uploadedAt: now() }])
     logActivity('file', id, 'uploaded', { name: f.name })
     return id
-  }, [logActivity])
+  }, [setFiles, logActivity])
 
   const updateFile = useCallback((id: string, u: Partial<ProjectFile>) => {
-    dirty.current.add('files')
     setFiles(prev => prev.map(f => f.id === id ? { ...f, ...u } : f))
     logActivity('file', id, 'updated')
-  }, [logActivity])
+  }, [setFiles, logActivity])
 
   const deleteFile = useCallback((id: string) => {
-    dirty.current.add('files')
     setFiles(prev => prev.filter(f => f.id !== id))
     logActivity('file', id, 'deleted')
-  }, [logActivity])
+  }, [setFiles, logActivity])
 
   // ===== 查询 =====
   const getMember = useCallback((id: string) => team.find(m => m.id === id), [team])
@@ -515,49 +503,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [tasks, deliverables, issues, files, todayStr])
 
   // ===== Initialize seed data (manual admin action only) =====
+  // 各集合 forceSave('*' 强制覆写)：set state + 显式写一次，不走 dirty/debounce
   const initializeSeedData = useCallback(async () => {
-    const seedData: Record<string, unknown[]> = {
-      tasks: buildDefaultTasks(),
-      deliverables: generateDeliverables(),
-      meetings: seedMeetings as unknown as Meeting[],
-      issues: buildDefaultIssues(),
-      activities: [],
-      versions: generateVersions(),
-      files: generateFileMetadata(),
-    }
-    // 不加 dirty（避免 setState 触发的 debounce 二次写入）；下方显式强制覆写一次
-    setTasks(seedData.tasks as Task[])
-    setDeliverables(seedData.deliverables as Deliverable[])
-    setMeetings(seedData.meetings as Meeting[])
-    setIssues(seedData.issues as Issue[])
-    setActivities([])
-    setDeliverableVersions(seedData.versions as DeliverableVersion[])
-    setFiles(seedData.files as ProjectFile[])
-    // 种子初始化 = 强制覆写（'*' 跳过版本比对），写完用返回的新版本号刷新本地持有版本
-    await Promise.all(
-      Object.entries(seedData).map(async ([key, data]) => {
-        const result = await serverSave(key as CollectionName, data, '*', setSaveStatus)
-        if (result.ok && result.version) versions.current[key as CollectionName] = result.version
-      })
-    )
-  }, [])
+    await Promise.all([
+      forceSaveTasks(buildDefaultTasks()),
+      forceSaveDeliverables(generateDeliverables() as Deliverable[]),
+      forceSaveMeetings(seedMeetings as unknown as Meeting[]),
+      forceSaveIssues(buildDefaultIssues()),
+      forceSaveActivities([]),
+      forceSaveVersions(generateVersions() as DeliverableVersion[]),
+      forceSaveFiles(generateFileMetadata() as ProjectFile[]),
+    ])
+  }, [forceSaveTasks, forceSaveDeliverables, forceSaveMeetings, forceSaveIssues, forceSaveActivities, forceSaveVersions, forceSaveFiles])
 
   // ===== Data Import =====
+  // setItems 内部置脏 → 经 debounced 保存持久化（行为同原 dirty.add + setState）
   const importData = useCallback((json: string): boolean => {
     try {
       const data = JSON.parse(json)
-      if (data.tasks) { dirty.current.add('tasks'); setTasks(data.tasks) }
-      if (data.deliverables) { dirty.current.add('deliverables'); setDeliverables(data.deliverables) }
-      if (data.meetings) { dirty.current.add('meetings'); setMeetings(data.meetings) }
-      if (data.issues) { dirty.current.add('issues'); setIssues(data.issues) }
-      if (data.activities) { dirty.current.add('activities'); setActivities(data.activities) }
-      if (data.deliverableVersions) { dirty.current.add('versions'); setDeliverableVersions(data.deliverableVersions) }
-      if (data.files) { dirty.current.add('files'); setFiles(data.files) }
+      if (data.tasks) setTasks(data.tasks)
+      if (data.deliverables) setDeliverables(data.deliverables)
+      if (data.meetings) setMeetings(data.meetings)
+      if (data.issues) setIssues(data.issues)
+      if (data.activities) setActivities(data.activities)
+      if (data.deliverableVersions) setDeliverableVersions(data.deliverableVersions)
+      if (data.files) setFiles(data.files)
       return true
     } catch {
       return false
     }
-  }, [])
+  }, [setTasks, setDeliverables, setMeetings, setIssues, setActivities, setDeliverableVersions, setFiles])
 
   return (
     <DataContext.Provider value={{
