@@ -1,11 +1,10 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react'
 import type {
   Task, Deliverable, DeliverableVersion, Meeting, Issue,
   TeamMember, Scenario, Milestone, ActivityLog, ProjectFile,
   DashboardStats, PersonAggregation, TaskStatus, DeliverableStatus, IssueStatus,
-  FileCategory,
 } from './types'
 import { SCENARIOS, generateDeliverables } from './seed-generator'
 import { generateFileMetadata } from './data/files-seed'
@@ -16,135 +15,56 @@ import seedMilestones from './data/milestones.json'
 import seedMeetings from './data/meetings.json'
 import seedIssues from './data/issues.json'
 
-const DATA_VERSION = '6'
-const KEYS = {
-  tasks: 'gwdz-v5-tasks',
-  deliverables: 'gwdz-v5-deliverables',
-  meetings: 'gwdz-v5-meetings',
-  issues: 'gwdz-v5-issues',
-  activities: 'gwdz-v5-activities',
-  versions: 'gwdz-v5-del-versions',
-  files: 'gwdz-v5-files',
-  version: 'gwdz-v5-version',
-}
+// ===== Server-side persistence via Vercel Blob =====
+// Primary: /api/data/[collection] — shared across all users
+// Fallback: localStorage — used as fast cache + offline mode
 
-// ===== Migration: merge seed updates into existing user data without wiping =====
+const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files'] as const
+type CollectionName = typeof COLLECTIONS[number]
 
-function mergeById<T extends { id: string }>(
-  existing: T[],
-  seed: T[],
-  updateFields?: (keyof T)[]
-): T[] {
-  const existingMap = new Map(existing.map(item => [item.id, item]))
-  let changed = false
+const CACHE_PREFIX = 'gwdz-cache-'
 
-  for (const seedItem of seed) {
-    const existingItem = existingMap.get(seedItem.id)
-    if (!existingItem) {
-      // New item from seed — add it
-      existingMap.set(seedItem.id, seedItem)
-      changed = true
-    } else if (updateFields) {
-      // Existing item — only update specified structural fields, never user-edited fields
-      let itemChanged = false
-      const updated = { ...existingItem }
-      for (const field of updateFields) {
-        if (existingItem[field] !== seedItem[field]) {
-          (updated as Record<string, unknown>)[field as string] = seedItem[field]
-          itemChanged = true
-        }
-      }
-      if (itemChanged) {
-        existingMap.set(seedItem.id, updated)
-        changed = true
+async function serverLoad<T>(collection: CollectionName): Promise<T[] | null> {
+  try {
+    const res = await fetch(`/api/data/${collection}`, { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        // Update local cache
+        try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
+        return data as T[]
       }
     }
-  }
-
-  return changed ? [...existingMap.values()] : existing
+  } catch { /* server unreachable, fall back to cache */ }
+  return null
 }
 
-function runMigrations(fromVer: string | null) {
-  // Files: merge new files, update fileUrl on existing (structural, not user data)
-  const existingFiles = load<ProjectFile>(KEYS.files, [])
-  if (existingFiles.length > 0) {
-    const seedFiles = generateFileMetadata()
-    const merged = mergeById(existingFiles, seedFiles, ['fileUrl', 'category', 'linkedDeliverableIds', 'scenarioId'])
-    if (merged !== existingFiles) save(KEYS.files, merged)
-  }
-
-  // DeliverableVersions: merge new versions
-  const existingVers = load<DeliverableVersion>(KEYS.versions, [])
-  if (existingVers.length > 0) {
-    const seedVers = generateVersions()
-    const merged = mergeById(existingVers, seedVers)
-    if (merged !== existingVers) save(KEYS.versions, merged)
-  }
-
-  // Deliverables: update scenarioCode (structural rename S37 etc.) but NOT status/currentVersion
-  const existingDels = load<Deliverable>(KEYS.deliverables, [])
-  if (existingDels.length > 0) {
-    const seedDels = generateDeliverables()
-    const merged = mergeById(existingDels, seedDels, ['scenarioCode', 'ownerId', 'dueDate'])
-    if (merged !== existingDels) save(KEYS.deliverables, merged)
-  }
-
-  // Tasks: update contactId (new field) but NOT status/description/priority
-  const existingTasks = load<Task>(KEYS.tasks, [])
-  if (existingTasks.length > 0) {
-    const rawTasks = seedTasks as Record<string, unknown>[]
-    const seedTaskList: Task[] = rawTasks.map(t => ({
-      id: t.id as string, title: t.title as string, description: (t.description as string) || '',
-      status: t.status as Task['status'], priority: t.priority as Task['priority'],
-      category: (t.scenarioId ? 'scenario' : 'project') as Task['category'],
-      assigneeId: t.assigneeId as string, contactId: t.contactId as string | undefined,
-      scenarioId: t.scenarioId as string | undefined, dueDate: t.dueDate as string,
-      tags: (t.tags as string[]) || [], createdAt: t.createdAt as string, updatedAt: t.updatedAt as string,
-    }))
-    const merged = mergeById(existingTasks, seedTaskList, ['contactId'])
-    if (merged !== existingTasks) save(KEYS.tasks, merged)
-  }
-
-  // Issues: update contactId but NOT status/resolution
-  const existingIssues = load<Issue>(KEYS.issues, [])
-  if (existingIssues.length > 0) {
-    const rawIssues = seedIssues as Record<string, unknown>[]
-    const seedIssueList: Issue[] = rawIssues.map(i => ({
-      id: i.id as string, title: i.title as string, description: (i.description as string) || '',
-      status: i.status as Issue['status'], severity: i.severity as Issue['severity'],
-      source: i.source as Issue['source'],
-      category: (i.scenarioId ? 'scenario' : 'project') as Issue['category'],
-      reporterId: i.reporterId as string, assigneeId: i.assigneeId as string,
-      contactId: i.contactId as string | undefined, scenarioId: i.scenarioId as string | undefined,
-      dueDate: i.dueDate as string | undefined,
-      linkedTaskIds: i.linkedTaskIds ? (i.linkedTaskIds as string[]) : i.linkedTaskId ? [i.linkedTaskId as string] : [],
-      resolution: i.resolution as string | undefined,
-      createdAt: i.createdAt as string, updatedAt: i.updatedAt as string,
-      resolvedAt: i.resolvedAt as string | undefined,
-    }))
-    const merged = mergeById(existingIssues, seedIssueList, ['contactId'])
-    if (merged !== existingIssues) save(KEYS.issues, merged)
-  }
+async function serverSave<T>(collection: CollectionName, data: T[]): Promise<void> {
+  // Update local cache immediately
+  try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
+  // Persist to server (fire and forget, don't block UI)
+  try {
+    await fetch(`/api/data/${collection}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  } catch { /* offline — data is in cache, will sync on next save */ }
 }
 
-function load<T>(key: string, fallback: T[]): T[] {
+function cacheLoad<T>(collection: CollectionName, fallback: T[]): T[] {
   if (typeof window === 'undefined') return fallback
   try {
-    const stored = localStorage.getItem(key)
+    const stored = localStorage.getItem(CACHE_PREFIX + collection)
     if (stored) return JSON.parse(stored)
-  } catch { /* ignore */ }
+  } catch {}
   return fallback
-}
-
-function save<T>(key: string, data: T[]) {
-  if (typeof window === 'undefined') return
-  try { localStorage.setItem(key, JSON.stringify(data)) } catch { /* ignore */ }
 }
 
 let idCounter = 0
 function genId(prefix: string): string {
   idCounter++
-  return `${prefix}_${idCounter.toString(36)}_${(typeof performance !== 'undefined' ? Math.floor(performance.now()) : 0).toString(36)}`
+  return `${prefix}_${Date.now().toString(36)}_${idCounter.toString(36)}`
 }
 
 function now(): string {
@@ -155,6 +75,35 @@ function now(): string {
 
 function nowISO(): string {
   return typeof window !== 'undefined' ? new window.Date().toISOString() : ''
+}
+
+// ===== Seed defaults (only for first-time initialization) =====
+
+function buildDefaultTasks(): Task[] {
+  return (seedTasks as Record<string, unknown>[]).map(t => ({
+    id: t.id as string, title: t.title as string, description: (t.description as string) || '',
+    status: t.status as Task['status'], priority: t.priority as Task['priority'],
+    category: (t.scenarioId ? 'scenario' : 'project') as Task['category'],
+    assigneeId: t.assigneeId as string, contactId: t.contactId as string | undefined,
+    scenarioId: t.scenarioId as string | undefined, dueDate: t.dueDate as string,
+    tags: (t.tags as string[]) || [], createdAt: t.createdAt as string, updatedAt: t.updatedAt as string,
+  }))
+}
+
+function buildDefaultIssues(): Issue[] {
+  return (seedIssues as Record<string, unknown>[]).map(i => ({
+    id: i.id as string, title: i.title as string, description: (i.description as string) || '',
+    status: i.status as Issue['status'], severity: i.severity as Issue['severity'],
+    source: i.source as Issue['source'],
+    category: (i.scenarioId ? 'scenario' : 'project') as Issue['category'],
+    reporterId: i.reporterId as string, assigneeId: i.assigneeId as string,
+    contactId: i.contactId as string | undefined, scenarioId: i.scenarioId as string | undefined,
+    dueDate: i.dueDate as string | undefined,
+    linkedTaskIds: i.linkedTaskIds ? (i.linkedTaskIds as string[]) : i.linkedTaskId ? [i.linkedTaskId as string] : [],
+    resolution: i.resolution as string | undefined,
+    createdAt: i.createdAt as string, updatedAt: i.updatedAt as string,
+    resolvedAt: i.resolvedAt as string | undefined,
+  }))
 }
 
 // ===== Context Interface =====
@@ -235,79 +184,79 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
   const todayStr = useMemo(() => now(), [])
 
-  // 初始化 — 种子数据仅作为新安装的默认值，绝不覆盖用户已有数据
+  // Track if initial load came from server (to avoid writing seed data back)
+  const loadedFromServer = useRef(false)
+
+  // ===== Initialization: Server first → cache fallback → seed defaults =====
   useEffect(() => {
-    const storedVer = localStorage.getItem(KEYS.version)
+    async function init() {
+      // Try loading from server
+      const [sTasks, sDeliverables, sMeetings, sIssues, sActivities, sVersions, sFiles] = await Promise.all([
+        serverLoad<Task>('tasks'),
+        serverLoad<Deliverable>('deliverables'),
+        serverLoad<Meeting>('meetings'),
+        serverLoad<Issue>('issues'),
+        serverLoad<ActivityLog>('activities'),
+        serverLoad<DeliverableVersion>('versions'),
+        serverLoad<ProjectFile>('files'),
+      ])
 
-    // Prepare seed defaults (only used if localStorage is empty)
-    const rawTasks = seedTasks as Record<string, unknown>[]
-    const defaultTasks: Task[] = rawTasks.map(t => ({
-      id: t.id as string,
-      title: t.title as string,
-      description: (t.description as string) || '',
-      status: t.status as Task['status'],
-      priority: t.priority as Task['priority'],
-      category: (t.scenarioId ? 'scenario' : 'project') as Task['category'],
-      assigneeId: t.assigneeId as string,
-      contactId: t.contactId as string | undefined,
-      scenarioId: t.scenarioId as string | undefined,
-      dueDate: t.dueDate as string,
-      tags: (t.tags as string[]) || [],
-      createdAt: t.createdAt as string,
-      updatedAt: t.updatedAt as string,
-    }))
+      // If server had ANY data, we're in multi-user mode
+      const hasServerData = sTasks || sDeliverables || sMeetings || sIssues || sFiles
+      if (hasServerData) loadedFromServer.current = true
 
-    const rawIssues = seedIssues as Record<string, unknown>[]
-    const defaultIssues: Issue[] = rawIssues.map(i => ({
-      id: i.id as string,
-      title: i.title as string,
-      description: (i.description as string) || '',
-      status: i.status as Issue['status'],
-      severity: i.severity as Issue['severity'],
-      source: i.source as Issue['source'],
-      category: (i.scenarioId ? 'scenario' : 'project') as Issue['category'],
-      reporterId: i.reporterId as string,
-      assigneeId: i.assigneeId as string,
-      contactId: i.contactId as string | undefined,
-      scenarioId: i.scenarioId as string | undefined,
-      dueDate: i.dueDate as string | undefined,
-      linkedTaskIds: i.linkedTaskIds ? (i.linkedTaskIds as string[]) : i.linkedTaskId ? [i.linkedTaskId as string] : [],
-      resolution: i.resolution as string | undefined,
-      createdAt: i.createdAt as string,
-      updatedAt: i.updatedAt as string,
-      resolvedAt: i.resolvedAt as string | undefined,
-    }))
+      // Load order: server → cache → seed defaults
+      setTasks(sTasks || cacheLoad<Task>('tasks', buildDefaultTasks()))
+      setDeliverables(sDeliverables || cacheLoad<Deliverable>('deliverables', generateDeliverables()))
+      setMeetings(sMeetings || cacheLoad<Meeting>('meetings', seedMeetings as unknown as Meeting[]))
+      setIssues(sIssues || cacheLoad<Issue>('issues', buildDefaultIssues()))
+      setActivities(sActivities || cacheLoad<ActivityLog>('activities', []))
+      setDeliverableVersions(sVersions || cacheLoad<DeliverableVersion>('versions', generateVersions()))
+      setFiles(sFiles || cacheLoad<ProjectFile>('files', generateFileMetadata()))
 
-    if (!storedVer) {
-      // 全新安装：清理可能存在的旧版本残留数据，加载种子
-      const oldKeys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-'))
-      for (const k of oldKeys) localStorage.removeItem(k)
-    } else if (storedVer !== DATA_VERSION) {
-      // 版本升级：运行迁移，合并新种子数据，保留用户修改
-      runMigrations(storedVer)
+      // If server was empty (first deploy), push seed data to server
+      if (!hasServerData) {
+        const defaults = {
+          tasks: buildDefaultTasks(),
+          deliverables: generateDeliverables(),
+          meetings: seedMeetings as unknown as Meeting[],
+          issues: buildDefaultIssues(),
+          activities: [] as ActivityLog[],
+          versions: generateVersions(),
+          files: generateFileMetadata(),
+        }
+        // Push seed data to server in background
+        for (const [key, data] of Object.entries(defaults)) {
+          serverSave(key as CollectionName, data as unknown[])
+        }
+      }
+
+      setReady(true)
     }
-
-    // 从 localStorage 加载（有数据用数据，无数据用种子默认）
-    setTasks(load<Task>(KEYS.tasks, defaultTasks))
-    setDeliverables(load<Deliverable>(KEYS.deliverables, generateDeliverables()))
-    setMeetings(load<Meeting>(KEYS.meetings, seedMeetings as unknown as Meeting[]))
-    setIssues(load<Issue>(KEYS.issues, defaultIssues))
-    setActivities(load<ActivityLog>(KEYS.activities, []))
-    setDeliverableVersions(load<DeliverableVersion>(KEYS.versions, generateVersions()))
-    setFiles(load<ProjectFile>(KEYS.files, generateFileMetadata()))
-
-    localStorage.setItem(KEYS.version, DATA_VERSION)
-    setReady(true)
+    init()
   }, [])
 
-  // 持久化
-  useEffect(() => { if (ready) save(KEYS.tasks, tasks) }, [tasks, ready])
-  useEffect(() => { if (ready) save(KEYS.deliverables, deliverables) }, [deliverables, ready])
-  useEffect(() => { if (ready) save(KEYS.meetings, meetings) }, [meetings, ready])
-  useEffect(() => { if (ready) save(KEYS.issues, issues) }, [issues, ready])
-  useEffect(() => { if (ready) save(KEYS.activities, activities) }, [activities, ready])
-  useEffect(() => { if (ready) save(KEYS.versions, deliverableVersions) }, [deliverableVersions, ready])
-  useEffect(() => { if (ready) save(KEYS.files, files) }, [files, ready])
+  // ===== Persist to server on every change =====
+  // Debounce writes to avoid flooding the API
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+
+  function debouncedSave<T>(collection: CollectionName, data: T[]) {
+    // Update cache immediately
+    try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
+    // Debounce server write (300ms)
+    if (saveTimers.current[collection]) clearTimeout(saveTimers.current[collection])
+    saveTimers.current[collection] = setTimeout(() => {
+      serverSave(collection, data)
+    }, 300)
+  }
+
+  useEffect(() => { if (ready) debouncedSave('tasks', tasks) }, [tasks, ready])
+  useEffect(() => { if (ready) debouncedSave('deliverables', deliverables) }, [deliverables, ready])
+  useEffect(() => { if (ready) debouncedSave('meetings', meetings) }, [meetings, ready])
+  useEffect(() => { if (ready) debouncedSave('issues', issues) }, [issues, ready])
+  useEffect(() => { if (ready) debouncedSave('activities', activities) }, [activities, ready])
+  useEffect(() => { if (ready) debouncedSave('versions', deliverableVersions) }, [deliverableVersions, ready])
+  useEffect(() => { if (ready) debouncedSave('files', files) }, [files, ready])
 
   const logActivity = useCallback((entityType: ActivityLog['entityType'], entityId: string, action: ActivityLog['action'], details?: Record<string, unknown>) => {
     setActivities(prev => [{
