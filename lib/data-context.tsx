@@ -22,43 +22,25 @@ import seedIssues from './data/issues.json'
 const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files'] as const
 type CollectionName = typeof COLLECTIONS[number]
 
-const CACHE_PREFIX = 'gwdz-cache-'
-
 async function serverLoad<T>(collection: CollectionName): Promise<T[] | null> {
   try {
     const res = await fetch(`/api/data/${collection}`, { cache: 'no-store' })
     if (res.ok) {
       const data = await res.json()
-      if (Array.isArray(data) && data.length > 0) {
-        // Update local cache
-        try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
-        return data as T[]
-      }
+      if (Array.isArray(data) && data.length > 0) return data as T[]
     }
-  } catch { /* server unreachable, fall back to cache */ }
+  } catch { /* server unreachable */ }
   return null
 }
 
 async function serverSave<T>(collection: CollectionName, data: T[]): Promise<void> {
-  // Update local cache immediately
-  try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
-  // Persist to server (fire and forget, don't block UI)
   try {
     await fetch(`/api/data/${collection}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-  } catch { /* offline — data is in cache, will sync on next save */ }
-}
-
-function cacheLoad<T>(collection: CollectionName, fallback: T[]): T[] {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const stored = localStorage.getItem(CACHE_PREFIX + collection)
-    if (stored) return JSON.parse(stored)
-  } catch {}
-  return fallback
+  } catch { /* will retry on next change */ }
 }
 
 let idCounter = 0
@@ -184,13 +166,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
   const todayStr = useMemo(() => now(), [])
 
-  // Track if initial load came from server (to avoid writing seed data back)
-  const loadedFromServer = useRef(false)
-
-  // ===== Initialization: Server first → cache fallback → seed defaults =====
+  // ===== Initialization: Server only, seed defaults only on first deploy =====
   useEffect(() => {
     async function init() {
-      // Try loading from server
       const [sTasks, sDeliverables, sMeetings, sIssues, sActivities, sVersions, sFiles] = await Promise.all([
         serverLoad<Task>('tasks'),
         serverLoad<Deliverable>('deliverables'),
@@ -201,34 +179,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
         serverLoad<ProjectFile>('files'),
       ])
 
-      // If server had ANY data, we're in multi-user mode
       const hasServerData = sTasks || sDeliverables || sMeetings || sIssues || sFiles
-      if (hasServerData) loadedFromServer.current = true
 
-      // Load order: server → cache → seed defaults
-      setTasks(sTasks || cacheLoad<Task>('tasks', buildDefaultTasks()))
-      setDeliverables(sDeliverables || cacheLoad<Deliverable>('deliverables', generateDeliverables()))
-      setMeetings(sMeetings || cacheLoad<Meeting>('meetings', seedMeetings as unknown as Meeting[]))
-      setIssues(sIssues || cacheLoad<Issue>('issues', buildDefaultIssues()))
-      setActivities(sActivities || cacheLoad<ActivityLog>('activities', []))
-      setDeliverableVersions(sVersions || cacheLoad<DeliverableVersion>('versions', generateVersions()))
-      setFiles(sFiles || cacheLoad<ProjectFile>('files', generateFileMetadata()))
+      // Server has data → use it directly
+      setTasks(sTasks || buildDefaultTasks())
+      setDeliverables(sDeliverables || generateDeliverables())
+      setMeetings(sMeetings || (seedMeetings as unknown as Meeting[]))
+      setIssues(sIssues || buildDefaultIssues())
+      setActivities(sActivities || [])
+      setDeliverableVersions(sVersions || generateVersions())
+      setFiles(sFiles || generateFileMetadata())
 
-      // If server was empty (first deploy), push seed data to server
+      // First deploy only: push seed defaults to server
       if (!hasServerData) {
-        const defaults = {
+        const defaults: Record<string, unknown[]> = {
           tasks: buildDefaultTasks(),
           deliverables: generateDeliverables(),
           meetings: seedMeetings as unknown as Meeting[],
           issues: buildDefaultIssues(),
-          activities: [] as ActivityLog[],
+          activities: [],
           versions: generateVersions(),
           files: generateFileMetadata(),
         }
-        // Push seed data to server in background
-        for (const [key, data] of Object.entries(defaults)) {
-          serverSave(key as CollectionName, data as unknown[])
-        }
+        await Promise.all(
+          Object.entries(defaults).map(([key, data]) => serverSave(key as CollectionName, data))
+        )
       }
 
       setReady(true)
@@ -236,18 +211,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     init()
   }, [])
 
-  // ===== Persist to server on every change =====
-  // Debounce writes to avoid flooding the API
+  // ===== Persist to server on every change (debounced 500ms) =====
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   function debouncedSave<T>(collection: CollectionName, data: T[]) {
-    // Update cache immediately
-    try { localStorage.setItem(CACHE_PREFIX + collection, JSON.stringify(data)) } catch {}
-    // Debounce server write (300ms)
     if (saveTimers.current[collection]) clearTimeout(saveTimers.current[collection])
-    saveTimers.current[collection] = setTimeout(() => {
-      serverSave(collection, data)
-    }, 300)
+    saveTimers.current[collection] = setTimeout(() => serverSave(collection, data), 500)
   }
 
   useEffect(() => { if (ready) debouncedSave('tasks', tasks) }, [tasks, ready])
