@@ -29,17 +29,32 @@ function formatDate(dateStr: string): string {
   return `${y}/${m}/${d}`
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  scenario: '场景开发',
-  project: '项目管理',
-  support: '支持保障',
-}
-
 const SEVERITY_COLORS: Record<string, string> = {
   '严重': '#ef4444',
   '一般': '#f59e0b',
   '轻微': '#3b82f6',
   '建议': '#6b7280',
+}
+
+const EXECUTION_GROUPS = ['第二执行组', '第一执行组', '专项支持'] as const
+const GROUP_LABELS: Record<string, string> = {
+  '第二执行组': '第二执行组（客质部）',
+  '第一执行组': '第一执行组（测试部）',
+  '专项支持': '专项支持（插件/数据）',
+}
+const GROUP_MEMBER_IDS: Record<string, string[]> = {
+  '第二执行组': ['m02', 'm06', 'm07'],
+  '第一执行组': ['m03', 'm04', 'm05'],
+  '专项支持': ['m08', 'm09'],
+}
+
+function getYesterday(todayStr: string): string {
+  const d = new Date(todayStr + 'T00:00:00')
+  const day = d.getDay()
+  // If Monday (1), yesterday is Friday (-3); if Sunday (0), use Friday (-2); otherwise -1
+  const offset = day === 1 ? -3 : day === 0 ? -2 : -1
+  d.setDate(d.getDate() + offset)
+  return d.toISOString().slice(0, 10)
 }
 
 export default function ReportsPage() {
@@ -67,19 +82,7 @@ export default function ReportsPage() {
   const nextMonday = addDays(weekMonday, 7)
   const nextFriday = addDays(weekMonday, 11)
 
-  const inProgressTasks = tasks.filter(t => t.status === '进行中')
   const overdueTasks = getOverdueTasks()
-  const severeOpenIssues = issues.filter(
-    i => i.severity !== '轻微' && i.severity !== '建议' && i.status !== '已解决' && i.status !== '已关闭'
-  )
-
-  // Group in-progress tasks by category
-  const tasksByCategory = inProgressTasks.reduce<Record<string, typeof inProgressTasks>>((acc, t) => {
-    const cat = t.category || 'project'
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(t)
-    return acc
-  }, {})
 
   // Weekly data
   const completedThisWeek = tasks.filter(
@@ -90,50 +93,148 @@ export default function ReportsPage() {
     t => t.status !== '已完成' && t.dueDate >= nextMonday && t.dueDate <= nextFriday
   )
 
+  const yesterday = getYesterday(today)
+
+  // Tasks that were active yesterday (in progress or completed yesterday)
+  const yesterdayTasks = tasks.filter(t =>
+    (t.status === '进行中' || t.status === '审核中') ||
+    (t.status === '已完成' && t.updatedAt >= yesterday)
+  )
+
+  // Tasks planned for today (not completed, due near today)
+  const todayPlannedTasks = tasks.filter(t =>
+    t.status !== '已完成' && t.dueDate <= addDays(today, 7)
+  )
+
+  // Open issues + overdue tasks for risk section
+  const openIssues = issues.filter(i => i.status !== '已解决' && i.status !== '已关闭')
+
+  // Group tasks by execution group
+  function getTaskGroup(t: typeof tasks[0]): string {
+    // Check if assignee belongs to a known group
+    for (const [group, memberIds] of Object.entries(GROUP_MEMBER_IDS)) {
+      if (memberIds.includes(t.assigneeId)) return group
+    }
+    // PM tasks go to project management, but we skip them in the 3-group view
+    return '项目管理'
+  }
+
+  function groupTasksByExecution(taskList: typeof tasks) {
+    const grouped: Record<string, typeof tasks> = {}
+    for (const g of EXECUTION_GROUPS) grouped[g] = []
+    for (const t of taskList) {
+      const group = getTaskGroup(t)
+      if (grouped[group]) grouped[group].push(t)
+    }
+    return grouped
+  }
+
   // ===== Builders =====
+
+  function buildSection1Text(): string {
+    const lines: string[] = []
+    lines.push('一、主计划（总计划）')
+    lines.push('序号 | 大计划项 | 计划节点 | 计划时间 | 当前实际情况 | 责任人 | 备注')
+    lines.push('--- | --- | --- | --- | --- | --- | ---')
+    milestones.forEach((m, idx) => {
+      const statusLabel = m.status === '已完成' ? '已完成' : m.status === '进行中' ? '进行中' : '待开始'
+      lines.push(`${idx + 1} | ${m.code} ${m.name} | ${m.description} | ${m.date} | ${statusLabel} | 李培嵩 | `)
+    })
+    return lines.join('\n')
+  }
+
+  function buildSection2Text(): string {
+    const lines: string[] = []
+    lines.push('二、已办（昨日）')
+    lines.push('序号 | 小组 | 昨日计划任务 | 当前进展稽核验收情况 | 偏差分析 | 纠偏措施 | 备注')
+    lines.push('--- | --- | --- | --- | --- | --- | ---')
+    const grouped = groupTasksByExecution(yesterdayTasks)
+    let seq = 1
+    for (const group of EXECUTION_GROUPS) {
+      const groupTasks = grouped[group]
+      if (groupTasks.length === 0) {
+        lines.push(`${seq} | ${GROUP_LABELS[group] || group} | 无 | - | - | - | `)
+        seq++
+        continue
+      }
+      for (const t of groupTasks) {
+        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+        const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
+        const prefix = scenario ? `[${scenario.code}] ` : ''
+        const progress = t.status === '已完成' ? '已完成' : t.status === '审核中' ? '审核中' : '进行中'
+        const deviation = t.dueDate < today && t.status !== '已完成' ? '逾期' : '无偏差'
+        const correction = deviation === '逾期' ? '加速推进' : ''
+        lines.push(`${seq} | ${GROUP_LABELS[group] || group} | ${prefix}${t.title}（${assignee}） | ${progress} | ${deviation} | ${correction} | `)
+        seq++
+      }
+    }
+    return lines.join('\n')
+  }
+
+  function buildSection3Text(): string {
+    const lines: string[] = []
+    lines.push('三、待办（今日）')
+    lines.push('序号 | 小组 | 今日任务项内容 | 计划时间 | 完成要求标准 | 责任人 | 备注')
+    lines.push('--- | --- | --- | --- | --- | --- | ---')
+    const grouped = groupTasksByExecution(todayPlannedTasks)
+    let seq = 1
+    for (const group of EXECUTION_GROUPS) {
+      const groupTasks = grouped[group]
+      if (groupTasks.length === 0) {
+        lines.push(`${seq} | ${GROUP_LABELS[group] || group} | 无 | - | - | - | `)
+        seq++
+        continue
+      }
+      for (const t of groupTasks) {
+        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+        const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
+        const prefix = scenario ? `[${scenario.code}] ` : ''
+        const standard = t.status === '待办' ? '完成并提交' : '持续推进'
+        lines.push(`${seq} | ${GROUP_LABELS[group] || group} | ${prefix}${t.title} | ${t.dueDate} | ${standard} | ${assignee} | `)
+        seq++
+      }
+    }
+    return lines.join('\n')
+  }
+
+  function buildSection4Text(): string {
+    const lines: string[] = []
+    lines.push('四、风险问题等事项')
+    lines.push('序号 | 风险/其他事项 | 描述 | 拟处置的措施策略 | 所需资源 | 责任人 | 备注')
+    lines.push('--- | --- | --- | --- | --- | --- | ---')
+    let seq = 1
+    // Open issues
+    for (const i of openIssues) {
+      const assignee = getMember(i.assigneeId)?.name || i.assigneeId
+      const measure = i.resolution || '待制定'
+      lines.push(`${seq} | [${i.severity}] ${i.title} | ${i.description.slice(0, 60)} | ${measure} | - | ${assignee} | `)
+      seq++
+    }
+    // Overdue tasks as risks
+    for (const t of overdueTasks) {
+      const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+      lines.push(`${seq} | [逾期] ${t.title} | 截止 ${t.dueDate}，当前未完成 | 加速推进，协调资源 | - | ${assignee} | `)
+      seq++
+    }
+    if (seq === 1) {
+      lines.push('1 | 无 | - | - | - | - | ')
+    }
+    return lines.join('\n')
+  }
 
   function buildDailyText(): string {
     const lines: string[] = []
-    lines.push(today)
+    lines.push(`国微电子 HIAgent AI 智能体项目 — 项目早会日报`)
+    lines.push(`日期：${today}（昨日：${yesterday}）`)
+    lines.push(`驻场人员：${onsiteStaff}`)
     lines.push('')
-    lines.push('1. 当日驻场人员')
-    lines.push(onsiteStaff)
+    lines.push(buildSection1Text())
     lines.push('')
-    lines.push('2. 本日工作简报')
-
-    const cats = Object.keys(tasksByCategory)
-    if (cats.length === 0) {
-      lines.push('  无进行中任务')
-    } else {
-      cats.forEach(cat => {
-        lines.push(`  【${CATEGORY_LABELS[cat] || cat}】`)
-        tasksByCategory[cat].forEach(t => {
-          const assignee = getMember(t.assigneeId)?.name || t.assigneeId
-          const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
-          const prefix = scenario ? `[${scenario.code}] ` : ''
-          lines.push(`  - ${prefix}${t.title}（${assignee}）`)
-        })
-      })
-    }
-
+    lines.push(buildSection2Text())
     lines.push('')
-    lines.push('3. 待解决问题')
-    const problemItems = [
-      ...overdueTasks.map(t => {
-        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
-        return `- [逾期] ${t.title}（截止 ${t.dueDate}，${assignee}）`
-      }),
-      ...severeOpenIssues.map(i => {
-        const assignee = getMember(i.assigneeId)?.name || i.assigneeId
-        return `- [${i.severity}] ${i.title}（${assignee}）`
-      }),
-    ]
-    if (problemItems.length === 0) {
-      lines.push('  无')
-    } else {
-      problemItems.forEach(item => lines.push(`  ${item}`))
-    }
-
+    lines.push(buildSection3Text())
+    lines.push('')
+    lines.push(buildSection4Text())
     return lines.join('\n')
   }
 
@@ -305,8 +406,8 @@ export default function ReportsPage() {
           <FileText size={20} className="text-violet-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-900">报告</h1>
-          <p className="text-sm text-gray-500">生成日报与周报，一键复制到微信</p>
+          <h1 className="text-xl font-bold text-gray-900">项目早会日报 / 周报</h1>
+          <p className="text-sm text-gray-500">基于早会指南 V1.4 模板，一键生成日报与周报</p>
         </div>
       </div>
 
@@ -328,20 +429,25 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      {/* ===== Daily Report ===== */}
-      {tab === '日报' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-800">项目日报 - {today}</h2>
-            <CopyButton text={buildDailyText()} sectionId="daily" />
-          </div>
-          <div className="p-6 space-y-5">
-            {/* Date */}
-            <div className="text-sm font-medium text-gray-900">{today}</div>
-
-            {/* 1. On-site staff */}
-            <div>
-              <div className="text-sm font-semibold text-gray-800 mb-2">1. 当日驻场人员</div>
+      {/* ===== Daily Report (项目早会日报) ===== */}
+      {tab === '日报' && (() => {
+        const grouped2 = groupTasksByExecution(yesterdayTasks)
+        const grouped3 = groupTasksByExecution(todayPlannedTasks)
+        return (
+        <div className="space-y-5">
+          {/* Header card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">项目早会日报</h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {today}（昨日：{yesterday}）
+                </p>
+              </div>
+              <CopyButton text={buildDailyText()} sectionId="daily-all" />
+            </div>
+            <div className="px-6 py-3">
+              <label className="text-xs font-medium text-gray-500 block mb-1">驻场人员</label>
               <input
                 type="text"
                 value={onsiteStaff}
@@ -349,80 +455,325 @@ export default function ReportsPage() {
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+          </div>
 
-            {/* 2. Work summary */}
-            <div>
-              <div className="text-sm font-semibold text-gray-800 mb-2">2. 本日工作简报</div>
-              {Object.keys(tasksByCategory).length === 0 ? (
-                <p className="text-sm text-gray-400 pl-2">无进行中任务</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(tasksByCategory).map(([cat, catTasks]) => (
-                    <div key={cat}>
-                      <div className="text-xs font-medium text-gray-500 mb-1">
-                        {CATEGORY_LABELS[cat] || cat}
-                      </div>
-                      <ul className="space-y-1 pl-2">
-                        {catTasks.map(t => {
-                          const assignee = getMember(t.assigneeId)?.name || t.assigneeId
-                          const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
-                          return (
-                            <li key={t.id} className="text-sm text-gray-700 flex items-start gap-1.5">
-                              <span className="text-gray-300 mt-0.5">-</span>
-                              <span>
-                                {scenario && (
-                                  <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded mr-1.5">
-                                    {scenario.code}
-                                  </span>
-                                )}
-                                {t.title}
-                                <span className="text-gray-400 ml-1">({assignee})</span>
-                              </span>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Section 1: 主计划 */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <span className="w-5 h-5 bg-blue-600 text-white rounded text-xs flex items-center justify-center font-bold">1</span>
+                主计划（总计划）
+              </h3>
+              <CopyButton text={buildSection1Text()} sectionId="daily-s1" />
             </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-10">序号</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">大计划项</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">计划节点</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-24">计划时间</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-20">当前实际情况</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">责任人</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">备注</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {milestones.map((m, idx) => {
+                    const statusColor = m.status === '已完成' ? 'text-green-700 bg-green-50' :
+                      m.status === '进行中' ? 'text-blue-700 bg-blue-50' : 'text-gray-500 bg-gray-100'
+                    const isOverdue = m.status !== '已完成' && m.date < today
+                    return (
+                      <tr key={m.id} className={`hover:bg-gray-50/50 ${isOverdue ? 'bg-red-50/30' : ''}`}>
+                        <td className="px-3 py-2.5 text-gray-400">{idx + 1}</td>
+                        <td className="px-3 py-2.5 font-medium text-gray-900">
+                          <span className="text-xs text-gray-400 mr-1">{m.code}</span>
+                          {m.name}
+                        </td>
+                        <td className="px-3 py-2.5 text-gray-600 text-xs">{m.description}</td>
+                        <td className="px-3 py-2.5 text-xs text-gray-500">{m.date}</td>
+                        <td className="px-3 py-2.5">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
+                            {m.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 text-xs text-gray-600">李培嵩</td>
+                        <td className="px-3 py-2.5 text-xs text-gray-400">
+                          {isOverdue && <span className="text-red-500 font-medium">已逾期</span>}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-            {/* 3. Pending issues */}
-            <div>
-              <div className="text-sm font-semibold text-gray-800 mb-2">3. 待解决问题</div>
-              {overdueTasks.length === 0 && severeOpenIssues.length === 0 ? (
-                <p className="text-sm text-gray-400 pl-2">无</p>
-              ) : (
-                <ul className="space-y-1.5 pl-2">
-                  {overdueTasks.map(t => (
-                    <li key={t.id} className="text-sm text-red-700 flex items-start gap-1.5">
-                      <span className="text-red-300 mt-0.5">-</span>
-                      <span>
-                        <span className="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded mr-1">逾期</span>
-                        {t.title}
-                        <span className="text-gray-400 ml-1">(截止 {t.dueDate}，{getMember(t.assigneeId)?.name || t.assigneeId})</span>
-                      </span>
-                    </li>
-                  ))}
-                  {severeOpenIssues.map(i => (
-                    <li key={i.id} className="text-sm text-amber-700 flex items-start gap-1.5">
-                      <span className="text-amber-300 mt-0.5">-</span>
-                      <span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded mr-1 ${
-                          i.severity === '严重' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
-                        }`}>{i.severity}</span>
-                        {i.title}
-                        <span className="text-gray-400 ml-1">({getMember(i.assigneeId)?.name || i.assigneeId})</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+          {/* Section 2: 已办（昨日） */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <span className="w-5 h-5 bg-emerald-600 text-white rounded text-xs flex items-center justify-center font-bold">2</span>
+                已办（昨日 {yesterday}）
+              </h3>
+              <CopyButton text={buildSection2Text()} sectionId="daily-s2" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-10">序号</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-36">小组</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">昨日计划任务</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-24">进展稽核</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-20">偏差分析</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-20">纠偏措施</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">备注</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {(() => {
+                    let seq = 0
+                    return EXECUTION_GROUPS.flatMap(group => {
+                      const groupTasks = grouped2[group]
+                      if (groupTasks.length === 0) {
+                        seq++
+                        return [(
+                          <tr key={`${group}-empty`} className="hover:bg-gray-50/50">
+                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-xs font-medium text-gray-600">{GROUP_LABELS[group]}</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">无</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )]
+                      }
+                      return groupTasks.map((t, tIdx) => {
+                        seq++
+                        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+                        const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
+                        const progress = t.status === '已完成' ? '已完成' : t.status === '审核中' ? '审核中' : '进行中'
+                        const progressColor = t.status === '已完成' ? 'text-green-700 bg-green-50' :
+                          t.status === '审核中' ? 'text-amber-700 bg-amber-50' : 'text-blue-700 bg-blue-50'
+                        const isOverdue = t.dueDate < today && t.status !== '已完成'
+                        return (
+                          <tr key={t.id} className={`hover:bg-gray-50/50 ${isOverdue ? 'bg-red-50/30' : ''}`}>
+                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-xs font-medium text-gray-600">
+                              {tIdx === 0 ? GROUP_LABELS[group] : ''}
+                            </td>
+                            <td className="px-3 py-2.5 text-gray-800">
+                              {scenario && (
+                                <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded mr-1.5">
+                                  {scenario.code}
+                                </span>
+                              )}
+                              {t.title}
+                              <span className="text-gray-400 text-xs ml-1">({assignee})</span>
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${progressColor}`}>
+                                {progress}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-xs">
+                              {isOverdue ? (
+                                <span className="text-red-600 font-medium">逾期</span>
+                              ) : (
+                                <span className="text-gray-400">无偏差</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-500">
+                              {isOverdue ? '加速推进' : ''}
+                            </td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )
+                      })
+                    })
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section 3: 待办（今日） */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <span className="w-5 h-5 bg-violet-600 text-white rounded text-xs flex items-center justify-center font-bold">3</span>
+                待办（今日 {today}）
+              </h3>
+              <CopyButton text={buildSection3Text()} sectionId="daily-s3" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-10">序号</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-36">小组</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">今日任务项内容</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-24">计划时间</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-24">完成要求标准</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">责任人</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">备注</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {(() => {
+                    let seq = 0
+                    return EXECUTION_GROUPS.flatMap(group => {
+                      const groupTasks = grouped3[group]
+                      if (groupTasks.length === 0) {
+                        seq++
+                        return [(
+                          <tr key={`${group}-empty`} className="hover:bg-gray-50/50">
+                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-xs font-medium text-gray-600">{GROUP_LABELS[group]}</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">无</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )]
+                      }
+                      return groupTasks.map((t, tIdx) => {
+                        seq++
+                        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+                        const scenario = t.scenarioId ? getScenario(t.scenarioId) : null
+                        const isUrgent = t.priority === '紧急' || t.priority === '高'
+                        return (
+                          <tr key={t.id} className={`hover:bg-gray-50/50 ${isUrgent ? 'bg-amber-50/30' : ''}`}>
+                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-xs font-medium text-gray-600">
+                              {tIdx === 0 ? GROUP_LABELS[group] : ''}
+                            </td>
+                            <td className="px-3 py-2.5 text-gray-800">
+                              {scenario && (
+                                <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded mr-1.5">
+                                  {scenario.code}
+                                </span>
+                              )}
+                              {t.title}
+                              {isUrgent && (
+                                <span className="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded ml-1.5">
+                                  {t.priority}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-500">{t.dueDate}</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">
+                              {t.status === '待办' ? '完成并提交' : '持续推进'}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">{assignee}</td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )
+                      })
+                    })
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section 4: 风险问题 */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <span className="w-5 h-5 bg-red-600 text-white rounded text-xs flex items-center justify-center font-bold">4</span>
+                风险问题等事项
+                {(openIssues.length + overdueTasks.length) > 0 && (
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                    {openIssues.length + overdueTasks.length}
+                  </span>
+                )}
+              </h3>
+              <CopyButton text={buildSection4Text()} sectionId="daily-s4" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-10">序号</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-40">风险/其他事项</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500">描述</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-32">拟处置措施</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-20">所需资源</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">责任人</th>
+                    <th className="px-3 py-2.5 text-xs font-semibold text-gray-500 w-16">备注</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {openIssues.length === 0 && overdueTasks.length === 0 ? (
+                    <tr>
+                      <td className="px-3 py-2.5 text-gray-400">1</td>
+                      <td colSpan={6} className="px-3 py-2.5 text-gray-400 text-xs">无风险问题</td>
+                    </tr>
+                  ) : (
+                    <>
+                      {openIssues.map((i, idx) => {
+                        const assignee = getMember(i.assigneeId)?.name || i.assigneeId
+                        const sevColor = i.severity === '严重' ? 'text-red-700 bg-red-50' :
+                          i.severity === '一般' ? 'text-amber-700 bg-amber-50' :
+                          i.severity === '轻微' ? 'text-blue-700 bg-blue-50' : 'text-gray-500 bg-gray-100'
+                        return (
+                          <tr key={i.id} className="hover:bg-gray-50/50">
+                            <td className="px-3 py-2.5 text-gray-400">{idx + 1}</td>
+                            <td className="px-3 py-2.5">
+                              <span className={`text-xs px-1.5 py-0.5 rounded font-medium mr-1 ${sevColor}`}>
+                                {i.severity}
+                              </span>
+                              <span className="text-gray-800 text-xs">{i.title}</span>
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600 max-w-[200px] truncate">
+                              {i.description.slice(0, 80)}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">
+                              {i.resolution || '待制定'}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-400">-</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">{assignee}</td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )
+                      })}
+                      {overdueTasks.map((t, idx) => {
+                        const assignee = getMember(t.assigneeId)?.name || t.assigneeId
+                        return (
+                          <tr key={t.id} className="hover:bg-gray-50/50 bg-red-50/30">
+                            <td className="px-3 py-2.5 text-gray-400">{openIssues.length + idx + 1}</td>
+                            <td className="px-3 py-2.5">
+                              <span className="text-xs px-1.5 py-0.5 rounded font-medium mr-1 text-red-700 bg-red-50">
+                                逾期
+                              </span>
+                              <span className="text-gray-800 text-xs">{t.title}</span>
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">
+                              截止 {t.dueDate}，当前未完成
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">
+                              加速推进，协调资源
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-400">-</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">{assignee}</td>
+                            <td className="px-3 py-2.5" />
+                          </tr>
+                        )
+                      })}
+                    </>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* ===== Weekly Report ===== */}
       {tab === '周报' && (

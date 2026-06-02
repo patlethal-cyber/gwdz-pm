@@ -36,7 +36,7 @@ const groupIcons: Record<SearchResult['group'], React.ReactNode> = {
 
 export default function Header({ title, subtitle, actions }: HeaderProps) {
   const router = useRouter()
-  const { tasks, deliverables, issues, meetings, activities, files, ready } = useData()
+  const { tasks, deliverables, issues, meetings, activities, ready } = useData()
 
   const [query, setQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -48,14 +48,40 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bellRef = useRef<HTMLDivElement>(null)
 
-  // Count activities in last 24 hours
+  const NOTIF_READ_KEY = 'gwdz-v5-notif-read-at'
+
+  const [lastReadAt, setLastReadAt] = useState<string>('')
+
+  // Load lastReadAt from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(NOTIF_READ_KEY)
+      if (stored) setLastReadAt(stored)
+    } catch { /* SSR / private browsing */ }
+  }, [])
+
+  // When notification panel opens, save current timestamp
+  useEffect(() => {
+    if (showNotifications) {
+      const now = new Date().toISOString()
+      setLastReadAt(now)
+      try { localStorage.setItem(NOTIF_READ_KEY, now) } catch { /* ignore */ }
+    }
+  }, [showNotifications])
+
+  // Count activities newer than lastReadAt
   const unreadCount = useMemo(() => {
     if (!ready) return 0
-    const cutoff = new Date()
-    cutoff.setHours(cutoff.getHours() - 24)
-    const cutoffISO = cutoff.toISOString()
-    return activities.filter(a => a.timestamp >= cutoffISO).length
-  }, [activities, ready])
+    if (!lastReadAt) return activities.length
+    return activities.filter(a => a.timestamp > lastReadAt).length
+  }, [activities, ready, lastReadAt])
+
+  // Callback for "mark all as read" from NotificationPanel
+  const handleMarkAllRead = useCallback(() => {
+    const now = new Date().toISOString()
+    setLastReadAt(now)
+    try { localStorage.setItem(NOTIF_READ_KEY, now) } catch { /* ignore */ }
+  }, [])
 
   const results = useMemo(() => {
     if (!query.trim() || !ready) return []
@@ -250,11 +276,6 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
           className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <FolderOpen size={18} />
-          {files.length > 0 && (
-            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-blue-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1">
-              {files.length > 99 ? '99+' : files.length}
-            </span>
-          )}
         </button>
         <FileManagerPanel
           isOpen={showFileManager}
@@ -275,7 +296,7 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
             )}
           </button>
           {showNotifications && (
-            <NotificationPanel onClose={() => setShowNotifications(false)} />
+            <NotificationPanel onClose={() => setShowNotifications(false)} onMarkAllRead={handleMarkAllRead} />
           )}
         </div>
       </div>

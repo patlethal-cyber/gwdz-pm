@@ -5,11 +5,12 @@ import { useData } from '@/lib/data-context'
 import {
   X, CheckSquare, FileText, Bug, Calendar, Flag,
   Plus, RefreshCw, Trash2, ArrowRightLeft,
-  AlertTriangle,
+  AlertTriangle, CheckCheck,
 } from 'lucide-react'
 
 interface NotificationPanelProps {
   onClose: () => void
+  onMarkAllRead?: () => void
 }
 
 const entityTypeIcons: Record<string, typeof CheckSquare> = {
@@ -70,7 +71,7 @@ const syntheticActionLabels: Record<string, string> = {
   severe: '严重问题',
 }
 
-export default function NotificationPanel({ onClose }: NotificationPanelProps) {
+export default function NotificationPanel({ onClose, onMarkAllRead }: NotificationPanelProps) {
   const { activities, tasks, deliverables, issues, meetings, today } = useData()
 
   // Generate synthetic system notifications from live data
@@ -192,12 +193,23 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
         <h3 className="text-sm font-semibold text-gray-800">通知</h3>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X size={16} />
-        </button>
+        <div className="flex items-center gap-1">
+          {onMarkAllRead && (
+            <button
+              onClick={onMarkAllRead}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              <CheckCheck size={14} />
+              <span>全部标记已读</span>
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Content */}
