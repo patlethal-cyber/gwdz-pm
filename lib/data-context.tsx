@@ -16,7 +16,7 @@ import seedMilestones from './data/milestones.json'
 import seedMeetings from './data/meetings.json'
 import seedIssues from './data/issues.json'
 
-const DATA_VERSION = '5.4'
+const DATA_VERSION = '6'
 const KEYS = {
   tasks: 'gwdz-v5-tasks',
   deliverables: 'gwdz-v5-deliverables',
@@ -26,6 +26,105 @@ const KEYS = {
   versions: 'gwdz-v5-del-versions',
   files: 'gwdz-v5-files',
   version: 'gwdz-v5-version',
+}
+
+// ===== Migration: merge seed updates into existing user data without wiping =====
+
+function mergeById<T extends { id: string }>(
+  existing: T[],
+  seed: T[],
+  updateFields?: (keyof T)[]
+): T[] {
+  const existingMap = new Map(existing.map(item => [item.id, item]))
+  let changed = false
+
+  for (const seedItem of seed) {
+    const existingItem = existingMap.get(seedItem.id)
+    if (!existingItem) {
+      // New item from seed — add it
+      existingMap.set(seedItem.id, seedItem)
+      changed = true
+    } else if (updateFields) {
+      // Existing item — only update specified structural fields, never user-edited fields
+      let itemChanged = false
+      const updated = { ...existingItem }
+      for (const field of updateFields) {
+        if (existingItem[field] !== seedItem[field]) {
+          (updated as Record<string, unknown>)[field as string] = seedItem[field]
+          itemChanged = true
+        }
+      }
+      if (itemChanged) {
+        existingMap.set(seedItem.id, updated)
+        changed = true
+      }
+    }
+  }
+
+  return changed ? [...existingMap.values()] : existing
+}
+
+function runMigrations(fromVer: string | null) {
+  // Files: merge new files, update fileUrl on existing (structural, not user data)
+  const existingFiles = load<ProjectFile>(KEYS.files, [])
+  if (existingFiles.length > 0) {
+    const seedFiles = generateFileMetadata()
+    const merged = mergeById(existingFiles, seedFiles, ['fileUrl', 'category', 'linkedDeliverableIds', 'scenarioId'])
+    if (merged !== existingFiles) save(KEYS.files, merged)
+  }
+
+  // DeliverableVersions: merge new versions
+  const existingVers = load<DeliverableVersion>(KEYS.versions, [])
+  if (existingVers.length > 0) {
+    const seedVers = generateVersions()
+    const merged = mergeById(existingVers, seedVers)
+    if (merged !== existingVers) save(KEYS.versions, merged)
+  }
+
+  // Deliverables: update scenarioCode (structural rename S37 etc.) but NOT status/currentVersion
+  const existingDels = load<Deliverable>(KEYS.deliverables, [])
+  if (existingDels.length > 0) {
+    const seedDels = generateDeliverables()
+    const merged = mergeById(existingDels, seedDels, ['scenarioCode', 'ownerId', 'dueDate'])
+    if (merged !== existingDels) save(KEYS.deliverables, merged)
+  }
+
+  // Tasks: update contactId (new field) but NOT status/description/priority
+  const existingTasks = load<Task>(KEYS.tasks, [])
+  if (existingTasks.length > 0) {
+    const rawTasks = seedTasks as Record<string, unknown>[]
+    const seedTaskList: Task[] = rawTasks.map(t => ({
+      id: t.id as string, title: t.title as string, description: (t.description as string) || '',
+      status: t.status as Task['status'], priority: t.priority as Task['priority'],
+      category: (t.scenarioId ? 'scenario' : 'project') as Task['category'],
+      assigneeId: t.assigneeId as string, contactId: t.contactId as string | undefined,
+      scenarioId: t.scenarioId as string | undefined, dueDate: t.dueDate as string,
+      tags: (t.tags as string[]) || [], createdAt: t.createdAt as string, updatedAt: t.updatedAt as string,
+    }))
+    const merged = mergeById(existingTasks, seedTaskList, ['contactId'])
+    if (merged !== existingTasks) save(KEYS.tasks, merged)
+  }
+
+  // Issues: update contactId but NOT status/resolution
+  const existingIssues = load<Issue>(KEYS.issues, [])
+  if (existingIssues.length > 0) {
+    const rawIssues = seedIssues as Record<string, unknown>[]
+    const seedIssueList: Issue[] = rawIssues.map(i => ({
+      id: i.id as string, title: i.title as string, description: (i.description as string) || '',
+      status: i.status as Issue['status'], severity: i.severity as Issue['severity'],
+      source: i.source as Issue['source'],
+      category: (i.scenarioId ? 'scenario' : 'project') as Issue['category'],
+      reporterId: i.reporterId as string, assigneeId: i.assigneeId as string,
+      contactId: i.contactId as string | undefined, scenarioId: i.scenarioId as string | undefined,
+      dueDate: i.dueDate as string | undefined,
+      linkedTaskIds: i.linkedTaskIds ? (i.linkedTaskIds as string[]) : i.linkedTaskId ? [i.linkedTaskId as string] : [],
+      resolution: i.resolution as string | undefined,
+      createdAt: i.createdAt as string, updatedAt: i.updatedAt as string,
+      resolvedAt: i.resolvedAt as string | undefined,
+    }))
+    const merged = mergeById(existingIssues, seedIssueList, ['contactId'])
+    if (merged !== existingIssues) save(KEYS.issues, merged)
+  }
 }
 
 function load<T>(key: string, fallback: T[]): T[] {
@@ -136,18 +235,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
   const todayStr = useMemo(() => now(), [])
 
-  // 初始化
+  // 初始化 — 种子数据仅作为新安装的默认值，绝不覆盖用户已有数据
   useEffect(() => {
     const storedVer = localStorage.getItem(KEYS.version)
-    if (storedVer !== DATA_VERSION) {
-      // Clear old v4 keys as well
-      const allKeys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-v'))
-      for (const k of allKeys) localStorage.removeItem(k)
-      localStorage.setItem(KEYS.version, DATA_VERSION)
-    }
 
+    // Prepare seed defaults (only used if localStorage is empty)
     const rawTasks = seedTasks as Record<string, unknown>[]
-    const enhancedTasks: Task[] = rawTasks.map(t => ({
+    const defaultTasks: Task[] = rawTasks.map(t => ({
       id: t.id as string,
       title: t.title as string,
       description: (t.description as string) || '',
@@ -164,7 +258,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }))
 
     const rawIssues = seedIssues as Record<string, unknown>[]
-    const enhancedIssues: Issue[] = rawIssues.map(i => ({
+    const defaultIssues: Issue[] = rawIssues.map(i => ({
       id: i.id as string,
       title: i.title as string,
       description: (i.description as string) || '',
@@ -184,13 +278,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
       resolvedAt: i.resolvedAt as string | undefined,
     }))
 
-    setTasks(load<Task>(KEYS.tasks, enhancedTasks))
+    if (!storedVer) {
+      // 全新安装：清理可能存在的旧版本残留数据，加载种子
+      const oldKeys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-'))
+      for (const k of oldKeys) localStorage.removeItem(k)
+    } else if (storedVer !== DATA_VERSION) {
+      // 版本升级：运行迁移，合并新种子数据，保留用户修改
+      runMigrations(storedVer)
+    }
+
+    // 从 localStorage 加载（有数据用数据，无数据用种子默认）
+    setTasks(load<Task>(KEYS.tasks, defaultTasks))
     setDeliverables(load<Deliverable>(KEYS.deliverables, generateDeliverables()))
     setMeetings(load<Meeting>(KEYS.meetings, seedMeetings as unknown as Meeting[]))
-    setIssues(load<Issue>(KEYS.issues, enhancedIssues))
+    setIssues(load<Issue>(KEYS.issues, defaultIssues))
     setActivities(load<ActivityLog>(KEYS.activities, []))
     setDeliverableVersions(load<DeliverableVersion>(KEYS.versions, generateVersions()))
     setFiles(load<ProjectFile>(KEYS.files, generateFileMetadata()))
+
+    localStorage.setItem(KEYS.version, DATA_VERSION)
     setReady(true)
   }, [])
 
