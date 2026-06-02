@@ -68,6 +68,7 @@ export async function PUT(
     access: 'public',
     contentType: 'application/json',
     addRandomSuffix: false,
+    allowOverwrite: true,
   })
 
   return Response.json({ ok: true, count: Array.isArray(data) ? data.length : 0 })
