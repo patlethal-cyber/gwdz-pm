@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { Search, Bell, FolderOpen, FileText, CheckSquare, Bug, Calendar } from 'lucide-react'
+import { Search, Bell, FolderOpen, FileText, CheckSquare, Bug, Calendar, Loader2, Check, CloudOff, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import NotificationPanel from '@/components/shared/NotificationPanel'
@@ -34,9 +34,52 @@ const groupIcons: Record<SearchResult['group'], React.ReactNode> = {
   meetings: <Calendar size={13} className="text-green-500" />,
 }
 
+// 保存状态指示器：把多人 last-write-wins 架构下的保存结果显性化（U1 + 冲突检测出口）
+function SaveStatusIndicator({ status }: { status: 'idle' | 'saving' | 'error' | 'conflict' }) {
+  if (status === 'saving') {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-blue-600">
+        <Loader2 size={13} className="animate-spin" />保存中…
+      </span>
+    )
+  }
+  if (status === 'error') {
+    return (
+      <span
+        className="flex items-center gap-1.5 text-xs text-red-600"
+        title="保存失败：修改未上传到服务器。请检查网络，下次修改会自动重试。"
+      >
+        <CloudOff size={13} />保存失败
+      </span>
+    )
+  }
+  if (status === 'conflict') {
+    return (
+      <span
+        className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1"
+        title="他人已修改并保存了同一数据。为避免覆盖对方改动，你的本次修改未保存。请刷新获取最新数据后再编辑。"
+      >
+        <AlertTriangle size={13} />数据已被他人更新
+        <button
+          onClick={() => window.location.reload()}
+          className="ml-0.5 inline-flex items-center gap-0.5 font-medium text-amber-800 hover:text-amber-950 underline"
+        >
+          <RefreshCw size={11} />刷新
+        </button>
+      </span>
+    )
+  }
+  // idle — 无待保存变更
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-gray-400" title="所有修改已同步到服务器">
+      <Check size={13} />已同步
+    </span>
+  )
+}
+
 export default function Header({ title, subtitle, actions }: HeaderProps) {
   const router = useRouter()
-  const { tasks, deliverables, issues, meetings, activities, ready } = useData()
+  const { tasks, deliverables, issues, meetings, activities, ready, saveStatus } = useData()
 
   const [query, setQuery] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -215,6 +258,7 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
       </div>
       <div className="flex items-center gap-3">
         {actions}
+        <SaveStatusIndicator status={saveStatus} />
         {/* Search */}
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />

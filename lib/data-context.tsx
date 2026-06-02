@@ -22,40 +22,51 @@ import seedIssues from './data/issues.json'
 const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files'] as const
 type CollectionName = typeof COLLECTIONS[number]
 
-async function serverLoad<T>(collection: CollectionName): Promise<T[] | null> {
+async function serverLoad<T>(collection: CollectionName): Promise<{ data: T[] | null; version: string }> {
   try {
     const res = await fetch(`/api/data/${collection}`, { cache: 'no-store' })
     if (res.ok) {
+      const version = res.headers.get('x-data-version') ?? ''
       const data = await res.json()
-      if (Array.isArray(data) && data.length > 0) return data as T[]
+      if (Array.isArray(data) && data.length > 0) return { data: data as T[], version }
+      return { data: null, version }
     }
   } catch { /* server unreachable */ }
-  return null
+  return { data: null, version: '' }
 }
 
-type SaveStatus = 'idle' | 'saving' | 'error'
+type SaveStatus = 'idle' | 'saving' | 'error' | 'conflict'
 
 async function serverSave<T>(
   collection: CollectionName,
   data: T[],
+  expectedVersion: string,
   setSaveStatus: (s: SaveStatus) => void,
-): Promise<void> {
+): Promise<{ ok: boolean; version?: string; conflict?: boolean }> {
   setSaveStatus('saving')
   try {
     const res = await fetch(`/api/data/${collection}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Expected-Version': expectedVersion },
       body: JSON.stringify(data),
     })
+    if (res.status === 409) {
+      console.warn(`[serverSave] ${collection} 冲突 — 数据已被他人更新`)
+      setSaveStatus('conflict')
+      return { ok: false, conflict: true }
+    }
     if (!res.ok) {
       console.error(`[serverSave] ${collection} failed: HTTP ${res.status}`)
       setSaveStatus('error')
-      return
+      return { ok: false }
     }
+    const body = await res.json().catch(() => ({} as { version?: string }))
     setSaveStatus('idle')
+    return { ok: true, version: body.version }
   } catch (err) {
     console.error(`[serverSave] ${collection} network error:`, err)
     setSaveStatus('error')
+    return { ok: false }
   }
 }
 
@@ -122,6 +133,7 @@ interface DataContextValue {
   addTask: (t: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateTask: (id: string, u: Partial<Task>) => void
   deleteTask: (id: string) => void
+  bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void
 
   addDeliverable: (d: Omit<Deliverable, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateDeliverable: (id: string, u: Partial<Deliverable>) => void
@@ -146,6 +158,7 @@ interface DataContextValue {
   getTasksByScenario: (scenarioId: string) => Task[]
   getIssuesByScenario: (scenarioId: string) => Issue[]
   getDeliverablesByScenario: (scenarioId: string) => Deliverable[]
+  getTasksByDeliverable: (deliverableId: string) => Task[]
   getDeliverablesByCategory: () => Record<string, Deliverable[]>
   getOverdueTasks: () => Task[]
   getPersonAggregation: (memberId: string) => PersonAggregation
@@ -184,6 +197,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Track which collections have been mutated by CRUD (not by init)
   const dirty = useRef<Set<CollectionName>>(new Set())
 
+  // 每个集合的服务器版本号（乐观并发：保存时带上，服务器比对，不匹配则 409 冲突）
+  const versions = useRef<Record<CollectionName, string>>({
+    tasks: '', deliverables: '', meetings: '', issues: '', activities: '', versions: '', files: '',
+  })
+
   const team = useMemo(() => seedTeam as TeamMember[], [])
   const scenarios = useMemo(() => SCENARIOS, [])
   const milestones = useMemo(() => seedMilestones as Milestone[], [])
@@ -203,7 +221,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // ===== Initialization: Server only, seed defaults only on first deploy =====
   useEffect(() => {
     async function init() {
-      const [sTasks, sDeliverables, sMeetings, sIssues, sActivities, sVersions, sFiles] = await Promise.all([
+      const [rTasks, rDeliverables, rMeetings, rIssues, rActivities, rVersions, rFiles] = await Promise.all([
         serverLoad<Task>('tasks'),
         serverLoad<Deliverable>('deliverables'),
         serverLoad<Meeting>('meetings'),
@@ -215,13 +233,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       // 直接使用服务器数据，服务器没有就空数组
       // 绝不自动推送种子数据 — 种子初始化通过设置页面手动触发
-      setTasks(sTasks || [])
-      setDeliverables(sDeliverables || [])
-      setMeetings(sMeetings || [])
-      setIssues(sIssues || [])
-      setActivities(sActivities || [])
-      setDeliverableVersions(sVersions || [])
-      setFiles(sFiles || [])
+      setTasks(rTasks.data || [])
+      setDeliverables(rDeliverables.data || [])
+      setMeetings(rMeetings.data || [])
+      setIssues(rIssues.data || [])
+      setActivities(rActivities.data || [])
+      setDeliverableVersions(rVersions.data || [])
+      setFiles(rFiles.data || [])
+
+      // 记录各集合初始版本号，供保存时乐观并发比对
+      versions.current = {
+        tasks: rTasks.version, deliverables: rDeliverables.version, meetings: rMeetings.version,
+        issues: rIssues.version, activities: rActivities.version, versions: rVersions.version, files: rFiles.version,
+      }
 
       setReady(true)
     }
@@ -234,9 +258,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   function debouncedSave<T>(collection: CollectionName, data: T[]) {
     if (!dirty.current.has(collection)) return
     if (saveTimers.current[collection]) clearTimeout(saveTimers.current[collection])
-    saveTimers.current[collection] = setTimeout(() => {
+    saveTimers.current[collection] = setTimeout(async () => {
       dirty.current.delete(collection)
-      serverSave(collection, data, setSaveStatus)
+      const result = await serverSave(collection, data, versions.current[collection] ?? '', setSaveStatus)
+      if (result.ok && result.version) versions.current[collection] = result.version
     }, 500)
   }
 
@@ -285,6 +310,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     dirty.current.add('tasks')
     setTasks(prev => prev.filter(t => t.id !== id))
     logActivity('task', id, 'deleted')
+  }, [logActivity])
+
+  // F3: 批量更新任务（多选 → 批量改状态/重分配）。一次 setState + 一条聚合日志
+  const bulkUpdateTasks = useCallback((ids: string[], patch: Partial<Task>) => {
+    if (ids.length === 0) return
+    const idSet = new Set(ids)
+    dirty.current.add('tasks')
+    setTasks(prev => prev.map(t => idSet.has(t.id) ? { ...t, ...patch, updatedAt: now() } : t))
+    logActivity('task', ids[0], 'updated', { bulk: ids.length, ...patch })
   }, [logActivity])
 
   // ===== Deliverable CRUD =====
@@ -405,6 +439,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const getTasksByScenario = useCallback((sid: string) => tasks.filter(t => t.scenarioId === sid), [tasks])
   const getIssuesByScenario = useCallback((sid: string) => issues.filter(i => i.scenarioId === sid), [issues])
   const getDeliverablesByScenario = useCallback((sid: string) => deliverables.filter(d => d.scenarioId === sid), [deliverables])
+  const getTasksByDeliverable = useCallback((did: string) => tasks.filter(t => t.deliverableId === did), [tasks])
 
   const getDeliverablesByCategory = useCallback(() => {
     const cats: Record<string, Deliverable[]> = {}
@@ -490,7 +525,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       versions: generateVersions(),
       files: generateFileMetadata(),
     }
-    for (const key of COLLECTIONS) dirty.current.add(key)
+    // 不加 dirty（避免 setState 触发的 debounce 二次写入）；下方显式强制覆写一次
     setTasks(seedData.tasks as Task[])
     setDeliverables(seedData.deliverables as Deliverable[])
     setMeetings(seedData.meetings as Meeting[])
@@ -498,8 +533,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setActivities([])
     setDeliverableVersions(seedData.versions as DeliverableVersion[])
     setFiles(seedData.files as ProjectFile[])
+    // 种子初始化 = 强制覆写（'*' 跳过版本比对），写完用返回的新版本号刷新本地持有版本
     await Promise.all(
-      Object.entries(seedData).map(([key, data]) => serverSave(key as CollectionName, data, setSaveStatus))
+      Object.entries(seedData).map(async ([key, data]) => {
+        const result = await serverSave(key as CollectionName, data, '*', setSaveStatus)
+        if (result.ok && result.version) versions.current[key as CollectionName] = result.version
+      })
     )
   }, [])
 
@@ -524,13 +563,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     <DataContext.Provider value={{
       tasks, deliverables, meetings, issues, team, scenarios, milestones,
       activities, deliverableVersions, files,
-      addTask, updateTask, deleteTask,
+      addTask, updateTask, deleteTask, bulkUpdateTasks,
       addDeliverable, updateDeliverable, deleteDeliverable, addDeliverableVersion,
       addMeeting, updateMeeting, deleteMeeting,
       addIssue, updateIssue, deleteIssue,
       addFile, updateFile, deleteFile,
       getMember, getScenario, getExternalMembers,
-      getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
+      getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario, getTasksByDeliverable,
       getDeliverablesByCategory, getOverdueTasks, getPersonAggregation,
       getFilesByEntity, getFilesByCategory,
       getDashboardStats, importData, initializeSeedData,

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, ExternalLink } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import type { Task, TaskStatus, TaskPriority, TaskCategory } from '@/lib/types'
 
@@ -23,7 +24,8 @@ interface TaskModalProps {
 }
 
 export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, defaultStatus }: TaskModalProps) {
-  const { team, scenarios } = useData()
+  const router = useRouter()
+  const { team, scenarios, deliverables } = useData()
   const isEdit = !!task
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -36,6 +38,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
   const [contactId, setContactId] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [scenarioId, setScenarioId] = useState('')
+  const [deliverableId, setDeliverableId] = useState('')
   const [tagsInput, setTagsInput] = useState('')
 
   useEffect(() => {
@@ -49,6 +52,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
       setContactId(task.contactId || '')
       setDueDate(task.dueDate)
       setScenarioId(task.scenarioId || '')
+      setDeliverableId(task.deliverableId || '')
       setTagsInput(task.tags.join(', '))
     } else {
       setTitle('')
@@ -60,6 +64,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
       setContactId('')
       setDueDate('')
       setScenarioId('')
+      setDeliverableId('')
       setTagsInput('')
     }
     setShowDeleteConfirm(false)
@@ -96,6 +101,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
       contactId: contactId || undefined,
       dueDate,
       scenarioId: category === 'scenario' ? scenarioId || undefined : undefined,
+      deliverableId: deliverableId || undefined,
       tags,
     }
     if (task) {
@@ -240,6 +246,33 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
               </select>
             </div>
           )}
+
+          {/* F1: 关联交付物（双向） */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">关联交付物</label>
+            <select
+              value={deliverableId}
+              onChange={e => setDeliverableId(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            >
+              <option value="">无</option>
+              {deliverables.map(d => <option key={d.id} value={d.id}>{d.code} {d.name}</option>)}
+            </select>
+            {deliverableId && (() => {
+              const d = deliverables.find(x => x.id === deliverableId)
+              if (!d) return null
+              return (
+                <button
+                  type="button"
+                  onClick={() => { onClose(); router.push(`/deliverables?open=${deliverableId}`) }}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  <ExternalLink size={12} />
+                  打开交付物 {d.code}
+                </button>
+              )
+            })()}
+          </div>
 
           {/* Due Date */}
           <div>

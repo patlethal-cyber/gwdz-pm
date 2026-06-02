@@ -40,11 +40,11 @@ function generateId() {
   return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
 }
 
-function emptyMeeting(): Meeting {
+function emptyMeeting(today: string): Meeting {
   return {
     id: generateId(),
     title: '',
-    date: '2026-06-01',
+    date: today,
     time: '14:00',
     duration: 60,
     location: '',
@@ -61,7 +61,7 @@ function emptyMeeting(): Meeting {
 export default function MeetingModal({ meeting, onClose, onSave, onDelete }: MeetingModalProps) {
   const { team, tasks, getMember, addTask, today } = useData()
   const isCreate = !meeting
-  const [form, setForm] = useState<Meeting>(meeting ? { ...meeting, actionItems: meeting.actionItems.map(a => ({ ...a })) } : emptyMeeting())
+  const [form, setForm] = useState<Meeting>(meeting ? { ...meeting, actionItems: meeting.actionItems.map(a => ({ ...a })) } : emptyMeeting(today))
   const [showAttendeeDropdown, setShowAttendeeDropdown] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   // Track which action item is showing task link dropdown

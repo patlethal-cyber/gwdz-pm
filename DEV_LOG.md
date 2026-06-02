@@ -16,8 +16,8 @@
 | 技术栈 | Next.js 16 + Tailwind CSS v4 + Recharts + Lucide React + Zod |
 | 数据存储 | **Vercel Blob**（JSON 文档存储，db/*.json，多用户共享） |
 | 文件存储 | **Vercel Blob**（488 项目文件，gwdz/ 前缀，public URL） |
-| 代码规模 | 46 个源文件，~20,080 行代码 |
-| 版本 | v6.0（2026-06-01） |
+| 代码规模 | 47 个源文件（+lib/schemas.ts） |
+| 版本 | **v6.1（2026-06-02）** |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
 ---
@@ -72,6 +72,22 @@ localStorage + 拖拽看板 + 搜索 + 通知 + 报告
 - TaskCard today 从 context 传入
 - 搜索 ?open=id 深链接三页均处理
 - Settings 信息更新 + 死代码清理
+
+### v6.1 — 数据防护层 + 双向关联 + 批量操作 ★ 当前版本（2026-06-02）
+
+**批次 1 — 数据防护层：**
+- **保存状态指示器（U1）**：Header 四态 — 已同步 / 保存中 / 保存失败 / 数据已被他人更新（saveStatus 之前已在 context 但无 UI 消费）
+- **冲突检测（乐观并发）**：GET 经 `X-Data-Version` 头返回 Blob `uploadedAt` 版本号；PUT 比对 `X-Expected-Version`，不一致返回 **409**；前端置 conflict 态提示刷新。把 last-write-wins 静默覆盖变成**可见冲突**（A1 缓解）
+- **API Zod 校验（A5）**：`lib/schemas.ts` looseObject schema，PUT + importData 拦截脏数据（缺 id / 非数组 → 422）。故意宽松，避免误拒合法数据
+- **修复会议默认日期（U4）**：MeetingModal 硬编码 `2026-06-01` → 动态 `today`
+- 顺带：blob 内容 fetch 加 `cache: no-store`（防 CDN 读到旧 JSON）
+
+**批次 2 — 功能（A3 拆分推迟）：**
+- **实体双向关联（F1）**：Task 加 `deliverableId` 字段；任务侧「关联交付物」选择器 + 交付物侧反向「关联任务」列表，双向点击跳转（复用 `?open=` 深链接）。替换了原来基于"同场景"的假关联计数
+- **批量操作（F3）**：任务列表多选 checkbox + 批量改状态/重分配（`bulkUpdateTasks`，一次 setState + 一条聚合日志）
+- **A3 拆分 DataContext 推迟**到独立会话（纯重构 + 回归风险，见 spawn task）
+
+**校验**：`npm run build` + `tsc --noEmit` + 浏览器（U1/U4/F1/F3）+ curl（401/422/409）全过
 
 ---
 
@@ -163,54 +179,56 @@ Meeting ──→ MeetingActionItem[] → Task
 
 | # | 问题 | 影响 | 建议 |
 |---|---|---|---|
-| A1 | **并发写入覆盖** | 两人同时改同一集合 → last-write-wins | 迁移 Vercel Postgres + 行级更新 |
-| A2 | **无用户身份** | 所有操作归属 m01，无法审计 | 登录时选"我是谁"+ 操作记录用户 ID |
-| A3 | **DataContext 是 God Object** | 500 行，7 实体混在一起 | 拆分为 per-collection hooks/services |
+| A1 | **并发写入覆盖** | 🟡 **v6.1 已缓解**：乐观并发冲突检测（409 + 提示刷新）把静默覆盖变可见。彻底解决仍需行级更新 | 迁移 Vercel Postgres（缓做） |
+| A2 | **无用户身份** | 所有操作归属 m01，无法审计 | 登录时选"我是谁"（已决定不做） |
+| A3 | **DataContext 是 God Object** | ~580 行，7 实体混在一起。**⏸️ 推迟到独立会话**（纯重构 + 回归风险，已建 spawn task） | 抽 usePersistedCollection hook + 拆 per-collection |
 | A4 | **数据 JSON 公开 URL** | db/*.json 用 access:public | 评估是否需改 private（当前可接受） |
-| A5 | **无 Zod 校验** | API 接受任意 JSON | 在 PUT handler 加 schema 验证 |
+| A5 | ~~**无 Zod 校验**~~ | ✅ **v6.1 完成**：lib/schemas.ts，PUT + importData 校验 | — |
 
 ### 功能级
 
 | # | 问题 | 影响 |
 |---|---|---|
-| F1 | 实体无双向关联 | 任务↔交付物无法互查 |
-| F2 | 无评论/讨论 | 上下文在微信里丢失 |
-| F3 | 无批量操作 | 改 10 个任务状态要 30+ 次点击 |
-| F4 | 会议文件上传是纯文本 URL | 需改成真实文件上传 |
-| F5 | 场景详情页只读 | 无法从场景直接创建任务/问题 |
-| F6 | 团队成员是只读种子数据 | 人员变动需改代码 |
-| F7 | Activity log 上限 200 条 | 2 周后旧记录丢失 |
-| F8 | 搜索 ?open= 深链接 | 已实现但需验证各页面是否正确打开 Modal |
+| F1 | ~~实体无双向关联~~ | ✅ **v6.1**：任务↔交付物双向关联+跳转（Task.deliverableId） |
+| F2 | ~~无评论/讨论~~ | ❌ **已砍**（用户决定：没什么用） |
+| F3 | ~~无批量操作~~ | ✅ **v6.1**：任务列表多选 + 批量改状态/重分配 |
+| F4 | 会议文件上传是纯文本 URL | 需改成真实文件上传（未排期） |
+| F5 | 场景详情页只读 | 无法从场景直接创建任务/问题（未排期） |
+| F6 | 团队成员是只读种子数据 | 人员变动需改代码（未排期） |
+| F7 | Activity log 上限 200 条 | 2 周后旧记录丢失（未排期） |
+| F8 | ~~搜索 ?open= 深链接~~ | ✅ **已实现并验证**（tasks/deliverables/issues 三页均处理） |
 
 ### UX 级
 
 | # | 问题 |
 |---|---|
-| U1 | 保存状态无 UI 指示器（saveStatus 已在 context 但未在 Header 展示）|
-| U2 | StatsCards grid-cols-4 无响应式断点（小屏会挤压）|
-| U3 | 多处日期计算不一致（getWeekEnd 两个版本）|
-| U4 | MeetingModal 默认日期硬编码为 2026-06-01 |
-| U5 | recharts 未 lazy load（每次加载报告页都下载全量库）|
+| U1 | ~~保存状态无 UI 指示器~~ ✅ **v6.1** Header 四态指示器（已同步/保存中/失败/冲突）|
+| U2 | StatsCards grid-cols-4 无响应式断点（小屏会挤压）→ 归入 UI/UX 审查后续任务 |
+| U3 | 日期计算不一致：getWeekEnd **复制 2 份**（page.tsx + tasks/page.tsx）+ reports/MeetingList 内联逻辑 = **4 处散落**（DEV_LOG 原写"2 个版本"已校正）|
+| U4 | ~~MeetingModal 默认日期硬编码为 2026-06-01~~ ✅ **v6.1** 改为动态 today |
+| U5 | recharts 未 lazy load（每次加载报告页都下载全量库）→ 归入 UI/UX 审查后续任务 |
 
 ---
 
-## 五、下一步迭代清单（已确认）
+## 五、下一步迭代清单
 
-按优先级排序：
+**v6.1 本期已完成**（批次1 数据防护 + 批次2 功能）：
+- ✅ 保存状态指示器（U1）/ 冲突检测 / Zod 校验（A5）/ 会议日期（U4）
+- ✅ 实体双向关联（F1）/ 批量操作（F3）
 
-| 优先级 | 需求 | 工作量 | 说明 |
-|---|---|---|---|
-| **高** | 保存状态指示器 | 1 天 | Header 展示 saving/saved/error 状态 |
-| **高** | 迁移 Vercel Postgres | 3 天 | 行级更新、事务、并发安全 |
-| **高** | 实体双向关联 | 2 天 | 任务↔交付物↔问题 |
-| **中** | DataContext 拆分 | 2 天 | 拆为 useTasksStore / useFilesStore 等 |
-| **中** | 评论/讨论功能 | 3 天 | Task/Issue/Deliverable 下的讨论串 |
-| **中** | 批量操作 | 2 天 | 多选 + 批量改状态/重分配 |
-| **低** | Zod API 校验 | 1 天 | PUT handler + importData 校验 |
+**下一步**：
+
+| 优先级 | 需求 | 状态 |
+|---|---|---|
+| **中** | DataContext 拆分（A3） | ⏸️ 推迟到独立会话（已建 spawn task）：抽 usePersistedCollection hook，保持 useData() 接口不变 |
+| **后续** | **UI/UX 设计审查与迭代升级** | 📋 本期后续任务（已建 spawn task）：含 U2 响应式、U5 recharts 懒加载、视觉/交互一致性 |
+| **高** | 迁移 Vercel Postgres（A1） | 缓做：v6.1 冲突检测已缓解 last-write-wins；真出现数据丢失或并发常态化再上 |
+| **中** | 功能补强 | F4 会议真实附件 / F5 场景页可操作 / F6 团队可编辑 / F7 日志上限 / U3 日期函数统一 |
 
 已明确**不做**：
-- ~~用户身份选择~~（当前共享密码足够）
-- ~~文件私有化存储~~（public URL 可接受）
+- ~~评论/讨论功能（F2）~~（用户决定：没什么用）
+- ~~用户身份选择（A2）~~（共享密码足够；注：若重启 F2 评论需先做此项）
+- ~~文件私有化存储（A4）~~（public URL 可接受）
 
 ---
 
@@ -243,4 +261,4 @@ node scripts/bulk-upload.mjs
 
 ---
 
-*最后更新：2026-06-01 by Claude Opus 4.6*
+*最后更新：2026-06-02 by Claude Opus 4.8 — v6.1（批次1 数据防护层 + 批次2 F1/F3；A3 推迟到独立会话）*

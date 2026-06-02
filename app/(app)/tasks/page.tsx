@@ -25,7 +25,7 @@ function getWeekEnd(dateStr: string): string {
 }
 
 export default function TasksPage() {
-  const { tasks, issues, team, scenarios, updateTask, addTask, deleteTask, getMember, getScenario, today, ready } = useData()
+  const { tasks, issues, team, scenarios, updateTask, addTask, deleteTask, bulkUpdateTasks, getMember, getScenario, today, ready } = useData()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -316,6 +316,8 @@ export default function TasksPage() {
           getMember={getMember}
           getScenario={getScenario}
           today={today}
+          team={team}
+          onBulkUpdate={bulkUpdateTasks}
         />
       )}
 

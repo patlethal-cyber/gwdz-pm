@@ -40,6 +40,7 @@ export interface Task {
   assigneeId: string
   contactId?: string
   scenarioId?: string
+  deliverableId?: string  // F1: 直接关联的交付物（任务服务/产出于该交付物），双向可查可跳
   dueDate: string
   tags: string[]
   createdAt: string

@@ -26,7 +26,7 @@ const STATUS_STYLE: Record<DeliverableStatus, { bg: string; text: string; dot: s
 
 export default function DeliverableModal({ isOpen, onClose, deliverable, onSave }: DeliverableModalProps) {
   const router = useRouter()
-  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, tasks, issues, today, addFile, getFilesByEntity, team } = useData()
+  const { getMember, getScenario, deliverableVersions, addDeliverableVersion, issues, today, addFile, getFilesByEntity, team, getTasksByDeliverable } = useData()
 
   const [status, setStatus] = useState<DeliverableStatus>('待编制')
   const [ownerId, setOwnerId] = useState('')
@@ -167,10 +167,9 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
   // Version history
   const versions = deliverableVersions.filter(v => v.deliverableId === deliverable.id)
 
-  // Related counts -- computed dynamically from context data
-  const linkedTaskCount = deliverable.scenarioId
-    ? tasks.filter(t => t.scenarioId === deliverable.scenarioId).length
-    : 0
+  // F1: 直接关联任务（task.deliverableId === 本交付物 id），双向可查可跳
+  const linkedTasks = getTasksByDeliverable(deliverable.id)
+  // 关联问题仍按场景维度作为快捷入口
   const linkedIssueCount = deliverable.scenarioId
     ? issues.filter(i => i.scenarioId === deliverable.scenarioId).length
     : 0
@@ -470,31 +469,53 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
             )
           })()}
 
-          {/* Related links */}
+          {/* F1: 直接关联任务（双向，点击跳转到对应任务） */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">关联项</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => { onClose(); router.push('/tasks') }}
-                className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
-              >
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center gap-1.5">
                 <CheckSquare size={14} className="text-blue-500" />
-                <span className="text-sm text-gray-700">关联任务</span>
-                <span className="ml-auto text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
-                  {linkedTaskCount}
-                </span>
-              </button>
-              <button
-                onClick={() => { onClose(); router.push('/issues') }}
-                className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
-              >
-                <Bug size={14} className="text-red-500" />
-                <span className="text-sm text-gray-700">关联问题</span>
-                <span className="ml-auto text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
-                  {linkedIssueCount}
-                </span>
-              </button>
-            </div>
+                关联任务
+                <span className="text-xs font-normal text-gray-400 ml-1">({linkedTasks.length})</span>
+              </span>
+            </label>
+            {linkedTasks.length > 0 ? (
+              <div className="space-y-1.5">
+                {linkedTasks.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => { onClose(); router.push(`/tasks?open=${t.id}`) }}
+                    className="w-full flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors text-left group"
+                  >
+                    <CheckSquare size={14} className="text-blue-500 shrink-0" />
+                    <span className="flex-1 text-sm text-gray-700 truncate group-hover:text-blue-700">{t.title}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                      t.status === '已完成' ? 'bg-green-50 text-green-600' :
+                      t.status === '进行中' ? 'bg-blue-50 text-blue-600' :
+                      t.status === '审核中' ? 'bg-amber-50 text-amber-600' :
+                      'bg-gray-100 text-gray-500'
+                    }`}>{t.status}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 py-3 text-center border border-dashed border-gray-200 rounded-lg">
+                暂无直接关联任务（在任务编辑中设置「关联交付物」）
+              </p>
+            )}
+          </div>
+
+          {/* 关联问题（场景级快捷入口） */}
+          <div>
+            <button
+              onClick={() => { onClose(); router.push('/issues') }}
+              className="w-full flex items-center gap-2 py-2.5 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+            >
+              <Bug size={14} className="text-red-500" />
+              <span className="text-sm text-gray-700">关联问题</span>
+              <span className="ml-auto text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
+                {linkedIssueCount}
+              </span>
+            </button>
           </div>
         </div>
 
