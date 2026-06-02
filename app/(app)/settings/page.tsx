@@ -95,7 +95,7 @@ export default function SettingsPage() {
       <div className="flex flex-col h-screen">
         <Header title="设置" subtitle="项目配置与系统信息" />
         <div className="flex items-center justify-center flex-1">
-          <div className="text-sm text-gray-400">加载中...</div>
+          <div className="text-sm text-gray-500">加载中...</div>
         </div>
       </div>
     )
@@ -320,7 +320,7 @@ export default function SettingsPage() {
                 </a>
               </div>
               <div className="pt-3 mt-3 border-t border-gray-100 px-3">
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-500">
                   伊登软件 x 火山引擎 HIAgent | 国微电子 AI 智能体项目管理系统
                 </p>
                 <p className="text-xs text-gray-300 mt-1">

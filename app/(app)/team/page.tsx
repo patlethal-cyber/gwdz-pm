@@ -110,14 +110,14 @@ export default function TeamPage() {
               <Building2 size={15} />
             </span>
             <h2 className="text-base font-semibold text-gray-900">伊登团队</h2>
-            <span className="text-xs text-gray-400 ml-1">{edenMembers.length} 人</span>
+            <span className="text-xs text-gray-500 ml-1">{edenMembers.length} 人</span>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-5">
             {edenGroups.map(([groupName, members]) => (
               <div key={groupName}>
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {groupName}
                   </h3>
                   <span className="text-[10px] text-gray-300">{members.length}</span>
@@ -146,7 +146,7 @@ export default function TeamPage() {
               <Globe size={15} />
             </span>
             <h2 className="text-base font-semibold text-gray-900">外部团队</h2>
-            <span className="text-xs text-gray-400 ml-1">{externalMembers.length} 人</span>
+            <span className="text-xs text-gray-500 ml-1">{externalMembers.length} 人</span>
           </div>
 
           <div className="space-y-4">
@@ -165,7 +165,7 @@ export default function TeamPage() {
                 <div className="space-y-4">
                   {Object.entries(depts).map(([dept, members]) => (
                     <div key={dept}>
-                      <h4 className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-2">
+                      <h4 className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-2">
                         {dept}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -184,10 +184,10 @@ export default function TeamPage() {
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-gray-900">{member.name}</span>
-                                <span className="text-[11px] text-gray-400 truncate">{member.role}</span>
+                                <span className="text-[11px] text-gray-500 truncate">{member.role}</span>
                               </div>
                               {member.contactFor && (
-                                <p className="text-[11px] text-gray-400 truncate mt-0.5">{member.contactFor}</p>
+                                <p className="text-[11px] text-gray-500 truncate mt-0.5">{member.contactFor}</p>
                               )}
                               {(memberTaskCounts[member.id] || 0) > 0 && (
                                 <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">

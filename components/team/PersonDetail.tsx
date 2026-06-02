@@ -84,12 +84,12 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
             {(member.email || member.phone) && (
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 {member.email && (
-                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                  <span className="flex items-center gap-1 text-xs text-gray-500">
                     <Mail size={12} /> {member.email}
                   </span>
                 )}
                 {member.phone && (
-                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                  <span className="flex items-center gap-1 text-xs text-gray-500">
                     <Phone size={12} /> {member.phone}
                   </span>
                 )}
@@ -98,7 +98,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X size={18} />
           </button>
@@ -132,7 +132,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
                 <Briefcase size={14} />
                 负责场景
-                <span className="text-xs font-normal text-gray-400">({agg.scenarios.length})</span>
+                <span className="text-xs font-normal text-gray-500">({agg.scenarios.length})</span>
               </h3>
               <div className="space-y-1.5">
                 {agg.scenarios.map(s => (
@@ -142,10 +142,10 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
                     className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-xs font-mono text-gray-400">{s.code}</span>
+                      <span className="text-xs font-mono text-gray-500">{s.code}</span>
                       <span className="text-sm text-gray-700 truncate group-hover:text-blue-600">{s.name}</span>
                     </div>
-                    <span className="text-[10px] text-gray-400 flex-shrink-0">{s.department}</span>
+                    <span className="text-[10px] text-gray-500 flex-shrink-0">{s.department}</span>
                   </Link>
                 ))}
               </div>
@@ -158,7 +158,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
                 <CheckSquare size={14} />
                 相关任务
-                <span className="text-xs font-normal text-gray-400">({agg.tasks.length})</span>
+                <span className="text-xs font-normal text-gray-500">({agg.tasks.length})</span>
               </h3>
               <div className="space-y-3">
                 {taskStatusOrder.map(status => {
@@ -170,7 +170,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
                         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${taskStatusColor[status]}`}>
                           {status}
                         </span>
-                        <span className="text-[10px] text-gray-400">{items.length}</span>
+                        <span className="text-[10px] text-gray-500">{items.length}</span>
                       </div>
                       <div className="space-y-1">
                         {items.map((t: Task) => {
@@ -184,9 +184,9 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
                               <span className="text-sm text-gray-700 truncate group-hover:text-blue-600">{t.title}</span>
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 {scenario && (
-                                  <span className="text-[10px] text-gray-400">{scenario.code}</span>
+                                  <span className="text-[10px] text-gray-500">{scenario.code}</span>
                                 )}
-                                <span className="text-[10px] text-gray-400">{t.dueDate}</span>
+                                <span className="text-[10px] text-gray-500">{t.dueDate}</span>
                               </div>
                             </Link>
                           )
@@ -205,7 +205,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
                 <FileText size={14} />
                 负责交付物
-                <span className="text-xs font-normal text-gray-400">({agg.deliverables.length})</span>
+                <span className="text-xs font-normal text-gray-500">({agg.deliverables.length})</span>
               </h3>
               <div className="space-y-3">
                 {deliverableStatusOrder.map(status => {
@@ -217,7 +217,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
                         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${deliverableStatusColor[status]}`}>
                           {status}
                         </span>
-                        <span className="text-[10px] text-gray-400">{items.length}</span>
+                        <span className="text-[10px] text-gray-500">{items.length}</span>
                       </div>
                       <div className="space-y-1">
                         {items.map((d: Deliverable) => (
@@ -227,11 +227,11 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
                             className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors group"
                           >
                             <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-xs font-mono text-gray-400">{d.code}</span>
+                              <span className="text-xs font-mono text-gray-500">{d.code}</span>
                               <span className="text-sm text-gray-700 truncate group-hover:text-blue-600">{d.name}</span>
                             </div>
                             {d.currentVersion && (
-                              <span className="text-[10px] text-gray-400 flex-shrink-0">{d.currentVersion}</span>
+                              <span className="text-[10px] text-gray-500 flex-shrink-0">{d.currentVersion}</span>
                             )}
                           </Link>
                         ))}
@@ -249,7 +249,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
                 <AlertTriangle size={14} />
                 相关问题
-                <span className="text-xs font-normal text-gray-400">({agg.issues.length})</span>
+                <span className="text-xs font-normal text-gray-500">({agg.issues.length})</span>
               </h3>
               <div className="space-y-1">
                 {agg.issues.map((i: Issue) => (
@@ -273,7 +273,7 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
 
           {/* Empty state */}
           {agg.tasks.length === 0 && agg.deliverables.length === 0 && agg.issues.length === 0 && agg.scenarios.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-gray-500">
               <User size={32} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">暂无关联数据</p>
             </div>

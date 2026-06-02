@@ -171,7 +171,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave, onDelete }:
           <h2 className="text-base font-bold text-gray-900">
             {isEdit ? '编辑问题' : '新建问题'}
           </h2>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -299,7 +299,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave, onDelete }:
                     {contact.name[0]}
                   </span>
                   <span className="text-sm text-gray-700">{contact.name}</span>
-                  <span className="text-xs text-gray-400">{contact.organization}</span>
+                  <span className="text-xs text-gray-500">{contact.organization}</span>
                 </div>
               )
             })()}
@@ -325,7 +325,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave, onDelete }:
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               关联任务
               {linkedTaskIds.length > 0 && (
-                <span className="ml-1.5 text-xs text-gray-400 font-normal">({linkedTaskIds.length})</span>
+                <span className="ml-1.5 text-xs text-gray-500 font-normal">({linkedTaskIds.length})</span>
               )}
             </label>
 
@@ -355,7 +355,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave, onDelete }:
 
             {/* Task search input */}
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 ref={taskSearchRef}
                 type="text"

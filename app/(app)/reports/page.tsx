@@ -3,10 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useData } from '@/lib/data-context'
 import { FileText, Copy, Check, BarChart3 } from 'lucide-react'
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
-} from 'recharts'
+import dynamic from 'next/dynamic'
 
 type Tab = '日报' | '周报' | '可视化周报'
 
@@ -29,12 +26,15 @@ function formatDate(dateStr: string): string {
   return `${y}/${m}/${d}`
 }
 
-const SEVERITY_COLORS: Record<string, string> = {
-  '严重': '#ef4444',
-  '一般': '#f59e0b',
-  '轻微': '#3b82f6',
-  '建议': '#6b7280',
-}
+// 懒加载 recharts 图表（ssr:false）——把图表库从首屏 bundle 拆出（E）
+const VizCharts = dynamic(() => import('@/components/reports/VizCharts'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[360px] rounded-xl border border-gray-200 bg-gray-50 animate-pulse flex items-center justify-center text-sm text-gray-500">
+      图表加载中…
+    </div>
+  ),
+})
 
 const EXECUTION_GROUPS = ['第二执行组', '第一执行组', '专项支持'] as const
 const GROUP_LABELS: Record<string, string> = {
@@ -486,9 +486,9 @@ export default function ReportsPage() {
                     const isOverdue = m.status !== '已完成' && m.date < today
                     return (
                       <tr key={m.id} className={`hover:bg-gray-50/50 ${isOverdue ? 'bg-red-50/30' : ''}`}>
-                        <td className="px-3 py-2.5 text-gray-400">{idx + 1}</td>
+                        <td className="px-3 py-2.5 text-gray-500">{idx + 1}</td>
                         <td className="px-3 py-2.5 font-medium text-gray-900">
-                          <span className="text-xs text-gray-400 mr-1">{m.code}</span>
+                          <span className="text-xs text-gray-500 mr-1">{m.code}</span>
                           {m.name}
                         </td>
                         <td className="px-3 py-2.5 text-gray-600 text-xs">{m.description}</td>
@@ -499,7 +499,7 @@ export default function ReportsPage() {
                           </span>
                         </td>
                         <td className="px-3 py-2.5 text-xs text-gray-600">李培嵩</td>
-                        <td className="px-3 py-2.5 text-xs text-gray-400">
+                        <td className="px-3 py-2.5 text-xs text-gray-500">
                           {isOverdue && <span className="text-red-500 font-medium">已逾期</span>}
                         </td>
                       </tr>
@@ -541,12 +541,12 @@ export default function ReportsPage() {
                         seq++
                         return [(
                           <tr key={`${group}-empty`} className="hover:bg-gray-50/50">
-                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{seq}</td>
                             <td className="px-3 py-2.5 text-xs font-medium text-gray-600">{GROUP_LABELS[group]}</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">无</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">无</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
                             <td className="px-3 py-2.5" />
                           </tr>
                         )]
@@ -561,7 +561,7 @@ export default function ReportsPage() {
                         const isOverdue = t.dueDate < today && t.status !== '已完成'
                         return (
                           <tr key={t.id} className={`hover:bg-gray-50/50 ${isOverdue ? 'bg-red-50/30' : ''}`}>
-                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{seq}</td>
                             <td className="px-3 py-2.5 text-xs font-medium text-gray-600">
                               {tIdx === 0 ? GROUP_LABELS[group] : ''}
                             </td>
@@ -572,7 +572,7 @@ export default function ReportsPage() {
                                 </span>
                               )}
                               {t.title}
-                              <span className="text-gray-400 text-xs ml-1">({assignee})</span>
+                              <span className="text-gray-500 text-xs ml-1">({assignee})</span>
                             </td>
                             <td className="px-3 py-2.5">
                               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${progressColor}`}>
@@ -583,7 +583,7 @@ export default function ReportsPage() {
                               {isOverdue ? (
                                 <span className="text-red-600 font-medium">逾期</span>
                               ) : (
-                                <span className="text-gray-400">无偏差</span>
+                                <span className="text-gray-500">无偏差</span>
                               )}
                             </td>
                             <td className="px-3 py-2.5 text-xs text-gray-500">
@@ -631,12 +631,12 @@ export default function ReportsPage() {
                         seq++
                         return [(
                           <tr key={`${group}-empty`} className="hover:bg-gray-50/50">
-                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{seq}</td>
                             <td className="px-3 py-2.5 text-xs font-medium text-gray-600">{GROUP_LABELS[group]}</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">无</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
-                            <td className="px-3 py-2.5 text-gray-400 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">无</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
+                            <td className="px-3 py-2.5 text-gray-500 text-xs">-</td>
                             <td className="px-3 py-2.5" />
                           </tr>
                         )]
@@ -648,7 +648,7 @@ export default function ReportsPage() {
                         const isUrgent = t.priority === '紧急' || t.priority === '高'
                         return (
                           <tr key={t.id} className={`hover:bg-gray-50/50 ${isUrgent ? 'bg-amber-50/30' : ''}`}>
-                            <td className="px-3 py-2.5 text-gray-400">{seq}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{seq}</td>
                             <td className="px-3 py-2.5 text-xs font-medium text-gray-600">
                               {tIdx === 0 ? GROUP_LABELS[group] : ''}
                             </td>
@@ -711,8 +711,8 @@ export default function ReportsPage() {
                 <tbody className="divide-y divide-gray-100">
                   {openIssues.length === 0 && overdueTasks.length === 0 ? (
                     <tr>
-                      <td className="px-3 py-2.5 text-gray-400">1</td>
-                      <td colSpan={6} className="px-3 py-2.5 text-gray-400 text-xs">无风险问题</td>
+                      <td className="px-3 py-2.5 text-gray-500">1</td>
+                      <td colSpan={6} className="px-3 py-2.5 text-gray-500 text-xs">无风险问题</td>
                     </tr>
                   ) : (
                     <>
@@ -723,7 +723,7 @@ export default function ReportsPage() {
                           i.severity === '轻微' ? 'text-blue-700 bg-blue-50' : 'text-gray-500 bg-gray-100'
                         return (
                           <tr key={i.id} className="hover:bg-gray-50/50">
-                            <td className="px-3 py-2.5 text-gray-400">{idx + 1}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{idx + 1}</td>
                             <td className="px-3 py-2.5">
                               <span className={`text-xs px-1.5 py-0.5 rounded font-medium mr-1 ${sevColor}`}>
                                 {i.severity}
@@ -736,7 +736,7 @@ export default function ReportsPage() {
                             <td className="px-3 py-2.5 text-xs text-gray-600">
                               {i.resolution || '待制定'}
                             </td>
-                            <td className="px-3 py-2.5 text-xs text-gray-400">-</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-500">-</td>
                             <td className="px-3 py-2.5 text-xs text-gray-600">{assignee}</td>
                             <td className="px-3 py-2.5" />
                           </tr>
@@ -746,7 +746,7 @@ export default function ReportsPage() {
                         const assignee = getMember(t.assigneeId)?.name || t.assigneeId
                         return (
                           <tr key={t.id} className="hover:bg-gray-50/50 bg-red-50/30">
-                            <td className="px-3 py-2.5 text-gray-400">{openIssues.length + idx + 1}</td>
+                            <td className="px-3 py-2.5 text-gray-500">{openIssues.length + idx + 1}</td>
                             <td className="px-3 py-2.5">
                               <span className="text-xs px-1.5 py-0.5 rounded font-medium mr-1 text-red-700 bg-red-50">
                                 逾期
@@ -759,7 +759,7 @@ export default function ReportsPage() {
                             <td className="px-3 py-2.5 text-xs text-gray-600">
                               加速推进，协调资源
                             </td>
-                            <td className="px-3 py-2.5 text-xs text-gray-400">-</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-500">-</td>
                             <td className="px-3 py-2.5 text-xs text-gray-600">{assignee}</td>
                             <td className="px-3 py-2.5" />
                           </tr>
@@ -820,9 +820,9 @@ export default function ReportsPage() {
 
                     return (
                       <tr key={s.id} className="hover:bg-gray-50/50">
-                        <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
+                        <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
                         <td className="px-4 py-3 font-medium text-gray-900">
-                          <span className="text-xs text-gray-400 mr-1">{s.code}</span>
+                          <span className="text-xs text-gray-500 mr-1">{s.code}</span>
                           {s.name}
                         </td>
                         <td className="px-4 py-3 text-gray-600">{progress}</td>
@@ -834,7 +834,7 @@ export default function ReportsPage() {
                         </td>
                         <td className="px-4 py-3">
                           {sIssues.length === 0 ? (
-                            <span className="text-xs text-gray-400">无</span>
+                            <span className="text-xs text-gray-500">无</span>
                           ) : (
                             <div className="space-y-0.5">
                               {sIssues.slice(0, 2).map(i => (
@@ -843,7 +843,7 @@ export default function ReportsPage() {
                                 </div>
                               ))}
                               {sIssues.length > 2 && (
-                                <div className="text-xs text-gray-400">+{sIssues.length - 2} 项</div>
+                                <div className="text-xs text-gray-500">+{sIssues.length - 2} 项</div>
                               )}
                             </div>
                           )}
@@ -890,7 +890,7 @@ export default function ReportsPage() {
                     i => (i.severity === '严重' || i.severity === '一般') && i.status !== '已关闭'
                   )
                   if (reportableIssues.length === 0) {
-                    return <p className="text-sm text-gray-400 pl-2">暂无重要问题</p>
+                    return <p className="text-sm text-gray-500 pl-2">暂无重要问题</p>
                   }
                   return (
                     <div className="space-y-3">
@@ -929,9 +929,9 @@ export default function ReportsPage() {
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>
                           {m.status}
                         </span>
-                        <span className="text-gray-400 text-xs">{m.code}</span>
+                        <span className="text-gray-500 text-xs">{m.code}</span>
                         <span className="text-gray-800">{m.name}</span>
-                        <span className="text-gray-400 text-xs ml-auto">{m.date}</span>
+                        <span className="text-gray-500 text-xs ml-auto">{m.date}</span>
                       </div>
                     )
                   })}
@@ -942,7 +942,7 @@ export default function ReportsPage() {
               <div>
                 <h3 className="text-sm font-semibold text-gray-800 mb-3">3. 本周进展</h3>
                 {completedThisWeek.length === 0 && inProgressThisWeek.length === 0 ? (
-                  <p className="text-sm text-gray-400 pl-2">暂无记录</p>
+                  <p className="text-sm text-gray-500 pl-2">暂无记录</p>
                 ) : (
                   <div className="space-y-3">
                     {completedThisWeek.length > 0 && (
@@ -977,7 +977,7 @@ export default function ReportsPage() {
               <div>
                 <h3 className="text-sm font-semibold text-gray-800 mb-3">4. 下周计划</h3>
                 {nextWeekTasks.length === 0 ? (
-                  <p className="text-sm text-gray-400 pl-2">按 WBS 计划推进</p>
+                  <p className="text-sm text-gray-500 pl-2">按 WBS 计划推进</p>
                 ) : (
                   <ul className="space-y-1">
                     {nextWeekTasks.map(t => (
@@ -993,127 +993,15 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* ===== Visual Weekly Report ===== */}
+      {/* ===== Visual Weekly Report（recharts 懒加载）===== */}
       {tab === '可视化周报' && (
-        <div className="space-y-6">
-          {/* Scenario progress bars */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-sm font-semibold text-gray-800 mb-4">场景进度概览</h2>
-            <div className="h-[360px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={scenarioProgressData} layout="vertical" margin={{ left: 10, right: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} tickFormatter={v => `${v}%`} />
-                  <YAxis type="category" dataKey="name" width={40} tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    formatter={(value: unknown, _name: unknown, props: unknown) => {
-                      const p = props as { payload?: { done?: number; total?: number } }
-                      const done = p?.payload?.done ?? 0
-                      const total = p?.payload?.total ?? 0
-                      return [`${value}% (${done}/${total})`, '完成率']
-                    }}
-                  />
-                  <Bar dataKey="progress" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            {/* Issue severity pie */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-              <h2 className="text-sm font-semibold text-gray-800 mb-4">未关闭问题严重程度分布</h2>
-              {severityPieData.length === 0 ? (
-                <div className="h-[240px] flex items-center justify-center text-sm text-gray-400">
-                  暂无未关闭问题
-                </div>
-              ) : (
-                <div className="h-[240px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={severityPieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        dataKey="value"
-                        label={({ name, value }: { name?: string; value?: number }) => `${name ?? ''}: ${value ?? ''}`}
-                      >
-                        {severityPieData.map((entry, idx) => (
-                          <Cell key={idx} fill={SEVERITY_COLORS[entry.name] || '#6b7280'} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </div>
-
-            {/* Week task stats */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-              <h2 className="text-sm font-semibold text-gray-800 mb-4">本周任务统计</h2>
-              <div className="h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weekTaskData} margin={{ left: 0, right: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={40}>
-                      {weekTaskData.map((entry, idx) => (
-                        <Cell
-                          key={idx}
-                          fill={
-                            entry.name === '已完成' ? '#22c55e' :
-                            entry.name === '进行中' ? '#3b82f6' :
-                            entry.name === '逾期' ? '#ef4444' : '#8b5cf6'
-                          }
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Milestone timeline */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-sm font-semibold text-gray-800 mb-4">里程碑进度</h2>
-            <div className="flex items-start gap-0 overflow-x-auto pb-2">
-              {milestoneData.map((m, idx) => {
-                const statusColor = m.status === '已完成' ? 'bg-green-500' :
-                  m.status === '进行中' ? 'bg-blue-500' : 'bg-gray-300'
-                const textColor = m.status === '已完成' ? 'text-green-700' :
-                  m.status === '进行中' ? 'text-blue-700' : 'text-gray-500'
-                const isPast = m.date <= today
-
-                return (
-                  <div key={m.code} className="flex items-start flex-1 min-w-[120px]">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-4 h-4 rounded-full ${statusColor} flex-shrink-0 z-10`} />
-                      {idx < milestoneData.length - 1 && (
-                        <div className={`w-full h-0.5 mt-[-8px] ${isPast ? 'bg-green-300' : 'bg-gray-200'}`} />
-                      )}
-                      <div className="mt-2 text-center px-1">
-                        <div className={`text-xs font-semibold ${textColor}`}>{m.name}</div>
-                        <div className="text-[10px] text-gray-400 mt-0.5">{m.code}</div>
-                        <div className="text-[10px] text-gray-400">{m.date}</div>
-                        <div className={`text-[10px] font-medium mt-1 ${textColor}`}>{m.status}</div>
-                      </div>
-                    </div>
-                    {idx < milestoneData.length - 1 && (
-                      <div className={`flex-1 h-0.5 mt-[7px] ${isPast ? 'bg-green-300' : 'bg-gray-200'}`} />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
+        <VizCharts
+          scenarioProgressData={scenarioProgressData}
+          severityPieData={severityPieData}
+          weekTaskData={weekTaskData}
+          milestoneData={milestoneData}
+          today={today}
+        />
       )}
     </div>
   )

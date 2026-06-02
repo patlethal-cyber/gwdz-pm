@@ -64,10 +64,10 @@ function DeliverableCard({ d, onSelect }: { d: Deliverable; onSelect: (d: Delive
               {owner.initials[0]}
             </div>
           )}
-          <span className="text-xs text-gray-400">{owner?.name}</span>
+          <span className="text-xs text-gray-500">{owner?.name}</span>
         </div>
         {updatedDate && (
-          <span className="text-xs text-gray-400">{updatedDate}</span>
+          <span className="text-xs text-gray-500">{updatedDate}</span>
         )}
       </div>
     </div>
@@ -96,7 +96,7 @@ export default function DeliverablePipeline({ filteredDeliverables, onSelect }: 
                 {/* Card list */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-2 max-h-[calc(100vh-260px)]">
                   {items.length === 0 ? (
-                    <div className="text-center py-8 text-sm text-gray-400">
+                    <div className="text-center py-8 text-sm text-gray-500">
                       暂无交付物
                     </div>
                   ) : (

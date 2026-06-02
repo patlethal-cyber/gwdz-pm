@@ -88,7 +88,7 @@ export default function TaskCard({ task, onClick, onDragStart, issues, getMember
               {linkedIssueCount}
             </span>
           )}
-          <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+          <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
             <Calendar size={11} />
             {task.dueDate.slice(5)}
             {isOverdue && ' 逾期'}

@@ -8,7 +8,7 @@ import GanttChart from '@/components/dashboard/GanttChart'
 import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
 // MilestoneTimeline removed — current phase shown in FocusBar + GanttChart milestones
 import PersonDetail from '@/components/team/PersonDetail'
-import { Calendar, Clock, AlertTriangle, Target, BarChart3, Cpu, Users, FileBox } from 'lucide-react'
+import { Calendar, Clock, Target, BarChart3, Cpu, Users, FileBox } from 'lucide-react'
 import type { TeamMember, DeliverableStatus } from '@/lib/types'
 
 function daysBetween(a: string, b: string): number {
@@ -150,7 +150,7 @@ export default function DashboardPage() {
         <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
         <div className="p-6 space-y-6">
           <div className="h-14 rounded-xl bg-gray-100 animate-pulse" />
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-32 rounded-xl bg-gray-100 animate-pulse" />
             ))}
@@ -168,71 +168,31 @@ export default function DashboardPage() {
       <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
 
       <div className="p-6 space-y-6">
-        {/* Today Focus Bar */}
-        <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Target size={16} className="text-blue-600" />
-                <span className="text-sm font-semibold text-blue-900">今日聚焦</span>
-              </div>
-              <div className="flex items-center gap-5 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Clock size={14} className="text-blue-500" />
-                  <span className="text-gray-700">
-                    距 M4{' '}
-                    <span className={`font-bold ${todayFocus.daysToM4 <= 7 ? 'text-red-600' : 'text-blue-700'}`}>
-                      {todayFocus.daysToM4}
-                    </span>{' '}
-                    天
-                  </span>
-                </div>
-                <div className="h-4 w-px bg-blue-200" />
-                <div className="flex items-center gap-1.5">
-                  <AlertTriangle
-                    size={14}
-                    className={todayFocus.overdueCount > 0 ? 'text-red-500' : 'text-gray-400'}
-                  />
-                  <span className="text-gray-700">
-                    逾期任务{' '}
-                    <span
-                      className={`font-bold ${
-                        todayFocus.overdueCount > 0 ? 'text-red-600' : 'text-gray-700'
-                      }`}
-                    >
-                      {todayFocus.overdueCount}
-                    </span>{' '}
-                    项
-                  </span>
-                </div>
-                <div className="h-4 w-px bg-blue-200" />
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={14} className="text-blue-500" />
-                  <span className="text-gray-700">
-                    本周会议{' '}
-                    <span className="font-bold text-blue-700">{todayFocus.meetingsThisWeek}</span>{' '}
-                    场
-                  </span>
-                </div>
-                <div className="h-4 w-px bg-blue-200" />
-                <div className="flex items-center gap-1.5">
-                  <AlertTriangle
-                    size={14}
-                    className={todayFocus.severeIssues > 0 ? 'text-red-500' : 'text-gray-400'}
-                  />
-                  <span className="text-gray-700">
-                    严重问题{' '}
-                    <span
-                      className={`font-bold ${
-                        todayFocus.severeIssues > 0 ? 'text-red-600' : 'text-gray-700'
-                      }`}
-                    >
-                      {todayFocus.severeIssues}
-                    </span>{' '}
-                    个
-                  </span>
-                </div>
-              </div>
+        {/* Today Focus Bar — 只保留独有指标（逾期/严重已在下方 StatsCards，去重）*/}
+        <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <div className="flex items-center gap-2">
+              <Target size={16} className="text-blue-600" />
+              <span className="text-sm font-semibold text-blue-900">今日聚焦</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-sm">
+              <Clock size={14} className="text-blue-500" />
+              <span className="text-gray-700">
+                距 M4{' '}
+                <span className={`font-bold ${todayFocus.daysToM4 <= 7 ? 'text-red-600' : 'text-blue-700'}`}>
+                  {todayFocus.daysToM4}
+                </span>{' '}
+                天
+              </span>
+            </div>
+            <div className="h-4 w-px bg-blue-200" />
+            <div className="flex items-center gap-1.5 text-sm">
+              <Calendar size={14} className="text-blue-500" />
+              <span className="text-gray-700">
+                本周会议{' '}
+                <span className="font-bold text-blue-700">{todayFocus.meetingsThisWeek}</span>{' '}
+                场
+              </span>
             </div>
           </div>
         </div>
@@ -241,7 +201,7 @@ export default function DashboardPage() {
         <StatsCards stats={stats} />
 
         {/* Tab Bar */}
-        <div className="bg-gray-100 p-1 rounded-xl inline-flex gap-1">
+        <div className="bg-gray-100 p-1 rounded-xl flex flex-wrap gap-1">
           {TABS.map(tab => {
             const Icon = tab.icon
             const isActive = activeTab === tab.key
@@ -249,7 +209,7 @@ export default function DashboardPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
@@ -284,7 +244,7 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-gray-900 truncate">{member.name}</span>
-                      <span className="text-xs text-gray-400 truncate">{member.role}</span>
+                      <span className="text-xs text-gray-500 truncate">{member.role}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700">
@@ -315,7 +275,7 @@ export default function DashboardPage() {
               ))}
             </div>
             {teamWorkloadData.length === 0 && (
-              <div className="rounded-xl border border-gray-200 bg-white px-5 py-12 text-center text-sm text-gray-400">
+              <div className="rounded-xl border border-gray-200 bg-white px-5 py-12 text-center text-sm text-gray-500">
                 暂无团队成员数据
               </div>
             )}
@@ -367,12 +327,12 @@ export default function DashboardPage() {
               <div className="border-b border-gray-100 px-5 py-3">
                 <h3 className="text-sm font-semibold text-gray-900">
                   {activePipelineStatus}
-                  <span className="ml-2 text-xs font-normal text-gray-400">{pipelineItems.length} 项</span>
+                  <span className="ml-2 text-xs font-normal text-gray-500">{pipelineItems.length} 项</span>
                 </h3>
               </div>
               <div className="divide-y divide-gray-50 max-h-[400px] overflow-y-auto">
                 {pipelineItems.length === 0 ? (
-                  <div className="px-5 py-8 text-center text-sm text-gray-400">
+                  <div className="px-5 py-8 text-center text-sm text-gray-500">
                     暂无交付物
                   </div>
                 ) : (
@@ -405,7 +365,7 @@ export default function DashboardPage() {
                               {owner.initials}
                             </div>
                           )}
-                          <span className="text-xs text-gray-400 w-20 text-right">{item.dueDate}</span>
+                          <span className="text-xs text-gray-500 w-20 text-right">{item.dueDate}</span>
                         </div>
                       </div>
                     )

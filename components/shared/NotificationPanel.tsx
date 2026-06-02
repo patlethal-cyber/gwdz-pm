@@ -205,7 +205,7 @@ export default function NotificationPanel({ onClose, onMarkAllRead }: Notificati
           )}
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-600 transition-colors"
           >
             <X size={16} />
           </button>
@@ -244,7 +244,7 @@ export default function NotificationPanel({ onClose, onMarkAllRead }: Notificati
                         <span className="text-xs text-gray-500">
                           {syntheticActionLabels[sn.action] || sn.action}
                         </span>
-                        <span className="text-[10px] text-gray-400">{sn._label}</span>
+                        <span className="text-[10px] text-gray-500">{sn._label}</span>
                       </div>
                       <div className="text-sm text-gray-800 mt-0.5 truncate">{entityName}</div>
                     </div>
@@ -263,7 +263,7 @@ export default function NotificationPanel({ onClose, onMarkAllRead }: Notificati
         )}
 
         {entries.length === 0 && systemNotifications.length === 0 ? (
-          <div className="py-12 text-center text-sm text-gray-400">暂无新通知</div>
+          <div className="py-12 text-center text-sm text-gray-500">暂无新通知</div>
         ) : (
           <div className="divide-y divide-gray-50">
             {entries.map(entry => {
@@ -290,11 +290,11 @@ export default function NotificationPanel({ onClose, onMarkAllRead }: Notificati
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <ActionIcon size={11} className="text-gray-400 flex-shrink-0" />
+                      <ActionIcon size={11} className="text-gray-500 flex-shrink-0" />
                       <span className="text-xs text-gray-500">{description}</span>
                     </div>
                     <div className="text-sm text-gray-800 mt-0.5 truncate">{entityName}</div>
-                    <div className="text-[10px] text-gray-400 mt-1">{time}</div>
+                    <div className="text-[10px] text-gray-500 mt-1">{time}</div>
                   </div>
                 </div>
               )

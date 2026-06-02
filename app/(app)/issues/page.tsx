@@ -101,7 +101,7 @@ export default function IssuesPage() {
   if (!ready) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-sm text-gray-400">Loading...</div>
+        <div className="text-sm text-gray-500">Loading...</div>
       </div>
     )
   }
@@ -187,7 +187,7 @@ export default function IssuesPage() {
               清除筛选
             </button>
           )}
-          <span className="ml-auto text-xs text-gray-400">{filtered.length} 个问题</span>
+          <span className="ml-auto text-xs text-gray-500">{filtered.length} 个问题</span>
         </div>
 
         {/* Issue table */}

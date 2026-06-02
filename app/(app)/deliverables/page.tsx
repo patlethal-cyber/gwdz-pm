@@ -46,7 +46,7 @@ function FilterDropdown({
           </option>
         ))}
       </select>
-      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
     </div>
   )
 }
@@ -216,7 +216,7 @@ export default function DeliverablesPage() {
             <span className={`text-sm font-bold ${text}`}>{statusCounts[status]}</span>
           </div>
         ))}
-        <div className="ml-auto text-xs text-gray-400">
+        <div className="ml-auto text-xs text-gray-500">
           共 {filteredDeliverables.length} 项
         </div>
       </div>

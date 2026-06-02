@@ -71,7 +71,7 @@ function getFileIconColor(fileType: string): string {
   if (fileType.includes('image')) return 'text-purple-500'
   if (fileType.includes('pdf')) return 'text-red-500'
   if (fileType.includes('markdown')) return 'text-gray-600'
-  return 'text-gray-400'
+  return 'text-gray-500'
 }
 
 function categorizeByPath(path: string): FileCategory {
@@ -139,7 +139,7 @@ function FileTree({
       >
         <FolderOpen size={16} className="shrink-0" />
         <span className="flex-1 text-left">全部文件</span>
-        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{totalCount}</span>
+        <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{totalCount}</span>
       </button>
 
       <div className="py-1">
@@ -158,7 +158,7 @@ function FileTree({
                 {hasSubPaths && (
                   <button
                     onClick={() => toggleExpand(cat)}
-                    className="pl-2 pr-0 py-2.5 text-gray-400 hover:text-gray-600"
+                    className="pl-2 pr-0 py-2.5 text-gray-500 hover:text-gray-600"
                   >
                     <ChevronRight
                       size={12}
@@ -178,7 +178,7 @@ function FileTree({
                 >
                   <CatIcon size={15} className="shrink-0" />
                   <span className="flex-1 text-left truncate">{cat}</span>
-                  <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{files.length}</span>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{files.length}</span>
                 </button>
               </div>
 
@@ -237,7 +237,7 @@ function FileRow({
       {/* Name + path */}
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-gray-900 truncate">{file.name}</div>
-        <div className="text-xs text-gray-400 truncate mt-0.5">{file.path}/{file.originalName}</div>
+        <div className="text-xs text-gray-500 truncate mt-0.5">{file.path}/{file.originalName}</div>
       </div>
 
       {/* Entity chips */}
@@ -264,18 +264,18 @@ function FileRow({
           </span>
         ))}
         {file.tags.length > 3 && (
-          <span className="text-[10px] text-gray-400">+{file.tags.length - 3}</span>
+          <span className="text-[10px] text-gray-500">+{file.tags.length - 3}</span>
         )}
       </div>
 
       {/* Size */}
       <div className="w-16 text-right shrink-0">
-        <span className="text-xs text-gray-400">{formatFileSize(file.fileSize)}</span>
+        <span className="text-xs text-gray-500">{formatFileSize(file.fileSize)}</span>
       </div>
 
       {/* Date */}
       <div className="w-24 text-right shrink-0">
-        <span className="text-xs text-gray-400">{file.uploadedAt}</span>
+        <span className="text-xs text-gray-500">{file.uploadedAt}</span>
       </div>
 
       {/* Upload status */}
@@ -315,7 +315,7 @@ function FileGridCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-900 line-clamp-2">{file.name}</div>
-          <div className="text-[11px] text-gray-400 truncate mt-0.5">{file.originalName}</div>
+          <div className="text-[11px] text-gray-500 truncate mt-0.5">{file.originalName}</div>
         </div>
       </div>
 
@@ -336,9 +336,9 @@ function FileGridCard({
       </div>
 
       <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-50">
-        <span className="text-[11px] text-gray-400">{file.uploadedAt}</span>
+        <span className="text-[11px] text-gray-500">{file.uploadedAt}</span>
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-gray-400">{formatFileSize(file.fileSize)}</span>
+          <span className="text-[11px] text-gray-500">{formatFileSize(file.fileSize)}</span>
           {file.fileUrl ? (
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
           ) : (
@@ -438,12 +438,12 @@ function FileDetailPanel({
             </div>
             <div className="min-w-0">
               <h2 className="text-base font-bold text-gray-900 truncate">{file.name}</h2>
-              <p className="text-xs text-gray-400 truncate">{file.originalName}</p>
+              <p className="text-xs text-gray-500 truncate">{file.originalName}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ml-3"
+            className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ml-3"
           >
             <X size={18} />
           </button>
@@ -525,7 +525,7 @@ function FileDetailPanel({
                   <div className="w-2 h-2 rounded-full bg-gray-300" />
                   <span className="text-sm text-gray-500">尚未上传文件</span>
                 </div>
-                <span className="text-xs text-gray-400">仅元数据</span>
+                <span className="text-xs text-gray-500">仅元数据</span>
               </div>
             )}
           </div>
@@ -540,14 +540,14 @@ function FileDetailPanel({
                   {tag}
                   <button
                     onClick={() => handleRemoveTag(tag)}
-                    className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover/tag:opacity-100"
+                    className="text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover/tag:opacity-100"
                   >
                     <X size={10} />
                   </button>
                 </span>
               ))}
               {file.tags.length === 0 && (
-                <span className="text-xs text-gray-400">暂无标签</span>
+                <span className="text-xs text-gray-500">暂无标签</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -562,7 +562,7 @@ function FileDetailPanel({
               <button
                 onClick={handleAddTag}
                 disabled={!tagInput.trim()}
-                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-30"
+                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-30"
               >
                 <Plus size={16} />
               </button>
@@ -593,7 +593,7 @@ function FileDetailPanel({
                 </div>
               ))}
               {linkedDeliverables.length === 0 && linkedTasks.length === 0 && linkedIssues.length === 0 && (
-                <p className="text-xs text-gray-400 py-2 text-center">暂无关联项</p>
+                <p className="text-xs text-gray-500 py-2 text-center">暂无关联项</p>
               )}
             </div>
           </div>
@@ -784,7 +784,7 @@ function UploadZone({
           <button
             onClick={onClose}
             disabled={uploading}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
+            className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
           >
             <X size={18} />
           </button>
@@ -820,11 +820,11 @@ function UploadZone({
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
-            <Upload size={32} className={`mx-auto mb-3 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+            <Upload size={32} className={`mx-auto mb-3 ${isDragging ? 'text-blue-500' : 'text-gray-500'}`} />
             <p className="text-sm font-medium text-gray-700">
               {isDragging ? '松开以添加文件' : '拖拽文件到此处，或点击选择'}
             </p>
-            <p className="text-xs text-gray-400 mt-1">支持 Word / Excel / PDF / PPT / 图片等格式</p>
+            <p className="text-xs text-gray-500 mt-1">支持 Word / Excel / PDF / PPT / 图片等格式</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -848,19 +848,19 @@ function UploadZone({
                   const FIcon = getFileIcon(entry.file.type)
                   return (
                     <div key={`${entry.file.name}-${idx}`} className="flex items-center gap-3 py-2 px-3 bg-gray-50 rounded-lg">
-                      <FIcon size={14} className="text-gray-400 shrink-0" />
+                      <FIcon size={14} className="text-gray-500 shrink-0" />
                       <span className="text-sm text-gray-700 flex-1 truncate">{entry.file.name}</span>
-                      <span className="text-xs text-gray-400">{formatFileSize(entry.file.size)}</span>
+                      <span className="text-xs text-gray-500">{formatFileSize(entry.file.size)}</span>
                       {entry.status === 'pending' && !uploading && (
                         <button
                           onClick={() => removeFile(idx)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          className="p-1 text-gray-500 hover:text-red-500 transition-colors"
                         >
                           <X size={12} />
                         </button>
                       )}
                       {entry.status === 'pending' && uploading && (
-                        <span className="text-xs text-gray-400">等待中</span>
+                        <span className="text-xs text-gray-500">等待中</span>
                       )}
                       {entry.status === 'uploading' && (
                         <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -1087,12 +1087,12 @@ export default function FilesPage() {
             </option>
           ))}
         </select>
-        <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
@@ -1103,7 +1103,7 @@ export default function FilesPage() {
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
           >
             <X size={12} />
           </button>
@@ -1128,7 +1128,7 @@ export default function FilesPage() {
       {/* Active filter indicator */}
       {(selectedCategory || searchQuery) && (
         <div className="flex items-center gap-2 px-6 py-2 bg-white border-b border-gray-100">
-          <span className="text-xs text-gray-400">筛选:</span>
+          <span className="text-xs text-gray-500">筛选:</span>
           {selectedCategory && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium">
               {selectedCategory}
@@ -1140,12 +1140,12 @@ export default function FilesPage() {
           {searchQuery && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium">
               &quot;{searchQuery}&quot;
-              <button onClick={() => setSearchQuery('')} className="ml-1 text-gray-400 hover:text-gray-600">
+              <button onClick={() => setSearchQuery('')} className="ml-1 text-gray-500 hover:text-gray-600">
                 <X size={10} />
               </button>
             </span>
           )}
-          <span className="text-xs text-gray-400 ml-auto">{filteredFiles.length} 个结果</span>
+          <span className="text-xs text-gray-500 ml-auto">{filteredFiles.length} 个结果</span>
         </div>
       )}
 
@@ -1166,14 +1166,14 @@ export default function FilesPage() {
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <FolderOpen size={48} className="text-gray-300 mb-4" />
               <h3 className="text-sm font-medium text-gray-500 mb-1">没有找到文件</h3>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 {searchQuery ? '尝试调整搜索关键词' : '点击上传按钮添加文件'}
               </p>
             </div>
           ) : viewMode === 'list' ? (
             <div className="space-y-1.5">
               {/* List header */}
-              <div className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <div className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div className="w-9" />
                 <div className="flex-1">文件名</div>
                 <div className="hidden lg:block w-32">关联</div>

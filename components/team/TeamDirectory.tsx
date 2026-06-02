@@ -24,7 +24,7 @@ export default function TeamDirectory({ members }: TeamDirectoryProps) {
       {Array.from(groups.entries()).map(([groupName, groupMembers]) => (
         <section key={groupName}>
           <div className="flex items-center gap-2 pb-2 mb-4 border-b border-gray-200">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               {groupName}
             </h2>
             <span className="text-[10px] text-gray-300 font-medium">

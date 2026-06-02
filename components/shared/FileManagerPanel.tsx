@@ -64,7 +64,7 @@ function getFileTypeIcon(name: string) {
     case 'webp':
       return <FileImage size={16} className="text-purple-500" />
     default:
-      return <File size={16} className="text-gray-400" />
+      return <File size={16} className="text-gray-500" />
   }
 }
 
@@ -189,7 +189,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-semibold text-gray-900">文件管理</h2>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
               {files.length} 个文件
             </span>
           </div>
@@ -203,7 +203,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
             </Link>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-600 transition-colors"
             >
               <X size={16} />
             </button>
@@ -213,7 +213,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
         {/* Search */}
         <div className="px-5 pt-4 pb-2 flex-shrink-0">
           <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
             <input
               type="text"
               value={search}
@@ -254,7 +254,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
           )}
 
           {filtered.length === 0 ? (
-            <div className="py-12 text-center text-sm text-gray-400">
+            <div className="py-12 text-center text-sm text-gray-500">
               {search || activeCategory ? '没有匹配的文件' : '暂无文件'}
             </div>
           ) : (
@@ -272,7 +272,7 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
                       {file.name}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-gray-500">
                         {formatFileSize(file.fileSize)}
                       </span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
@@ -310,11 +310,11 @@ export default function FileManagerPanel({ isOpen, onClose }: FileManagerPanelPr
                 dragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50'
               }`}
             >
-              <Upload size={24} className="mx-auto text-gray-400 mb-2" />
+              <Upload size={24} className="mx-auto text-gray-500 mb-2" />
               <p className="text-sm text-gray-600 mb-1">
                 {uploading ? '上传中...' : '拖拽文件到此处'}
               </p>
-              <p className="text-xs text-gray-400 mb-3">或点击下方按钮选择文件</p>
+              <p className="text-xs text-gray-500 mb-3">或点击下方按钮选择文件</p>
               <input
                 ref={fileInputRef}
                 type="file"

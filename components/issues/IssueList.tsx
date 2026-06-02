@@ -88,7 +88,7 @@ export default function IssueList({ issues, onEdit, team, scenarios, tasks, toda
                   className="border-b border-gray-50 hover:bg-gray-50/80 cursor-pointer transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono text-gray-400">{issue.id.slice(0, 8).toUpperCase()}</span>
+                    <span className="text-xs font-mono text-gray-500">{issue.id.slice(0, 8).toUpperCase()}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm font-medium text-gray-900 line-clamp-1">{issue.title}</span>
@@ -136,7 +136,7 @@ export default function IssueList({ issues, onEdit, team, scenarios, tasks, toda
                           </Link>
                         ))}
                         {linkedTasks.length > 2 && (
-                          <span className="text-[10px] text-gray-400 self-center">+{linkedTasks.length - 2}</span>
+                          <span className="text-[10px] text-gray-500 self-center">+{linkedTasks.length - 2}</span>
                         )}
                       </div>
                     ) : (
@@ -181,7 +181,7 @@ export default function IssueList({ issues, onEdit, team, scenarios, tasks, toda
       </div>
 
       {sorted.length === 0 && (
-        <div className="py-16 text-center text-sm text-gray-400">
+        <div className="py-16 text-center text-sm text-gray-500">
           没有匹配的问题
         </div>
       )}

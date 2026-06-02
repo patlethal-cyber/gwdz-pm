@@ -25,7 +25,7 @@ export default function MemberCard({ member, onClick, taskCount, issueCount, sce
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-900 truncate">{member.name}</span>
-          <span className="text-[11px] text-gray-400 truncate hidden sm:inline">{member.role}</span>
+          <span className="text-[11px] text-gray-500 truncate hidden sm:inline">{member.role}</span>
         </div>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">

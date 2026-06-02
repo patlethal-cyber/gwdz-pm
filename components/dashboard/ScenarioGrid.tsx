@@ -208,7 +208,7 @@ export default function ScenarioGrid() {
                             {/* Progress bar */}
                             <div className="mb-2">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] text-gray-400">
+                                <span className="text-[10px] text-gray-500">
                                   交付进度
                                 </span>
                                 <span className="text-[10px] font-semibold text-gray-600">
@@ -237,7 +237,7 @@ export default function ScenarioGrid() {
                                 className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                                   m.issueCount > 0
                                     ? 'bg-red-50 text-red-600'
-                                    : 'bg-gray-50 text-gray-400'
+                                    : 'bg-gray-50 text-gray-500'
                                 }`}
                               >
                                 <AlertCircle size={9} />
@@ -267,7 +267,7 @@ export default function ScenarioGrid() {
                                         'bg-gray-300'
                                       }`} />
                                       <span className="truncate">{truncate(t.title, 20)}</span>
-                                      <span className="ml-auto text-[10px] text-gray-400 flex-shrink-0">{t.status}</span>
+                                      <span className="ml-auto text-[10px] text-gray-500 flex-shrink-0">{t.status}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -288,7 +288,7 @@ export default function ScenarioGrid() {
                                         : <FileText size={10} className="text-gray-300 flex-shrink-0" />
                                       }
                                       <span className="truncate">{truncate(d.name, 18)}</span>
-                                      <span className="ml-auto text-[10px] text-gray-400 flex-shrink-0">{d.status}</span>
+                                      <span className="ml-auto text-[10px] text-gray-500 flex-shrink-0">{d.status}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -310,7 +310,7 @@ export default function ScenarioGrid() {
                                         'bg-gray-300'
                                       }`} />
                                       <span className="truncate">{truncate(i.title, 18)}</span>
-                                      <span className="ml-auto text-[10px] text-gray-400 flex-shrink-0">{i.status}</span>
+                                      <span className="ml-auto text-[10px] text-gray-500 flex-shrink-0">{i.status}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -318,7 +318,7 @@ export default function ScenarioGrid() {
                             )}
 
                             {m.tasks.length === 0 && m.delivs.length === 0 && m.issues.length === 0 && (
-                              <div className="text-center text-gray-400 py-2">
+                              <div className="text-center text-gray-500 py-2">
                                 暂无关联数据
                               </div>
                             )}

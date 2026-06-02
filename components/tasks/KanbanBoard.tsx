@@ -119,7 +119,7 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
             {/* Add button */}
             <button
               onClick={() => onAddTask(col.status)}
-              className="mt-2 flex items-center justify-center gap-1.5 w-full py-2 text-sm text-gray-400 hover:text-blue-600 hover:bg-blue-50 border border-dashed border-gray-200 hover:border-blue-300 rounded-lg transition-all"
+              className="mt-2 flex items-center justify-center gap-1.5 w-full py-2 text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 border border-dashed border-gray-200 hover:border-blue-300 rounded-lg transition-all"
             >
               <Plus size={14} />
               <span>添加任务</span>

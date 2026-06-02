@@ -32,7 +32,7 @@ export default function MeetingList({ meetings, onSelect }: MeetingListProps) {
 
   if (meetings.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-16 text-gray-500">
         <FileText size={40} className="mb-3 text-gray-300" />
         <p className="text-sm">暂无会议纪要</p>
       </div>
@@ -85,7 +85,7 @@ export default function MeetingList({ meetings, onSelect }: MeetingListProps) {
 
             {/* Minutes preview */}
             {meeting.minutes && (
-              <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+              <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
                 {meeting.minutes}
               </p>
             )}
@@ -120,7 +120,7 @@ export default function MeetingList({ meetings, onSelect }: MeetingListProps) {
               {/* Action items badge */}
               {totalActions > 0 && (
                 <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                  <ListChecks size={13} className="text-gray-400" />
+                  <ListChecks size={13} className="text-gray-500" />
                   <span>
                     {totalActions - doneActions > 0 && (
                       <span className="text-amber-600 font-medium">{totalActions - doneActions} 项待办</span>

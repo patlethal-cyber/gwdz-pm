@@ -128,7 +128,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
             返回总览
           </button>
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">场景未找到</p>
+            <p className="text-gray-500 text-lg">场景未找到</p>
           </div>
         </main>
       </div>
@@ -184,7 +184,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Blueprint version */}
             <div className="flex items-center gap-2">
-              <Tag size={14} className="text-gray-400" />
+              <Tag size={14} className="text-gray-500" />
               <span className="text-sm text-gray-500">蓝图版本</span>
               <span className="text-sm font-mono font-medium text-gray-800 bg-gray-100 px-2 py-0.5 rounded">
                 {scenario.blueprintVersion}
@@ -208,8 +208,8 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
                 </>
               ) : (
                 <>
-                  <User size={16} className="text-gray-400" />
-                  <span className="text-gray-400">未分配</span>
+                  <User size={16} className="text-gray-500" />
+                  <span className="text-gray-500">未分配</span>
                 </>
               )}
             </div>
@@ -222,7 +222,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
               />
               <span className="text-gray-600">数据: {readiness.label}</span>
               {scenario.dataNote && (
-                <span className="text-gray-400 text-xs">({scenario.dataNote})</span>
+                <span className="text-gray-500 text-xs">({scenario.dataNote})</span>
               )}
             </div>
 
@@ -255,7 +255,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
               <FileText size={15} className="text-violet-500" />
               交付物
-              <span className="text-xs font-normal text-gray-400">({scenarioDeliverables.length})</span>
+              <span className="text-xs font-normal text-gray-500">({scenarioDeliverables.length})</span>
             </h3>
             {scenarioDeliverables.length > 0 ? (
               <div className="space-y-2">
@@ -269,13 +269,13 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
                       <span className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${st.dot}`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-mono text-gray-400">{d.code}</span>
+                          <span className="text-xs font-mono text-gray-500">{d.code}</span>
                           <span className="text-sm text-gray-700 truncate">{d.name}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         {(d.currentVersion || latestVersion) && (
-                          <span className="text-[10px] font-mono text-gray-400">
+                          <span className="text-[10px] font-mono text-gray-500">
                             {d.currentVersion || latestVersion?.versionNumber}
                           </span>
                         )}
@@ -288,7 +288,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
                 })}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 text-center py-6">暂无交付物</p>
+              <p className="text-xs text-gray-500 text-center py-6">暂无交付物</p>
             )}
           </div>
 
@@ -297,7 +297,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
               <ListChecks size={15} className="text-blue-500" />
               任务
-              <span className="text-xs font-normal text-gray-400">({scenarioTasks.length})</span>
+              <span className="text-xs font-normal text-gray-500">({scenarioTasks.length})</span>
             </h3>
             {scenarioTasks.length > 0 ? (
               <div className="space-y-2">
@@ -318,14 +318,14 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
                             {assignee.initials}
                           </span>
                         )}
-                        <span className="text-[10px] text-gray-400">{t.dueDate}</span>
+                        <span className="text-[10px] text-gray-500">{t.dueDate}</span>
                       </div>
                     </div>
                   )
                 })}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 text-center py-6">暂无任务</p>
+              <p className="text-xs text-gray-500 text-center py-6">暂无任务</p>
             )}
           </div>
 
@@ -334,7 +334,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
               <AlertCircle size={15} className="text-red-500" />
               问题
-              <span className="text-xs font-normal text-gray-400">({scenarioIssues.length})</span>
+              <span className="text-xs font-normal text-gray-500">({scenarioIssues.length})</span>
             </h3>
             {scenarioIssues.length > 0 ? (
               <div className="space-y-2">
@@ -350,7 +350,7 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
                 })}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 text-center py-6">暂无问题</p>
+              <p className="text-xs text-gray-500 text-center py-6">暂无问题</p>
             )}
           </div>
         </div>
@@ -361,18 +361,18 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
               <FileText size={15} className="text-gray-500" />
               关联文件
-              <span className="text-xs font-normal text-gray-400">({scenarioFiles.length})</span>
+              <span className="text-xs font-normal text-gray-500">({scenarioFiles.length})</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {scenarioFiles.map(f => (
                 <div key={f.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-50">
-                  <FileText size={14} className="text-gray-400 flex-shrink-0" />
+                  <FileText size={14} className="text-gray-500 flex-shrink-0" />
                   <span className="text-sm text-gray-700 truncate flex-1 min-w-0">{f.name}</span>
                   {f.fileUrl ? (
                     <a
                       href={f.fileUrl}
                       download={f.originalName}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                      className="p-1 text-gray-500 hover:text-blue-600 transition-colors flex-shrink-0"
                       onClick={e => e.stopPropagation()}
                     >
                       <Download size={14} />

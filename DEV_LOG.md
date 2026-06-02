@@ -17,7 +17,7 @@
 | 数据存储 | **Vercel Blob**（JSON 文档存储，db/*.json，多用户共享） |
 | 文件存储 | **Vercel Blob**（488 项目文件，gwdz/ 前缀，public URL） |
 | 代码规模 | 47 个源文件（+lib/schemas.ts） |
-| 版本 | **v6.1（2026-06-02）** |
+| 版本 | **v6.2（2026-06-02）** |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
 ---
@@ -88,6 +88,17 @@ localStorage + 拖拽看板 + 搜索 + 通知 + 报告
 - **A3 拆分 DataContext 推迟**到独立会话（纯重构 + 回归风险，见 spawn task）
 
 **校验**：`npm run build` + `tsc --noEmit` + 浏览器（U1/U4/F1/F3）+ curl（401/422/409）全过
+
+### v6.2 — UI/UX 设计审查 + 响应式迭代 ★ 当前版本（2026-06-02）
+
+先 design-critique + accessibility-review 双审查 → 与用户对齐范围 → 实现（B 键盘 a11y 本轮不做）：
+- **A 响应式 shell**：新增 `SidebarContext`；侧栏 lg 以下 off-canvas 抽屉（hamburger + 背板 + 关闭），lg 以上静态可收起；Header 降级（标题 truncate / 搜索 md+ / 保存指示器小屏图标化 / hamburger）；StatsCards / 今日聚焦 / tab / 加载骨架全加断点。移动端从"侧栏占 60% 整页挤爆"→"干净可用"
+- **C 对比度 + aria**：全站 `text-gray-400 → gray-500`（201 处，满足 4.5:1）；Header/Sidebar/3 Modal 图标按钮补 aria-label
+- **D 去重 + 统一 Modal**：今日聚焦 bar 删逾期/严重（已在 StatsCards），只留 距M4 + 本周会议；MeetingModal 居中弹窗 → 右侧抽屉（与任务/交付物统一范式）
+- **E recharts 懒加载**：抽 `VizCharts.tsx` + `next/dynamic(ssr:false)`，图表库移出首屏 bundle
+- 新文件：`components/layout/sidebar-context.tsx`、`components/reports/VizCharts.tsx`
+- **校验**：build + tsc + preview 多断点（375 抽屉 / 1280 静态侧栏 / MeetingModal 抽屉）+ 无 console 报错
+- **未做（a11y review 发现的 2 个 blocker）**：B = 卡片/列表行是 `<div onClick>` 键盘打不开 + Modal 无 focus trap/return。本轮范围外，建议下一轮
 
 ---
 
@@ -203,10 +214,10 @@ Meeting ──→ MeetingActionItem[] → Task
 | # | 问题 |
 |---|---|
 | U1 | ~~保存状态无 UI 指示器~~ ✅ **v6.1** Header 四态指示器（已同步/保存中/失败/冲突）|
-| U2 | StatsCards grid-cols-4 无响应式断点（小屏会挤压）→ 归入 UI/UX 审查后续任务 |
+| U2 | ~~StatsCards grid-cols-4 无响应式~~ ✅ **v6.2** 全站响应式（侧栏抽屉 + grid 断点 + header 降级）|
 | U3 | 日期计算不一致：getWeekEnd **复制 2 份**（page.tsx + tasks/page.tsx）+ reports/MeetingList 内联逻辑 = **4 处散落**（DEV_LOG 原写"2 个版本"已校正）|
 | U4 | ~~MeetingModal 默认日期硬编码为 2026-06-01~~ ✅ **v6.1** 改为动态 today |
-| U5 | recharts 未 lazy load（每次加载报告页都下载全量库）→ 归入 UI/UX 审查后续任务 |
+| U5 | ~~recharts 未 lazy load~~ ✅ **v6.2** next/dynamic 懒加载（VizCharts）|
 
 ---
 
@@ -221,7 +232,8 @@ Meeting ──→ MeetingActionItem[] → Task
 | 优先级 | 需求 | 状态 |
 |---|---|---|
 | **中** | DataContext 拆分（A3） | ⏸️ 推迟到独立会话（已建 spawn task）：抽 usePersistedCollection hook，保持 useData() 接口不变 |
-| **后续** | **UI/UX 设计审查与迭代升级** | 📋 本期后续任务（已建 spawn task）：含 U2 响应式、U5 recharts 懒加载、视觉/交互一致性 |
+| ~~后续~~ | UI/UX 设计审查与迭代升级 | ✅ **v6.2 完成**：响应式 / 对比度 / 去重 / 统一 Modal / recharts 懒加载 |
+| **中** | a11y 键盘可达 + Modal focus trap（B） | 🆕 a11y review 发现 2 个 blocker：卡片/行 `<div onClick>` 键盘打不开、Modal 无 focus trap。建议下一轮 |
 | **高** | 迁移 Vercel Postgres（A1） | 缓做：v6.1 冲突检测已缓解 last-write-wins；真出现数据丢失或并发常态化再上 |
 | **中** | 功能补强 | F4 会议真实附件 / F5 场景页可操作 / F6 团队可编辑 / F7 日志上限 / U3 日期函数统一 |
 
@@ -267,4 +279,4 @@ node scripts/bulk-upload.mjs
 
 ---
 
-*最后更新：2026-06-02 by Claude Opus 4.8 — v6.1（批次1 数据防护层 + 批次2 F1/F3；A3 推迟到独立会话）*
+*最后更新：2026-06-02 by Claude Opus 4.8 — v6.2（UI/UX 审查 + 响应式/对比度/去重/统一Modal/recharts 懒加载；A3 与 a11y-B 待后续）*

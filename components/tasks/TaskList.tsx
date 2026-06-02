@@ -247,7 +247,7 @@ export default function TaskList({ tasks, onTaskClick, issues, getMember, getSce
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 text-sm ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-600'}`}>
-                      <Calendar size={12} className={isOverdue ? 'text-red-500' : 'text-gray-400'} />
+                      <Calendar size={12} className={isOverdue ? 'text-red-500' : 'text-gray-500'} />
                       {task.dueDate}
                       {isOverdue && <span className="text-[10px] ml-0.5">逾期</span>}
                     </span>
@@ -269,7 +269,7 @@ export default function TaskList({ tasks, onTaskClick, issues, getMember, getSce
         </table>
 
         {sorted.length === 0 && (
-          <div className="py-16 text-center text-sm text-gray-400">
+          <div className="py-16 text-center text-sm text-gray-500">
             没有匹配的任务
           </div>
         )}

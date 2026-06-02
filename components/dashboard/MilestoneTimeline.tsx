@@ -110,7 +110,7 @@ export default function MilestoneTimeline() {
               </span>
 
               {/* date */}
-              <span className="mt-0.5 text-[11px] text-gray-400">
+              <span className="mt-0.5 text-[11px] text-gray-500">
                 {formatDate(ms.date)}
               </span>
 

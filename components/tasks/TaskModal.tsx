@@ -123,7 +123,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
           <h2 className="text-base font-bold text-gray-900">
             {isEdit ? '编辑任务' : '新建任务'}
           </h2>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} aria-label="关闭" className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -226,7 +226,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete, def
                     {contact.name[0]}
                   </span>
                   <span className="text-sm text-gray-700">{contact.name}</span>
-                  <span className="text-xs text-gray-400">{contact.organization}</span>
+                  <span className="text-xs text-gray-500">{contact.organization}</span>
                 </div>
               )
             })()}

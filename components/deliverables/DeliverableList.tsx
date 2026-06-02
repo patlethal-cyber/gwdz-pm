@@ -65,7 +65,7 @@ export default function DeliverableList({ deliverables, categoryGrouped, onSelec
   if (sortedCategories.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm text-gray-400">没有匹配的交付物</p>
+        <p className="text-sm text-gray-500">没有匹配的交付物</p>
       </div>
     )
   }
@@ -85,7 +85,7 @@ export default function DeliverableList({ deliverables, categoryGrouped, onSelec
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
             >
               <div className={`transition-transform ${isCollapsed ? '' : 'rotate-90'}`}>
-                <ChevronRight size={16} className="text-gray-400" />
+                <ChevronRight size={16} className="text-gray-500" />
               </div>
               {code && (
                 <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 shrink-0">
@@ -93,7 +93,7 @@ export default function DeliverableList({ deliverables, categoryGrouped, onSelec
                 </span>
               )}
               <span className="text-sm font-semibold text-gray-900">{cat}</span>
-              <span className="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+              <span className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                 {items.length}
               </span>
             </button>
@@ -132,7 +132,7 @@ export default function DeliverableList({ deliverables, categoryGrouped, onSelec
                               {d.scenarioCode}
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400">--</span>
+                            <span className="text-xs text-gray-500">--</span>
                           )}
                         </td>
                         <td className="px-4 py-2.5">
@@ -156,7 +156,7 @@ export default function DeliverableList({ deliverables, categoryGrouped, onSelec
                               <span className="text-xs text-gray-600">{owner.name}</span>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">--</span>
+                            <span className="text-xs text-gray-500">--</span>
                           )}
                         </td>
                         <td className={`px-4 py-2.5 text-xs ${isOverdue ? 'text-red-500 font-medium' : 'text-gray-500'}`}>

@@ -191,7 +191,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
               )}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ml-3">
+          <button onClick={onClose} aria-label="关闭" className="p-1.5 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ml-3">
             <X size={18} />
           </button>
         </div>
@@ -212,7 +212,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                     <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                       isCurrent ? `${style.activeBg} ${style.text} ring-2 ring-offset-1 ring-current` :
                       isPast ? `${style.bg} ${style.text} opacity-60` :
-                      'bg-gray-50 text-gray-400'
+                      'bg-gray-50 text-gray-500'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${isCurrent || isPast ? style.dot : 'bg-gray-300'}`} />
                       {s}
@@ -323,23 +323,23 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
               <div className="space-y-2">
                 {versions.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)).map(v => (
                   <div key={v.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50">
-                    <FileText size={14} className="text-gray-400 shrink-0" />
+                    <FileText size={14} className="text-gray-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-mono font-medium text-gray-900">{v.versionNumber}</span>
-                        <span className="text-xs text-gray-400">{v.uploadedAt}</span>
+                        <span className="text-xs text-gray-500">{v.uploadedAt}</span>
                       </div>
                       <p className="text-xs text-gray-500 truncate">
                         {v.fileName}
-                        {v.fileSize > 0 && <span className="ml-1.5 text-gray-400">({formatFileSize(v.fileSize)})</span>}
+                        {v.fileSize > 0 && <span className="ml-1.5 text-gray-500">({formatFileSize(v.fileSize)})</span>}
                       </p>
-                      {v.notes && <p className="text-xs text-gray-400 mt-0.5">{v.notes}</p>}
+                      {v.notes && <p className="text-xs text-gray-500 mt-0.5">{v.notes}</p>}
                     </div>
                     {v.fileUrl ? (
                       <a
                         href={v.fileUrl}
                         download={v.fileName}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         onClick={e => e.stopPropagation()}
                       >
                         <Download size={14} />
@@ -351,7 +351,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 py-3 text-center">暂无版本记录</p>
+              <p className="text-xs text-gray-500 py-3 text-center">暂无版本记录</p>
             )}
 
             {/* Upload form */}
@@ -435,16 +435,16 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                   <span className="flex items-center gap-1.5">
                     <Paperclip size={14} />
                     关联文件
-                    <span className="text-xs font-normal text-gray-400 ml-1">({linkedFiles.length})</span>
+                    <span className="text-xs font-normal text-gray-500 ml-1">({linkedFiles.length})</span>
                   </span>
                 </label>
                 <div className="space-y-1.5">
                   {linkedFiles.map(f => (
                     <div key={f.id} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-gray-50">
-                      <FileText size={14} className="text-gray-400 shrink-0" />
+                      <FileText size={14} className="text-gray-500 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-700 truncate">{f.name}</p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-500">
                           {f.fileSize > 0 && formatFileSize(f.fileSize)}
                           {f.fileSize > 0 && f.uploadedAt && ' · '}
                           {f.uploadedAt}
@@ -454,7 +454,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                         <a
                           href={f.fileUrl}
                           download={f.originalName}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           onClick={e => e.stopPropagation()}
                         >
                           <Download size={14} />
@@ -475,7 +475,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
               <span className="flex items-center gap-1.5">
                 <CheckSquare size={14} className="text-blue-500" />
                 关联任务
-                <span className="text-xs font-normal text-gray-400 ml-1">({linkedTasks.length})</span>
+                <span className="text-xs font-normal text-gray-500 ml-1">({linkedTasks.length})</span>
               </span>
             </label>
             {linkedTasks.length > 0 ? (
@@ -498,7 +498,7 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 py-3 text-center border border-dashed border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-500 py-3 text-center border border-dashed border-gray-200 rounded-lg">
                 暂无直接关联任务（在任务编辑中设置「关联交付物」）
               </p>
             )}

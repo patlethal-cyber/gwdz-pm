@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import Sidebar from "@/components/layout/Sidebar";
+import { SidebarProvider } from "@/components/layout/sidebar-context";
 import { DataProvider } from "@/lib/data-context";
 
 export default function AppLayout({
@@ -11,9 +12,10 @@ export default function AppLayout({
 }) {
   return (
     <DataProvider>
+      <SidebarProvider>
       <div className="flex h-screen">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto min-w-0">
           <Suspense fallback={
             <div className="p-6">
               <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-4" />
@@ -24,6 +26,7 @@ export default function AppLayout({
           </Suspense>
         </main>
       </div>
+      </SidebarProvider>
     </DataProvider>
   );
 }

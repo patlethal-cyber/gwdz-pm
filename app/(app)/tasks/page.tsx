@@ -254,7 +254,7 @@ export default function TasksPage() {
 
       {/* Filter bar */}
       <div className="flex items-center gap-3 px-6 py-2.5 bg-gray-50/50 border-b border-gray-100">
-        <Filter size={14} className="text-gray-400" />
+        <Filter size={14} className="text-gray-500" />
 
         <select
           value={filterAssignee}
@@ -292,7 +292,7 @@ export default function TasksPage() {
           </button>
         )}
 
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="ml-auto text-xs text-gray-500">
           {filteredTasks.length !== tasks.length && `已筛选 ${filteredTasks.length} / ${tasks.length}`}
         </span>
       </div>

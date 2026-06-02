@@ -155,7 +155,7 @@ export default function GanttChart() {
         <h2 className="text-base font-semibold text-gray-900">
           场景甘特图
         </h2>
-        <div className="flex items-center gap-1 text-xs text-gray-400">
+        <div className="flex items-center gap-1 text-xs text-gray-500">
           <Info size={12} />
           <span>悬停查看详情</span>
         </div>
@@ -199,7 +199,7 @@ export default function GanttChart() {
             {/* Right column header */}
             <div
               style={{ width: RIGHT_INFO_WIDTH, flexShrink: 0 }}
-              className="flex items-end justify-center pb-1 border-b border-gray-200 text-[10px] text-gray-400"
+              className="flex items-end justify-center pb-1 border-b border-gray-200 text-[10px] text-gray-500"
             >
               任务 / 问题
             </div>
@@ -398,7 +398,7 @@ export default function GanttChart() {
                       className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                         metrics.issueCount > 0
                           ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-50 text-gray-400'
+                          : 'bg-gray-50 text-gray-500'
                       }`}
                     >
                       <AlertCircle size={10} />
@@ -427,7 +427,7 @@ export default function GanttChart() {
 
           {/* ===== Legend ===== */}
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-gray-100 pt-3">
-            <span className="text-[11px] font-medium text-gray-400 mr-1">批次:</span>
+            <span className="text-[11px] font-medium text-gray-500 mr-1">批次:</span>
             {Object.entries(BATCH_COLORS)
               .filter(([k]) => k !== '二批（提前）')
               .map(([key, val]) => (
@@ -439,7 +439,7 @@ export default function GanttChart() {
                   <span className="text-[11px] text-gray-500">{val.label}</span>
                 </div>
               ))}
-            <span className="ml-3 text-[11px] font-medium text-gray-400 mr-1">数据就绪:</span>
+            <span className="ml-3 text-[11px] font-medium text-gray-500 mr-1">数据就绪:</span>
             {Object.entries(READINESS).map(([key, val]) => (
               <div key={key} className="flex items-center gap-1.5">
                 <span
