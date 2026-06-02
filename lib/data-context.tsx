@@ -137,6 +137,7 @@ interface DataContextValue {
 
   getDashboardStats: () => DashboardStats
   importData: (json: string) => boolean
+  initializeSeedData: () => Promise<void>
   today: string
   ready: boolean
 }
@@ -179,32 +180,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         serverLoad<ProjectFile>('files'),
       ])
 
-      const hasServerData = sTasks || sDeliverables || sMeetings || sIssues || sFiles
-
-      // Server has data → use it directly
-      setTasks(sTasks || buildDefaultTasks())
-      setDeliverables(sDeliverables || generateDeliverables())
-      setMeetings(sMeetings || (seedMeetings as unknown as Meeting[]))
-      setIssues(sIssues || buildDefaultIssues())
+      // 直接使用服务器数据，服务器没有就空数组
+      // 绝不自动推送种子数据 — 种子初始化通过设置页面手动触发
+      setTasks(sTasks || [])
+      setDeliverables(sDeliverables || [])
+      setMeetings(sMeetings || [])
+      setIssues(sIssues || [])
       setActivities(sActivities || [])
-      setDeliverableVersions(sVersions || generateVersions())
-      setFiles(sFiles || generateFileMetadata())
-
-      // First deploy only: push seed defaults to server
-      if (!hasServerData) {
-        const defaults: Record<string, unknown[]> = {
-          tasks: buildDefaultTasks(),
-          deliverables: generateDeliverables(),
-          meetings: seedMeetings as unknown as Meeting[],
-          issues: buildDefaultIssues(),
-          activities: [],
-          versions: generateVersions(),
-          files: generateFileMetadata(),
-        }
-        await Promise.all(
-          Object.entries(defaults).map(([key, data]) => serverSave(key as CollectionName, data))
-        )
-      }
+      setDeliverableVersions(sVersions || [])
+      setFiles(sFiles || [])
 
       setReady(true)
     }
@@ -440,6 +424,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [tasks, deliverables, issues, files, todayStr])
 
+  // ===== Initialize seed data (manual admin action only) =====
+  const initializeSeedData = useCallback(async () => {
+    const seedData: Record<string, unknown[]> = {
+      tasks: buildDefaultTasks(),
+      deliverables: generateDeliverables(),
+      meetings: seedMeetings as unknown as Meeting[],
+      issues: buildDefaultIssues(),
+      activities: [],
+      versions: generateVersions(),
+      files: generateFileMetadata(),
+    }
+    setTasks(seedData.tasks as Task[])
+    setDeliverables(seedData.deliverables as Deliverable[])
+    setMeetings(seedData.meetings as Meeting[])
+    setIssues(seedData.issues as Issue[])
+    setActivities([])
+    setDeliverableVersions(seedData.versions as DeliverableVersion[])
+    setFiles(seedData.files as ProjectFile[])
+    await Promise.all(
+      Object.entries(seedData).map(([key, data]) => serverSave(key as CollectionName, data))
+    )
+  }, [])
+
   // ===== Data Import =====
   const importData = useCallback((json: string): boolean => {
     try {
@@ -470,7 +477,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
       getDeliverablesByCategory, getOverdueTasks, getPersonAggregation,
       getFilesByEntity, getFilesByCategory,
-      getDashboardStats, importData,
+      getDashboardStats, importData, initializeSeedData,
       today: todayStr,
       ready,
     }}>

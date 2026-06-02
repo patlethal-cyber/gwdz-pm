@@ -13,10 +13,11 @@ export default function SettingsPage() {
   const {
     tasks, deliverables, meetings, issues, team, scenarios, milestones,
     activities, deliverableVersions, files,
-    today, ready, importData,
+    today, ready, importData, initializeSeedData,
   } = useData()
 
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showSeedConfirm, setShowSeedConfirm] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   function getDaysRemaining(target: string): number {
@@ -84,12 +85,13 @@ export default function SettingsPage() {
     showToast('数据已导出')
   }
 
+  async function handleSeedData() {
+    await initializeSeedData()
+    showToast('种子数据已初始化，页面将刷新')
+    setTimeout(() => window.location.reload(), 1000)
+  }
+
   function handleResetData() {
-    // Clear all gwdz-v4 keys from localStorage
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('gwdz-v'))
-    for (const k of keys) {
-      localStorage.removeItem(k)
-    }
     window.location.reload()
   }
 
@@ -281,11 +283,11 @@ export default function SettingsPage() {
                 />
               </label>
               <button
-                onClick={() => setShowResetConfirm(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
+                onClick={() => setShowSeedConfirm(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
               >
                 <RefreshCcw size={16} />
-                重置数据
+                初始化种子数据
               </button>
             </div>
           </section>
@@ -356,6 +358,35 @@ export default function SettingsPage() {
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
               >
                 确认重置
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Seed data confirmation dialog */}
+      {showSeedConfirm && (
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-base font-semibold text-amber-900 mb-2">⚠️ 初始化种子数据</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              此操作将用预置的种子数据<strong>覆盖服务器上的所有数据</strong>。所有团队成员手动创建和修改的任务、问题、交付物等记录将被替换。
+            </p>
+            <p className="text-xs text-red-600 font-medium mb-4">
+              仅在首次部署或需要完全重置时使用。
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowSeedConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={() => { setShowSeedConfirm(false); handleSeedData() }}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors"
+              >
+                确认初始化
               </button>
             </div>
           </div>
