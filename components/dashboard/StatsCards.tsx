@@ -84,7 +84,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
                 <div className="flex items-center gap-1">
                   <ListChecks size={14} className="text-gray-300" />
                   <span className="text-xs text-gray-400">
-                    / {stats.totalTasks}
+                    / {card.key === 'severe' ? stats.totalIssues : stats.totalTasks}
                   </span>
                 </div>
               )}

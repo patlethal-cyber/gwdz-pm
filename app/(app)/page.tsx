@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
 import GanttChart from '@/components/dashboard/GanttChart'
 import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
+import MilestoneTimeline from '@/components/dashboard/MilestoneTimeline'
 import { Calendar, Clock, AlertTriangle, Target, ArrowRight } from 'lucide-react'
 
 function daysBetween(a: string, b: string): number {
@@ -230,6 +231,9 @@ export default function DashboardPage() {
 
         {/* Scenario Progress Grid */}
         <ScenarioGrid />
+
+        {/* Milestone Timeline */}
+        <MilestoneTimeline />
 
         {/* Risk Alerts (inline) */}
         <div className="grid grid-cols-2 gap-6">

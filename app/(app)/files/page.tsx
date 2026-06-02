@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import { useData } from '@/lib/data-context'
+import { uploadFile } from '@/lib/file-utils'
 import type { ProjectFile, FileCategory } from '@/lib/types'
 
 // ===== Constants =====
@@ -668,28 +669,40 @@ function FileDetailPanel({
   )
 }
 
+type UploadFileStatus = 'pending' | 'uploading' | 'done' | 'error'
+
+interface UploadFileEntry {
+  file: File
+  status: UploadFileStatus
+  error?: string
+}
+
 function UploadZone({
   isOpen,
   onClose,
-  onUpload,
+  onFileUploaded,
 }: {
   isOpen: boolean
   onClose: () => void
-  onUpload: (files: File[]) => void
+  onFileUploaded: (file: File, category: FileCategory, url: string, size: number) => void
 }) {
   const [isDragging, setIsDragging] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [entries, setEntries] = useState<UploadFileEntry[]>([])
   const [uploading, setUploading] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [category, setCategory] = useState<FileCategory>('其他')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedFiles([])
+      setEntries([])
       setUploading(false)
-      setProgress(0)
+      setCategory('其他')
     }
   }, [isOpen])
+
+  const completedCount = entries.filter(e => e.status === 'done').length
+  const errorCount = entries.filter(e => e.status === 'error').length
+  const progress = entries.length > 0 ? Math.round(((completedCount + errorCount) / entries.length) * 100) : 0
 
   function handleDragOver(e: React.DragEvent) {
     e.preventDefault()
@@ -705,34 +718,57 @@ function UploadZone({
     e.preventDefault()
     setIsDragging(false)
     const droppedFiles = Array.from(e.dataTransfer.files)
-    setSelectedFiles(prev => [...prev, ...droppedFiles])
+    setEntries(prev => [...prev, ...droppedFiles.map(f => ({ file: f, status: 'pending' as UploadFileStatus }))])
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
-      setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)])
+      const newFiles = Array.from(e.target.files)
+      setEntries(prev => [...prev, ...newFiles.map(f => ({ file: f, status: 'pending' as UploadFileStatus }))])
     }
   }
 
   function removeFile(idx: number) {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== idx))
+    setEntries(prev => prev.filter((_, i) => i !== idx))
   }
 
   async function handleUpload() {
-    if (selectedFiles.length === 0) return
+    if (entries.length === 0) return
     setUploading(true)
-    setProgress(0)
 
-    // Simulate upload progress
-    for (let i = 0; i <= selectedFiles.length; i++) {
-      await new Promise(r => setTimeout(r, 300))
-      setProgress(Math.round((i / selectedFiles.length) * 100))
+    // Upload each file sequentially via the real API
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i]
+
+      // Mark as uploading
+      setEntries(prev => prev.map((e, j) => j === i ? { ...e, status: 'uploading' } : e))
+
+      const pathname = `gwdz/${category}/${entry.file.name}`
+
+      try {
+        const result = await uploadFile(entry.file, pathname)
+
+        // Mark as done
+        setEntries(prev => prev.map((e, j) => j === i ? { ...e, status: 'done' } : e))
+
+        // Create the file record with the real URL
+        onFileUploaded(entry.file, category, result.url, result.size)
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : '上传失败'
+
+        // Mark as error
+        setEntries(prev => prev.map((e, j) => j === i ? { ...e, status: 'error', error: errMsg } : e))
+
+        // Still create the record but with empty fileUrl
+        onFileUploaded(entry.file, category, '', entry.file.size)
+      }
     }
 
-    onUpload(selectedFiles)
+    // Brief pause so user can see the final state
+    await new Promise(r => setTimeout(r, 600))
+
     setUploading(false)
-    setProgress(0)
-    setSelectedFiles([])
+    setEntries([])
     onClose()
   }
 
@@ -740,27 +776,45 @@ function UploadZone({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={uploading ? undefined : onClose} />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-bold text-gray-900">上传文件</h2>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            disabled={uploading}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="p-6">
+          {/* Category selector */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">文件分类</label>
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value as FileCategory)}
+              disabled={uploading}
+              className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {ALL_CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Drop zone */}
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+              uploading ? 'cursor-default opacity-60' : 'cursor-pointer'
+            } ${
               isDragging
                 ? 'border-blue-400 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -780,36 +834,55 @@ function UploadZone({
             />
           </div>
 
-          {/* Selected files */}
-          {selectedFiles.length > 0 && (
+          {/* Selected files with per-file status */}
+          {entries.length > 0 && (
             <div className="mt-4 space-y-2">
               <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                已选择 {selectedFiles.length} 个文件
+                {uploading
+                  ? `上传中 ${completedCount}/${entries.length}${errorCount > 0 ? ` (${errorCount} 失败)` : ''}`
+                  : `已选择 ${entries.length} 个文件`
+                }
               </div>
-              {selectedFiles.map((f, idx) => {
-                const FIcon = getFileIcon(f.type)
-                return (
-                  <div key={`${f.name}-${idx}`} className="flex items-center gap-3 py-2 px-3 bg-gray-50 rounded-lg">
-                    <FIcon size={14} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-700 flex-1 truncate">{f.name}</span>
-                    <span className="text-xs text-gray-400">{formatFileSize(f.size)}</span>
-                    <button
-                      onClick={() => removeFile(idx)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )
-              })}
+              <div className="max-h-48 overflow-y-auto space-y-1.5">
+                {entries.map((entry, idx) => {
+                  const FIcon = getFileIcon(entry.file.type)
+                  return (
+                    <div key={`${entry.file.name}-${idx}`} className="flex items-center gap-3 py-2 px-3 bg-gray-50 rounded-lg">
+                      <FIcon size={14} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-700 flex-1 truncate">{entry.file.name}</span>
+                      <span className="text-xs text-gray-400">{formatFileSize(entry.file.size)}</span>
+                      {entry.status === 'pending' && !uploading && (
+                        <button
+                          onClick={() => removeFile(idx)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                      {entry.status === 'pending' && uploading && (
+                        <span className="text-xs text-gray-400">等待中</span>
+                      )}
+                      {entry.status === 'uploading' && (
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      )}
+                      {entry.status === 'done' && (
+                        <div className="w-2 h-2 rounded-full bg-green-400" title="上传成功" />
+                      )}
+                      {entry.status === 'error' && (
+                        <span className="text-xs text-red-500" title={entry.error}>失败</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )}
 
-          {/* Progress bar */}
+          {/* Overall progress bar */}
           {uploading && (
             <div className="mt-4">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-gray-500">上传中...</span>
+                <span className="text-xs text-gray-500">上传进度</span>
                 <span className="text-xs font-medium text-blue-600">{progress}%</span>
               </div>
               <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
@@ -825,16 +898,17 @@ function UploadZone({
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+            disabled={uploading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-30"
           >
             取消
           </button>
           <button
             onClick={handleUpload}
-            disabled={selectedFiles.length === 0 || uploading}
+            disabled={entries.length === 0 || uploading}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
-            {uploading ? '上传中...' : `上传 ${selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}`}
+            {uploading ? '上传中...' : `上传 ${entries.length > 0 ? `(${entries.length})` : ''}`}
           </button>
         </div>
       </div>
@@ -914,25 +988,22 @@ export default function FilesPage() {
     }
   }
 
-  function handleUploadFiles(uploadedFiles: File[]) {
-    for (const f of uploadedFiles) {
-      const cat = categorizeByPath(f.name)
-      addFile({
-        name: f.name.replace(/\.[^.]+$/, ''),
-        originalName: f.name,
-        path: cat === '其他' ? '其他' : '',
-        category: cat,
-        fileUrl: '',
-        fileSize: f.size,
-        fileType: f.type || 'application/octet-stream',
-        uploadedBy: 'm01',
-        linkedDeliverableIds: [],
-        linkedTaskIds: [],
-        linkedIssueIds: [],
-        tags: [],
-      })
-    }
-  }
+  const handleFileUploaded = useCallback((file: File, category: FileCategory, url: string, size: number) => {
+    addFile({
+      name: file.name.replace(/\.[^.]+$/, ''),
+      originalName: file.name,
+      path: category,
+      category: category,
+      fileUrl: url,
+      fileSize: size || file.size,
+      fileType: file.type || 'application/octet-stream',
+      uploadedBy: 'm01',
+      linkedDeliverableIds: [],
+      linkedTaskIds: [],
+      linkedIssueIds: [],
+      tags: [],
+    })
+  }, [addFile])
 
   function handleSelectCategory(cat: FileCategory | null) {
     setSelectedCategory(cat)
@@ -1151,7 +1222,7 @@ export default function FilesPage() {
       <UploadZone
         isOpen={showUpload}
         onClose={() => setShowUpload(false)}
-        onUpload={handleUploadFiles}
+        onFileUploaded={handleFileUploaded}
       />
 
       {/* Detail panel */}

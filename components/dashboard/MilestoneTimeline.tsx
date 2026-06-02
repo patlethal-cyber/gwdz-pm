@@ -48,11 +48,9 @@ function daysBetween(a: string, b: string) {
 }
 
 export default function MilestoneTimeline() {
-  const { milestones } = useData()
+  const { milestones, today } = useData()
 
   const sorted = [...milestones].sort((a, b) => a.date.localeCompare(b.date))
-
-  const today = '2026-05-31'
   const firstDate = sorted[0]?.date ?? today
   const lastDate = sorted[sorted.length - 1]?.date ?? today
   const totalSpan = daysBetween(firstDate, lastDate) || 1

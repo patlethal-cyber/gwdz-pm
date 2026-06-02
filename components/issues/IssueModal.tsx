@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import { X, Search, XCircle } from 'lucide-react'
+import { X, Search, XCircle, Trash2 } from 'lucide-react'
 import type { Issue, IssueStatus, IssueSeverity, IssueSource, IssueCategory } from '@/lib/types'
 import { useData } from '@/lib/data-context'
 
@@ -18,11 +18,13 @@ interface IssueModalProps {
   onClose: () => void
   issue?: Issue
   onSave: (issue: Issue) => void
+  onDelete?: (id: string) => void
 }
 
-export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModalProps) {
+export default function IssueModal({ isOpen, onClose, issue, onSave, onDelete }: IssueModalProps) {
   const { team, scenarios, tasks, today } = useData()
   const isEdit = !!issue
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -73,6 +75,7 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
     }
     setTaskSearch('')
     setShowTaskDropdown(false)
+    setShowDeleteConfirm(false)
   }, [issue, isOpen])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -119,6 +122,13 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
 
   function removeLinkedTask(taskId: string) {
     setLinkedTaskIds(prev => prev.filter(id => id !== taskId))
+  }
+
+  function handleDelete() {
+    if (issue && onDelete) {
+      onDelete(issue.id)
+      onClose()
+    }
   }
 
   function handleSave() {
@@ -390,21 +400,55 @@ export default function IssueModal({ isOpen, onClose, issue, onSave }: IssueModa
           )}
         </div>
 
+        {/* Delete confirmation */}
+        {showDeleteConfirm && (
+          <div className="px-6 py-3 bg-red-50 border-t border-red-200 flex items-center justify-between gap-3">
+            <span className="text-sm text-red-700">确定要删除此问题吗？此操作不可撤销。</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-red-100 rounded-md transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                确认删除
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            取消
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!title.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isEdit ? '保存修改' : '创建问题'}
-          </button>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div>
+            {isEdit && onDelete && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <Trash2 size={15} />
+                删除
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              取消
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!title.trim()}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isEdit ? '保存修改' : '创建问题'}
+            </button>
+          </div>
         </div>
       </div>
 

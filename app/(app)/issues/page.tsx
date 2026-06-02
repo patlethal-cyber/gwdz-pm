@@ -15,7 +15,7 @@ const severityOptions: IssueSeverity[] = ['严重', '一般', '轻微', '建议'
 const sourceOptions: IssueSource[] = ['甲方反馈', 'UAT测试', '内部发现', '平台问题']
 
 export default function IssuesPage() {
-  const { issues, addIssue, updateIssue, team, scenarios, tasks, today, ready } = useData()
+  const { issues, addIssue, updateIssue, deleteIssue, team, scenarios, tasks, today, ready } = useData()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -193,6 +193,7 @@ export default function IssuesPage() {
         onClose={() => { setModalOpen(false); setEditIssue(undefined) }}
         issue={editIssue}
         onSave={handleSave}
+        onDelete={deleteIssue}
       />
     </div>
   )

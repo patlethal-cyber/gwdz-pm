@@ -39,8 +39,9 @@ export default function SettingsPage() {
     const reader = new FileReader()
     reader.onload = async (evt) => {
       try {
-        const json = JSON.parse(evt.target?.result as string)
-        const ok = importData(json)
+        const raw = evt.target?.result as string
+        JSON.parse(raw) // validate JSON before importing
+        const ok = importData(raw)
         if (ok) {
           showToast('数据导入成功，页面将刷新')
           setTimeout(() => window.location.reload(), 1000)

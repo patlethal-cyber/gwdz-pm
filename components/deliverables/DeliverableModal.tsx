@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { X, ChevronRight, Upload, Info, Download, FileText, Link2, Bug, CheckSquare, CheckCircle2, AlertTriangle, Paperclip } from 'lucide-react'
+import { X, ChevronRight, Upload, Info, Download, FileText, Bug, CheckSquare, CheckCircle2, AlertTriangle, Paperclip } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import { uploadFile, formatFileSize } from '@/lib/file-utils'
@@ -239,14 +239,10 @@ export default function DeliverableModal({ isOpen, onClose, deliverable, onSave 
               <span className="text-sm font-medium text-gray-900">{deliverable.department}</span>
             </div>
             {scenario && (
-              <div
-                className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                onClick={() => { onClose(); router.push(`/scenarios/${deliverable.scenarioId}`) }}
-              >
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
                 <span className="text-sm text-gray-500">关联场景</span>
-                <span className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                <span className="text-sm font-medium text-gray-900">
                   {scenario.code} {scenario.name}
-                  <Link2 size={12} />
                 </span>
               </div>
             )}

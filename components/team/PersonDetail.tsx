@@ -1,6 +1,6 @@
 'use client'
 
-import { X, User, Briefcase, CheckSquare, FileText, AlertTriangle, Mail, Phone, ExternalLink } from 'lucide-react'
+import { X, User, Briefcase, CheckSquare, FileText, AlertTriangle, Mail, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useData } from '@/lib/data-context'
 import type { TeamMember, Task, Deliverable, Issue } from '@/lib/types'
@@ -136,17 +136,16 @@ export default function PersonDetail({ member, onClose }: PersonDetailProps) {
               </h3>
               <div className="space-y-1.5">
                 {agg.scenarios.map(s => (
-                  <Link
+                  <div
                     key={s.id}
-                    href={`/scenarios/${s.id}`}
-                    className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-xs font-mono text-gray-400">{s.code}</span>
-                      <span className="text-sm text-gray-700 truncate group-hover:text-blue-600">{s.name}</span>
+                      <span className="text-sm text-gray-700 truncate">{s.name}</span>
                     </div>
                     <span className="text-[10px] text-gray-400 flex-shrink-0">{s.department}</span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </section>

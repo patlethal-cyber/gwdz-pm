@@ -46,7 +46,9 @@ export default function TasksPage() {
   useEffect(() => {
     const urlStatus = searchParams.get('status')
     const urlSeverity = searchParams.get('severity')
-    if (urlStatus && statusOptions.includes(urlStatus as TaskStatus)) {
+    if (urlStatus === 'overdue') {
+      setSummaryFilter('overdue')
+    } else if (urlStatus && statusOptions.includes(urlStatus as TaskStatus)) {
       setSummaryFilter(urlStatus)
     }
     if (urlSeverity && priorityOptions.includes(urlSeverity as TaskPriority)) {
@@ -64,6 +66,7 @@ export default function TasksPage() {
       '审核中': tasks.filter(t => t.status === '审核中').length,
       '已完成': tasks.filter(t => t.status === '已完成').length,
       dueThisWeek: tasks.filter(t => t.status !== '已完成' && t.dueDate >= today && t.dueDate <= weekEnd).length,
+      overdue: tasks.filter(t => t.dueDate && t.dueDate < today && t.status !== '已完成').length,
     }
   }, [tasks, today])
 
@@ -84,7 +87,9 @@ export default function TasksPage() {
 
     // Summary pill filter
     if (summaryFilter) {
-      if (summaryFilter === 'dueThisWeek') {
+      if (summaryFilter === 'overdue') {
+        result = result.filter(t => t.dueDate && t.dueDate < today && t.status !== '已完成')
+      } else if (summaryFilter === 'dueThisWeek') {
         const weekEnd = getWeekEnd(today)
         result = result.filter(t => t.status !== '已完成' && t.dueDate >= today && t.dueDate <= weekEnd)
       } else if (statusOptions.includes(summaryFilter as TaskStatus)) {
@@ -162,7 +167,8 @@ export default function TasksPage() {
     { key: '进行中', label: '进行中', count: stats['进行中'], activeColor: 'bg-blue-600 text-white', inactiveColor: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
     { key: '审核中', label: '审核中', count: stats['审核中'], activeColor: 'bg-amber-500 text-white', inactiveColor: 'bg-amber-50 text-amber-700 hover:bg-amber-100' },
     { key: '已完成', label: '已完成', count: stats['已完成'], activeColor: 'bg-green-600 text-white', inactiveColor: 'bg-green-50 text-green-700 hover:bg-green-100' },
-    { key: 'dueThisWeek', label: '本周到期', count: stats.dueThisWeek, activeColor: 'bg-red-600 text-white', inactiveColor: 'bg-red-50 text-red-600 hover:bg-red-100' },
+    { key: 'overdue', label: '逾期', count: stats.overdue, activeColor: 'bg-red-700 text-white', inactiveColor: 'bg-red-100 text-red-700 hover:bg-red-200' },
+    { key: 'dueThisWeek', label: '本周到期', count: stats.dueThisWeek, activeColor: 'bg-orange-600 text-white', inactiveColor: 'bg-orange-50 text-orange-600 hover:bg-orange-100' },
   ]
 
   return (
@@ -303,6 +309,7 @@ export default function TasksPage() {
         onClose={() => { setModalOpen(false); setEditTask(undefined) }}
         task={editTask}
         onSave={handleSave}
+        onDelete={deleteTask}
         defaultStatus={defaultStatus}
       />
     </div>

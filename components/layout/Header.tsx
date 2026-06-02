@@ -64,7 +64,7 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
     for (const t of tasks) {
       if (count >= 5) break
       if (t.title.toLowerCase().includes(q)) {
-        out.push({ id: t.id, title: t.title, group: 'tasks', href: '/tasks' })
+        out.push({ id: t.id, title: t.title, group: 'tasks', href: `/tasks?open=${t.id}` })
         count++
       }
     }
@@ -73,7 +73,7 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
     for (const d of deliverables) {
       if (count >= 5) break
       if (d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q)) {
-        out.push({ id: d.id, title: `${d.code} ${d.name}`, group: 'deliverables', href: '/deliverables' })
+        out.push({ id: d.id, title: `${d.code} ${d.name}`, group: 'deliverables', href: `/deliverables?open=${d.id}` })
         count++
       }
     }
@@ -82,7 +82,7 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
     for (const i of issues) {
       if (count >= 5) break
       if (i.title.toLowerCase().includes(q)) {
-        out.push({ id: i.id, title: i.title, group: 'issues', href: '/issues' })
+        out.push({ id: i.id, title: i.title, group: 'issues', href: `/issues?open=${i.id}` })
         count++
       }
     }

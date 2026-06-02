@@ -11,17 +11,19 @@ export default function AppLayout({
 }) {
   return (
     <DataProvider>
-      <Sidebar />
-      <main className="ml-[240px] min-h-screen transition-all duration-300">
-        <Suspense fallback={
-          <div className="p-6">
-            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-4" />
-            <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
-          </div>
-        }>
-          {children}
-        </Suspense>
-      </main>
+      <div className="flex h-screen">
+        <Sidebar />
+        <main className="flex-1 overflow-hidden">
+          <Suspense fallback={
+            <div className="p-6">
+              <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+              <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
+            </div>
+          }>
+            {children}
+          </Suspense>
+        </main>
+      </div>
     </DataProvider>
   );
 }
