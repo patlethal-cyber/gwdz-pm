@@ -259,7 +259,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Warn user about unsaved changes on tab close
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (saveStatus === 'saving') {
+      // error = 上次保存失败、改动仍滞留在内存里，关页同样会丢
+      if (saveStatus === 'saving' || saveStatus === 'error') {
         e.preventDefault()
       }
     }

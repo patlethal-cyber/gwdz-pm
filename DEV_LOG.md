@@ -17,7 +17,7 @@
 | 数据存储 | **Vercel Blob**（JSON 文档存储，db/*.json，多用户共享） |
 | 文件存储 | **Vercel Blob**（488 项目文件，gwdz/ 前缀，public URL） |
 | 代码规模 | 49 个源文件，~20,400 行 |
-| 版本 | **v6.3（2026-06-02）** |
+| 版本 | **v6.4（2026-06-10）** |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
 ---
@@ -100,7 +100,35 @@ localStorage + 拖拽看板 + 搜索 + 通知 + 报告
 - **校验**：build + tsc + preview 多断点（375 抽屉 / 1280 静态侧栏 / MeetingModal 抽屉）+ 无 console 报错
 - **未做（a11y review 发现的 2 个 blocker）**：B = 卡片/列表行是 `<div onClick>` 键盘打不开 + Modal 无 focus trap/return。~~建议下一轮~~ → **已决定不做**（用户拍板，移出 backlog）
 
-### v6.3 — A3 拆分 DataContext（usePersistedCollection）★ 当前版本（2026-06-02）
+### v6.4 — F7 日志归档 + 备份自动化 + 小修打包 ★ 当前版本（2026-06-10）
+
+建设期 → 运营期第一轮：保数据 + 还卫生债。
+
+**F7 活动日志归档（审计永不丢）：**
+- 客户端 cap 200 不变；**服务端在 PUT activities 覆写前 diff 新旧数据**，被裁掉的条目自动追加进 `db/activities-archive.json`（append-only，按 id 去重）。纯函数在 `lib/activity-archive.ts`（7 单测全过）
+- 归档写失败 → 整个 PUT 返 500（宁可客户端重试，不静默丢审计）；导入/种子重置被替换掉的条目也会进归档（over-archive 故意为之）
+- `GET /api/data/activities-archive` 只读可查（PUT 被 400 拒）；backup/validate 脚本已纳入第 8 集合
+- ⚠️ 残余风险（A1 类）：两客户端在 200 条满载时同 ~200ms 内保存且都过 409 检查，归档可能互相覆盖（Blob 无 compare-and-swap）。窗口极窄，Postgres 迁移时根除
+
+**数据备份自动化（双层）：**
+- **云端层**：`/api/cron/backup` + vercel.json cron（每天 19:00 UTC = 北京 03:00），8 集合快照到同 store `backups/daily/<北京日期>/` + manifest；保留近 14 天 + 每月 1 号永久；`?dry=1` 干跑。鉴权 = Bearer `CRON_SECRET`（**已生成并配进 Vercel Production**，本地留档 `.env.cron-secret` 已 gitignore）或 gwdz-auth cookie 手动触发。防误覆写/脏写
+- **本机层**：`scripts/install-local-daily-backup.sh` 装 launchd agent（`com.gwdz-pm.daily-backup`），每天 09:30 本地跑 backup-data.mjs 到 `backups/`，防 store 级灾难。**已安装并 kickstart 实测成功**。⚠️ plist 焊死 node 绝对路径（/bin/bash wrapper 会被 macOS TCC 拦在 ~/Documents 外，实测 Operation not permitted）——nvm 升级 node 后重跑安装脚本一次
+- 验证方式：云端看 Blob `backups/daily/` 是否有当天目录（或 Vercel runtime logs 搜 `[cron/backup]`）；本机看 `backups/launchd-backup.log`
+
+**小修打包：**
+- **U3 日期统一**：新 `lib/date.ts`（formatYMD/parseYMD/addDays/daysBetween/getMonday/getWeekEnd/getPrevWorkday/formatDate，全部本地时区安全），page/tasks/reports/NotificationPanel 4 处散落定义收敛。**附带修复真 bug**：reports 页旧 getMonday/addDays/getYesterday 用 `toISOString().slice(0,10)`，UTC+8 下回退一天 → 周报范围曾显示周日起，现已是周一—周五（实测 2026/06/08-2026/06/12）；tasks 页 getWeekEnd 周日语义统一为"当天"（旧代码周日会跨到下周日，属修复）
+- **删死代码**：MilestoneTimeline.tsx / TeamDirectory.tsx（0 引用）
+- **middleware → proxy**：Next 16 新约定（文件+函数重命名），废弃警告消除，build 显示 `ƒ Proxy`。publicPaths 加 `/api/cron/backup`（**故意精确路径**，未来 cron 路由必须逐个登记防裸奔）
+
+**多代理对抗审查后的加固（17 findings → 12 confirmed → 修 5 / 误报 1 / 文档化 6）：**
+- readBlobJson 加 `Array.isArray` 守卫（blob 损坏成非数组时不再 TypeError 炸 PUT）
+- beforeunload 在 saveStatus='error' 时也拦截关页（改动滞留内存时关 tab 会丢）
+- cron 路由在 CRON_SECRET 缺失时 console.error 喊话（否则 Vercel Cron 永久静默 401）
+- 已知未修（低危/预存在）：保存失败后不自动重试（需用户再改一次才触发，v6.3 预存在）；prune 翻页在 >1000 blob 时才需要（约 9 年后）
+
+**校验**：build + tsc EXIT 0 · 纯函数单测 7/7 · dev 只读浏览器全流程（零 PUT 生产）· cron dry-run 8 集合计数与备份基线一致 · 401/400/307 反向测试 · launchd 端到端实测
+
+### v6.3 — A3 拆分 DataContext（usePersistedCollection）（2026-06-02）
 
 纯内部重构，**零用户可见变化、零行为变化**：
 - 抽取通用 hook **`usePersistedCollection<T>(name, ready, setSaveStatus)`**，收敛单集合的 state + 版本号(X-Data-Version 乐观并发) + dirty + debounced serverSave + forceSave。7 个集合各调一次
@@ -191,6 +219,7 @@ Meeting ──→ MeetingActionItem[] → Task
 | `SITE_PASSWORD` | ✅ 已设置 | gwdz2026 |
 | `BLOB_READ_WRITE_TOKEN` | ✅ 已设置 | Vercel Blob 存储 |
 | `BLOB_STORE_ID` | ✅ 已设置 | store_hW6hfp72n0WGTESQ |
+| `CRON_SECRET` | ✅ 已设置（2026-06-10，仅 Production） | 每日备份 cron 鉴权；本地留档 .env.cron-secret（gitignored，600） |
 
 ---
 
@@ -216,7 +245,7 @@ Meeting ──→ MeetingActionItem[] → Task
 | F4 | 会议文件上传是纯文本 URL | 需改成真实文件上传（未排期） |
 | F5 | 场景详情页只读 | 无法从场景直接创建任务/问题（未排期） |
 | F6 | 团队成员是只读种子数据 | 人员变动需改代码（未排期） |
-| F7 | Activity log 上限 200 条 | ⚠️ **2026-06-10 实测已 90/200**，按当前使用速度将触顶静默丢审计 → 下阶段 P1 |
+| F7 | ~~Activity log 上限 200 条静默丢审计~~ | ✅ **v6.4**：服务端覆写前 diff，被裁条目自动归档到 activities-archive（只读 GET 可查） |
 | F8 | ~~搜索 ?open= 深链接~~ | ✅ **已实现并验证**（tasks/deliverables/issues 三页均处理） |
 
 ### UX 级
@@ -225,7 +254,7 @@ Meeting ──→ MeetingActionItem[] → Task
 |---|---|
 | U1 | ~~保存状态无 UI 指示器~~ ✅ **v6.1** Header 四态指示器（已同步/保存中/失败/冲突）|
 | U2 | ~~StatsCards grid-cols-4 无响应式~~ ✅ **v6.2** 全站响应式（侧栏抽屉 + grid 断点 + header 降级）|
-| U3 | 日期计算不一致：getWeekEnd **复制 2 份**（page.tsx + tasks/page.tsx）+ reports/MeetingList 内联逻辑 = **4 处散落**（DEV_LOG 原写"2 个版本"已校正）|
+| U3 | ~~日期计算 4 处散落~~ ✅ **v6.4** 统一到 lib/date.ts，并修复 reports 页 UTC+8 回退一天 bug |
 | U4 | ~~MeetingModal 默认日期硬编码为 2026-06-01~~ ✅ **v6.1** 改为动态 today |
 | U5 | ~~recharts 未 lazy load~~ ✅ **v6.2** next/dynamic 懒加载（VizCharts）|
 
@@ -316,11 +345,12 @@ node scripts/bulk-upload.mjs
 
 | 优先级 | 方向 | 理由 |
 |---|---|---|
-| **P1** | F7 活动日志上限 | 实测 90/200，触顶即静默丢审计记录 |
-| **P1** | 数据备份自动化 | 数据已是真资产（76 任务/36 版本），手动备份不可持续；backup-data.mjs 已就绪，差定时调度 |
-| **P2** | 小修打包 | U3 日期函数统一到 lib/date.ts + 删 2 个死代码文件 + middleware→proxy 迁移 |
+| ~~P1~~ | ~~F7 活动日志上限~~ | ✅ **v6.4** 服务端归档 |
+| ~~P1~~ | ~~数据备份自动化~~ | ✅ **v6.4** Vercel Cron（云端日快照）+ launchd（本机异地副本）双层 |
+| ~~P2~~ | ~~小修打包~~ | ✅ **v6.4** lib/date.ts 统一 + 删死代码 + middleware→proxy |
 | **P3** | F4 会议附件 / F5 场景页可操作 / F6 团队可编辑 | 等团队使用反馈再挑 |
-| 观察 | A1 Postgres | 触发条件 = 409 冲突频发或实际数据丢失，当前无证据 |
+| 观察 | A1 Postgres | 触发条件 = 409 冲突频发或实际数据丢失，当前无证据；归档并发窄窗竞态也由它根除 |
+| 观察 | 云端 cron 首跑确认 | 部署后次日（北京 03:00 后）查 Blob `backups/daily/` 有无当天目录 |
 
 ---
 
@@ -338,17 +368,15 @@ node scripts/bulk-upload.mjs
 - 验证期间禁写生产 Blob（.env.local 连的就是生产）；禁止裸 PUT /api/data/*（缺 X-Expected-Version 头会真实写入）
 - push main 前向我确认
 
-本期目标（按优先级，每完成一项校验一项）：
-1. F7 活动日志：activities 已 90/200，触顶静默丢审计 → 设计归档/裁剪策略并实现
-2. 数据备份自动化：基于 scripts/backup-data.mjs 给出每日定时备份方案并落地
-3. 小修打包：U3 日期函数统一到 lib/date.ts（3 处定义）+ 删死代码（components/dashboard/MilestoneTimeline.tsx、
-   components/team/TeamDirectory.tsx）+ middleware.ts → proxy 迁移（消除 Next16 废弃警告）
-4.（如有余力）F4 会议真实附件 / F5 场景页可创建任务问题 / F6 团队成员可编辑，与我确认后再做
+本期候选（v6.4 已清完 P1/P2，以下按需挑）：
+1. 部署后确认：云端 cron 首跑（北京 03:00 后查 Blob backups/daily/ 当天目录）+ 生产首次活动归档触发（activities 满 200 后查 activities-archive 非空）
+2. F4 会议真实附件 / F5 场景页可创建任务问题 / F6 团队成员可编辑 —— 与我确认范围后再做
+3.（如团队反馈）S38 高命中文档榜（方案见 memory/s38-operation-feature-volcano-api.md）
 
 不做（已拍板，别再提）：F2 评论、A2 用户身份、A4 文件私有化、a11y-B 键盘可达/focus trap。
-A1 Postgres 维持缓做（触发条件 = 409 频发或数据丢失）。
+A1 Postgres 维持缓做（触发条件 = 409 频发或数据丢失；迁移时一并根除归档窄窗竞态）。
 ```
 
 ---
 
-*最后更新：2026-06-10 by Claude Fable 5 — 状态审查 + README 重写 + 下阶段方向（v6.3 线上运行中，团队真实采用）*
+*最后更新：2026-06-10 by Claude Fable 5 — v6.4：F7 服务端归档 + 双层备份自动化（Vercel Cron 已配 CRON_SECRET + launchd 已装机）+ U3/死代码/proxy 小修 + 21-agent 对抗审查加固*

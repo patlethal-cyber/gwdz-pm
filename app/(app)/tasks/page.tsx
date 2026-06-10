@@ -9,20 +9,13 @@ import TaskList from '@/components/tasks/TaskList'
 import TaskModal from '@/components/tasks/TaskModal'
 import { useData } from '@/lib/data-context'
 import type { Task, TaskStatus, TaskPriority } from '@/lib/types'
+import { getWeekEnd } from '@/lib/date'
 
 type ViewMode = 'kanban' | 'list'
 
 const priorityOptions: TaskPriority[] = ['紧急', '高', '中', '低']
 const statusOptions: TaskStatus[] = ['待办', '进行中', '审核中', '已完成']
 const departmentOptions = ['客户质量部', '测试一部', '测试二部']
-
-function getWeekEnd(dateStr: string): string {
-  const d = new Date(dateStr)
-  const day = d.getDay()
-  const diff = 7 - day
-  d.setDate(d.getDate() + diff)
-  return d.toISOString().split('T')[0]
-}
 
 export default function TasksPage() {
   const { tasks, issues, team, scenarios, updateTask, addTask, deleteTask, bulkUpdateTasks, getMember, getScenario, today, ready } = useData()

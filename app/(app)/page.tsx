@@ -6,27 +6,10 @@ import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
 import GanttChart from '@/components/dashboard/GanttChart'
 import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
-// MilestoneTimeline removed — current phase shown in FocusBar + GanttChart milestones
 import PersonDetail from '@/components/team/PersonDetail'
 import { Calendar, Clock, Target, BarChart3, Cpu, Users, FileBox } from 'lucide-react'
 import type { TeamMember, DeliverableStatus } from '@/lib/types'
-
-function daysBetween(a: string, b: string): number {
-  const da = new Date(a + 'T00:00:00')
-  const db = new Date(b + 'T00:00:00')
-  return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function getWeekEnd(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  const dayOfWeek = d.getDay() // 0=Sun
-  const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek
-  const end = new Date(d.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000)
-  const y = end.getFullYear()
-  const m = String(end.getMonth() + 1).padStart(2, '0')
-  const dd = String(end.getDate()).padStart(2, '0')
-  return `${y}-${m}-${dd}`
-}
+import { daysBetween, getWeekEnd } from '@/lib/date'
 
 type DashboardTab = 'gantt' | 'scenarios' | 'team' | 'pipeline'
 
@@ -375,9 +358,6 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-
-        {/* Milestone Timeline — always visible */}
-        {/* MilestoneTimeline removed */}
       </div>
 
       {/* PersonDetail slide-over */}

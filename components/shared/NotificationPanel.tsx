@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { useData } from '@/lib/data-context'
+import { addDays } from '@/lib/date'
 import {
   X, CheckSquare, FileText, Bug, Calendar, Flag,
   Plus, RefreshCw, Trash2, ArrowRightLeft,
@@ -54,15 +55,6 @@ function relativeTime(timestamp: string): string {
   if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`
   if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`
   return timestamp.slice(0, 10)
-}
-
-function addDays(dateStr: string, n: number): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const dt = new Date(y, m - 1, d + n)
-  const yy = dt.getFullYear()
-  const mm = String(dt.getMonth() + 1).padStart(2, '0')
-  const dd = String(dt.getDate()).padStart(2, '0')
-  return `${yy}-${mm}-${dd}`
 }
 
 const syntheticActionLabels: Record<string, string> = {

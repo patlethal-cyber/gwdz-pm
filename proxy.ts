@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const publicPaths = ['/login', '/api/auth']
+  // 备份 cron 不走 cookie 认证 — 由 Vercel Cron 触发，路由内部用 CRON_SECRET 鉴权。
+  // 故意写精确路径而非 '/api/cron' 前缀：未来新增 cron 路由必须逐个在此登记，防止默认裸奔
+  const publicPaths = ['/login', '/api/auth', '/api/cron/backup']
   if (publicPaths.some(p => pathname.startsWith(p))) {
     return NextResponse.next()
   }

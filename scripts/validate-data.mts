@@ -4,17 +4,19 @@
  * 用法：npx tsx scripts/validate-data.mts <backup-dir>
  */
 import { validateCollection } from '../lib/schemas'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 
 const dir = process.argv[2]
 if (!dir) { console.error('用法: npx tsx scripts/validate-data.mts <backup-dir>'); process.exit(2) }
 
 const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files']
+// F7 归档库与 activities 同构，用同一 schema 校验；旧备份目录没有该文件则跳过
+if (existsSync(`${dir}/activities-archive.json`)) COLLECTIONS.push('activities-archive')
 let allPass = true
 
 for (const c of COLLECTIONS) {
   const data = JSON.parse(readFileSync(`${dir}/${c}.json`, 'utf-8'))
-  const result = validateCollection(c, data)
+  const result = validateCollection(c === 'activities-archive' ? 'activities' : c, data)
   if (result.ok) {
     console.log(`✅ ${c.padEnd(13)} ${String(data.length).padStart(4)} 条 — PASS`)
   } else {

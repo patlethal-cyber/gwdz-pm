@@ -13,7 +13,8 @@ for (const line of envContent.split('\n')) {
   if (m) process.env[m[1]] = m[2]
 }
 
-const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files']
+// activities-archive = F7 归档库（服务端 PUT activities 时自动追加），只备份不进 export.json
+const COLLECTIONS = ['tasks', 'deliverables', 'meetings', 'issues', 'activities', 'versions', 'files', 'activities-archive']
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
 const dir = new URL(`../backups/${stamp}/`, import.meta.url).pathname
@@ -28,8 +29,8 @@ for (const c of COLLECTIONS) {
     const res = await fetch(info.url, { cache: 'no-store' })
     const data = await res.json()
     writeFileSync(`${dir}${c}.json`, JSON.stringify(data, null, 2))
-    // export.json 用 restore-backup.mjs 的键名（versions -> deliverableVersions）
-    combined[c === 'versions' ? 'deliverableVersions' : c] = data
+    // export.json 用 restore-backup.mjs 的键名（versions -> deliverableVersions）；归档库不进 export.json
+    if (c !== 'activities-archive') combined[c === 'versions' ? 'deliverableVersions' : c] = data
     manifest.push({
       collection: c,
       count: Array.isArray(data) ? data.length : 'NOT_ARRAY',
@@ -39,7 +40,7 @@ for (const c of COLLECTIONS) {
   } catch (e) {
     // blob 不存在 = 该集合为空
     writeFileSync(`${dir}${c}.json`, '[]')
-    combined[c === 'versions' ? 'deliverableVersions' : c] = []
+    if (c !== 'activities-archive') combined[c === 'versions' ? 'deliverableVersions' : c] = []
     manifest.push({ collection: c, count: 0, version: '(blob 不存在)', bytes: 2 })
   }
 }
@@ -49,4 +50,4 @@ writeFileSync(`${dir}manifest.json`, JSON.stringify(manifest, null, 2))
 
 console.table(manifest)
 console.log('\n✅ 备份目录:', dir)
-console.log('   - 逐集合 7 份 + export.json（restore 兼容）+ manifest.json')
+console.log(`   - 逐集合 ${COLLECTIONS.length} 份 + export.json（restore 兼容）+ manifest.json`)

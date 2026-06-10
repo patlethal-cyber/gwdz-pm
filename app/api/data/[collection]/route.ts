@@ -1,11 +1,28 @@
 import { type NextRequest } from 'next/server'
 import { put, head } from '@vercel/blob'
 import { validateCollection } from '@/lib/schemas'
+import { diffDropped, appendToArchive } from '@/lib/activity-archive'
 
 const VALID_COLLECTIONS = new Set([
   'tasks', 'deliverables', 'meetings', 'issues',
   'activities', 'versions', 'files',
 ])
+
+// F7: 活动日志归档库 — 只读集合（仅 GET；写入由 PUT activities 内部触发）
+const ACTIVITIES_ARCHIVE = 'activities-archive'
+
+async function readBlobJson<T>(path: string): Promise<T[] | null> {
+  try {
+    const info = await head(path)
+    if (!info) return null
+    const res = await fetch(info.url, { cache: 'no-store' })
+    const parsed = await res.json()
+    // blob 内容损坏成非数组时按"不存在"处理，否则 diffDropped 的 .filter 会抛 TypeError
+    return Array.isArray(parsed) ? (parsed as T[]) : null
+  } catch {
+    return null // blob 不存在
+  }
+}
 
 function blobPath(collection: string) {
   return `db/${collection}.json`
@@ -38,7 +55,7 @@ export async function GET(
   if (authErr) return authErr
 
   const { collection } = await params
-  if (!VALID_COLLECTIONS.has(collection)) {
+  if (!VALID_COLLECTIONS.has(collection) && collection !== ACTIVITIES_ARCHIVE) {
     return Response.json({ error: '无效的数据集合' }, { status: 400 })
   }
 
@@ -93,6 +110,29 @@ export async function PUT(
       { error: '数据已被他人更新，请刷新后重试', conflict: true, currentVersion: current },
       { status: 409 }
     )
+  }
+
+  // F7: activities 覆写前，把即将被丢弃的条目（客户端裁剪到 200 条 / 导入替换 / 种子重置）
+  // 追加进归档库 — 审计记录永不丢失。归档失败则整个保存失败（宁可让客户端重试，不静默丢审计）。
+  if (collection === 'activities') {
+    const currentItems = await readBlobJson<{ id: string }>(blobPath(collection))
+    const dropped = diffDropped(currentItems ?? [], data as { id: string }[])
+    if (dropped.length > 0) {
+      const archive = (await readBlobJson<{ id: string }>(blobPath(ACTIVITIES_ARCHIVE))) ?? []
+      const merged = appendToArchive(archive, dropped)
+      if (merged !== archive) {
+        try {
+          await put(blobPath(ACTIVITIES_ARCHIVE), JSON.stringify(merged), {
+            access: 'public',
+            contentType: 'application/json',
+            addRandomSuffix: false,
+            allowOverwrite: true,
+          })
+        } catch {
+          return Response.json({ error: '活动日志归档写入失败，本次保存未执行' }, { status: 500 })
+        }
+      }
+    }
   }
 
   await put(blobPath(collection), JSON.stringify(data), {

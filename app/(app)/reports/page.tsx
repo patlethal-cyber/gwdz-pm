@@ -4,27 +4,9 @@ import { useState, useMemo } from 'react'
 import { useData } from '@/lib/data-context'
 import { FileText, Copy, Check, BarChart3 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { getMonday, addDays, formatDate, getPrevWorkday } from '@/lib/date'
 
 type Tab = '日报' | '周报' | '可视化周报'
-
-function getMonday(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  d.setDate(d.getDate() + diff)
-  return d.toISOString().slice(0, 10)
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
-function formatDate(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-')
-  return `${y}/${m}/${d}`
-}
 
 // 懒加载 recharts 图表（ssr:false）——把图表库从首屏 bundle 拆出（E）
 const VizCharts = dynamic(() => import('@/components/reports/VizCharts'), {
@@ -46,15 +28,6 @@ const GROUP_MEMBER_IDS: Record<string, string[]> = {
   '第二执行组': ['m02', 'm06', 'm07'],
   '第一执行组': ['m03', 'm04', 'm05'],
   '专项支持': ['m08', 'm09'],
-}
-
-function getYesterday(todayStr: string): string {
-  const d = new Date(todayStr + 'T00:00:00')
-  const day = d.getDay()
-  // If Monday (1), yesterday is Friday (-3); if Sunday (0), use Friday (-2); otherwise -1
-  const offset = day === 1 ? -3 : day === 0 ? -2 : -1
-  d.setDate(d.getDate() + offset)
-  return d.toISOString().slice(0, 10)
 }
 
 export default function ReportsPage() {
@@ -93,7 +66,7 @@ export default function ReportsPage() {
     t => t.status !== '已完成' && t.dueDate >= nextMonday && t.dueDate <= nextFriday
   )
 
-  const yesterday = getYesterday(today)
+  const yesterday = getPrevWorkday(today)
 
   // Tasks that were active yesterday (in progress or completed yesterday)
   const yesterdayTasks = tasks.filter(t =>
