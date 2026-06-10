@@ -295,7 +295,8 @@ node scripts/bulk-upload.mjs
 - production = v6.3（commit b346ac9）READY；**近 7 天运行时日志 error/warning/fatal 为 0**
 
 **数据（vs 2026-06-02 备份基线 `backups/2026-06-02T06-28-44/`）**
-- **工具被团队真实重度使用**：tasks 12→**76**、meetings 4→**14**、issues 1→**4**、versions 10→**36**、files 488→**493**、activities 51→**90**；最后写入 2026-06-05
+- **工具被团队真实使用中**：tasks 12→**76**、meetings 4→**14**、issues 1→**4**、versions 10→**36**、files 488→**493**、activities 51→**90**；最后写入 2026-06-05
+- 数据来源说明：增长 = 团队日常使用 + **2026-06-02 晚的一次性补录**（merge-batch1/2.mjs，dry-run + --commit 设计，已执行完毕；脚本归档于 `../_归档/_scripts/`，勿重跑——内含硬编码日期）
 - 无任何集合缩水；写防护在生产生效（无 cookie→307、非法 body→422）；A4 公开 URL 现状不变（已接受）
 
 **代码**
