@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Task, TaskStatus, Issue, TeamMember, Scenario } from '@/lib/types'
 import TaskCard from './TaskCard'
+
+const DONE_COLLAPSE_KEY = 'gwdz-kanban-done-collapsed'
 
 const columns: { status: TaskStatus; label: string; headerColor: string; countColor: string }[] = [
   { status: '待办', label: '待办', headerColor: 'bg-gray-100 text-gray-600', countColor: 'bg-gray-200 text-gray-600' },
@@ -33,6 +35,20 @@ interface KanbanBoardProps {
 export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddTask, issues = [], getMember, getScenario, today }: KanbanBoardProps) {
   const [dragOverCol, setDragOverCol] = useState<TaskStatus | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [doneCollapsed, setDoneCollapsed] = useState(false)
+
+  // "已完成"列折叠偏好（localStorage，设备级）
+  useEffect(() => {
+    try { if (localStorage.getItem(DONE_COLLAPSE_KEY) === '1') setDoneCollapsed(true) } catch { /* ignore */ }
+  }, [])
+
+  function toggleDoneCollapsed() {
+    setDoneCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem(DONE_COLLAPSE_KEY, next ? '1' : '0') } catch { /* ignore */ }
+      return next
+    })
+  }
 
   function handleDragStart(e: React.DragEvent<HTMLDivElement>, task: Task) {
     e.dataTransfer.setData('text/plain', task.id)
@@ -74,6 +90,32 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
         const colTasks = tasks.filter(t => t.status === col.status)
         const isOver = dragOverCol === col.status
 
+        // "已完成"列折叠成竖向窄条（仍是 drop 目标），节省横向空间
+        if (col.status === '已完成' && doneCollapsed) {
+          return (
+            <div
+              key={col.status}
+              className={`flex-shrink-0 w-12 flex flex-col items-center rounded-xl border border-dashed transition-all ${
+                isOver ? 'ring-2 ring-blue-400 bg-blue-50/30 border-blue-300' : 'border-gray-200 bg-gray-50/50'
+              }`}
+              onDragOver={e => handleDragOver(e, col.status)}
+              onDragLeave={handleDragLeave}
+              onDrop={e => handleDrop(e, col.status)}
+            >
+              <button
+                onClick={toggleDoneCollapsed}
+                className="flex flex-col items-center gap-2 pt-3 pb-2 w-full text-gray-500 hover:text-green-600 transition-colors"
+                title="展开已完成"
+                aria-label="展开已完成列"
+              >
+                <ChevronRight size={16} />
+                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${col.countColor}`}>{colTasks.length}</span>
+                <span className="text-xs font-semibold [writing-mode:vertical-rl] tracking-wider mt-1">已完成</span>
+              </button>
+            </div>
+          )
+        }
+
         return (
           <div
             key={col.status}
@@ -90,9 +132,21 @@ export default function KanbanBoard({ tasks, onStatusChange, onTaskClick, onAddT
                 <span className={`w-2 h-2 rounded-full ${dotColors[col.status]}`} />
                 <span className="text-sm font-semibold">{col.label}</span>
               </div>
-              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${col.countColor}`}>
-                {colTasks.length}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${col.countColor}`}>
+                  {colTasks.length}
+                </span>
+                {col.status === '已完成' && (
+                  <button
+                    onClick={toggleDoneCollapsed}
+                    className="p-0.5 rounded hover:bg-black/5 transition-colors"
+                    title="折叠已完成"
+                    aria-label="折叠已完成列"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Card list */}

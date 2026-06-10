@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { Plus, LayoutGrid, List, Filter } from 'lucide-react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { Plus, LayoutGrid, List, Filter, User } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import KanbanBoard from '@/components/tasks/KanbanBoard'
 import TaskList from '@/components/tasks/TaskList'
 import TaskModal from '@/components/tasks/TaskModal'
 import { useData } from '@/lib/data-context'
+import { useCurrentMember } from '@/components/layout/current-member-context'
 import type { Task, TaskStatus, TaskPriority } from '@/lib/types'
 import { getWeekEnd } from '@/lib/date'
 
@@ -21,35 +22,35 @@ export default function TasksPage() {
   const { tasks, issues, team, scenarios, updateTask, addTask, deleteTask, bulkUpdateTasks, getMember, getScenario, today, ready } = useData()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { memberId } = useCurrentMember()
 
   const [view, setView] = useState<ViewMode>('kanban')
   const [modalOpen, setModalOpen] = useState(false)
   const [editTask, setEditTask] = useState<Task | undefined>(undefined)
   const [defaultStatus, setDefaultStatus] = useState<TaskStatus>('待办')
 
-  // Filter state
-  const [filterAssignee, setFilterAssignee] = useState('')
-  const [filterPriority, setFilterPriority] = useState('')
-  const [filterDept, setFilterDept] = useState('')
+  // 筛选状态 = URL 派生（刷新保留 / 可分享 / 后退保留）。
+  // assignee 三态：无参数 = 默认"我的"（若选了身份）；'all' = 明确全部；'m0x' = 指定人
+  const assigneeParam = searchParams.get('assignee')
+  const filterAssignee = assigneeParam === null ? (memberId ?? '') : assigneeParam === 'all' ? '' : assigneeParam
+  const isDefaultMine = assigneeParam === null && !!memberId
+  const filterPriority = searchParams.get('priority') ?? searchParams.get('severity') ?? ''
+  const filterDept = searchParams.get('dept') ?? ''
+  const summaryFilter = searchParams.get('status') ?? ''
 
-  // Summary pill filter (status or "dueThisWeek")
-  const [summaryFilter, setSummaryFilter] = useState<string>('')
-
-  // Read URL params for dashboard drill-down
-  useEffect(() => {
-    const urlStatus = searchParams.get('status')
-    const urlSeverity = searchParams.get('severity')
-    if (urlStatus === 'overdue') {
-      setSummaryFilter('overdue')
-    } else if (urlStatus && statusOptions.includes(urlStatus as TaskStatus)) {
-      setSummaryFilter(urlStatus)
+  const updateParams = useCallback((patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(Array.from(searchParams.entries()))
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null || v === '') next.delete(k)
+      else next.set(k, v)
     }
-    if (urlSeverity && priorityOptions.includes(urlSeverity as TaskPriority)) {
-      setFilterPriority(urlSeverity)
-    }
-  }, [searchParams])
+    next.delete('open')
+    next.delete('severity') // 统一到 priority
+    const qs = next.toString()
+    router.replace(qs ? `/tasks?${qs}` : '/tasks', { scroll: false })
+  }, [searchParams, router])
 
-  // Handle ?open=taskId from global search
+  // Handle ?open=taskId from global search（处理后只删 open，保留筛选参数）
   useEffect(() => {
     if (!ready) return
     const openId = searchParams.get('open')
@@ -60,7 +61,10 @@ export default function TasksPage() {
       setDefaultStatus(target.status)
       setModalOpen(true)
     }
-    router.replace('/tasks', { scroll: false })
+    const next = new URLSearchParams(Array.from(searchParams.entries()))
+    next.delete('open')
+    const qs = next.toString()
+    router.replace(qs ? `/tasks?${qs}` : '/tasks', { scroll: false })
   }, [searchParams, ready, tasks, router])
 
   // Summary stats
@@ -120,10 +124,11 @@ export default function TasksPage() {
     return result
   }, [tasks, summaryFilter, filterAssignee, filterPriority, filterDept, today, getScenario])
 
-  const hasActiveFilters = filterAssignee || filterPriority || filterDept || summaryFilter
+  // "默认我的"不算 active（是默认视图）；用户明确动过 assignee 或设了其它筛选才算
+  const hasActiveFilters = assigneeParam !== null || filterPriority || filterDept || summaryFilter
 
   function handleSummaryClick(key: string) {
-    setSummaryFilter(prev => prev === key ? '' : key)
+    updateParams({ status: summaryFilter === key ? null : key })
   }
 
   function handleTaskClick(task: Task) {
@@ -152,10 +157,7 @@ export default function TasksPage() {
   }
 
   function clearAllFilters() {
-    setFilterAssignee('')
-    setFilterPriority('')
-    setFilterDept('')
-    setSummaryFilter('')
+    router.replace('/tasks', { scroll: false })
   }
 
   if (!ready) {
@@ -251,7 +253,7 @@ export default function TasksPage() {
 
         <select
           value={filterAssignee}
-          onChange={e => setFilterAssignee(e.target.value)}
+          onChange={e => updateParams({ assignee: e.target.value === '' ? 'all' : e.target.value })}
           className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">全部负责人</option>
@@ -260,7 +262,7 @@ export default function TasksPage() {
 
         <select
           value={filterPriority}
-          onChange={e => setFilterPriority(e.target.value)}
+          onChange={e => updateParams({ priority: e.target.value || null })}
           className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">全部优先级</option>
@@ -269,12 +271,18 @@ export default function TasksPage() {
 
         <select
           value={filterDept}
-          onChange={e => setFilterDept(e.target.value)}
+          onChange={e => updateParams({ dept: e.target.value || null })}
           className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">全部部门</option>
           {scenarioDepts.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
+
+        {isDefaultMine && (
+          <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 rounded-full px-2 py-1">
+            <User size={11} /> 默认显示你的任务
+          </span>
+        )}
 
         {hasActiveFilters && (
           <button

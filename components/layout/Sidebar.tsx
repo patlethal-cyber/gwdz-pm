@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   CheckSquare,
   FileBox,
+  FolderOpen,
   Calendar,
   Users,
   Bug,
@@ -13,16 +14,22 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   Cpu,
   X,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useSidebar } from './sidebar-context'
+import { useData } from '@/lib/data-context'
+import { useCurrentMember } from './current-member-context'
+import type { TeamMember } from '@/lib/types'
 
 const navItems = [
   { href: '/', label: '总览', icon: LayoutDashboard },
   { href: '/tasks', label: '任务', icon: CheckSquare },
+  { href: '/scenarios', label: '场景', icon: Cpu },
   { href: '/deliverables', label: '交付物', icon: FileBox },
+  { href: '/files', label: '文件', icon: FolderOpen },
   { href: '/meetings', label: '会议', icon: Calendar },
   { href: '/issues', label: '问题', icon: Bug },
   { href: '/team', label: '团队', icon: Users },
@@ -33,6 +40,9 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const { mobileOpen, setMobileOpen } = useSidebar()
+  const { getMember } = useData()
+  const { memberId, openPicker } = useCurrentMember()
+  const currentMember = memberId ? (getMember(memberId) as TeamMember | undefined) : undefined
 
   // 桌面 collapsed 时隐藏文字（lg:hidden）；移动端抽屉始终展开显示文字
   const labelCls = collapsed ? 'lg:hidden' : ''
@@ -112,16 +122,30 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        {/* User info card */}
-        <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
-            LP
-          </div>
+        {/* 当前视角（设备级"我是谁"）— 点击切换 */}
+        <button
+          onClick={openPicker}
+          className="group border-t border-white/10 px-4 py-3 flex items-center gap-3 w-full text-left hover:bg-white/5 transition-colors"
+          title="切换当前视角"
+        >
+          {currentMember ? (
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+              style={{ backgroundColor: currentMember.color }}
+            >
+              {currentMember.initials}
+            </div>
+          ) : (
+            <div className="w-8 h-8 bg-white/15 rounded-full flex items-center justify-center flex-shrink-0">
+              <Users size={15} className="text-white/70" />
+            </div>
+          )}
           <div className={`flex-1 min-w-0 ${labelCls}`}>
-            <div className="text-xs font-medium truncate">李培嵩</div>
-            <div className="text-[10px] text-white/40 truncate">项目经理</div>
+            <div className="text-xs font-medium truncate">{currentMember?.name ?? '全局视角'}</div>
+            <div className="text-[10px] text-white/40 truncate">{currentMember?.role ?? '查看全部 · 点击切换'}</div>
           </div>
-        </div>
+          <ChevronsUpDown size={14} className={`text-white/30 group-hover:text-white/60 flex-shrink-0 ${labelCls}`} />
+        </button>
 
         {/* Collapse toggle — desktop only */}
         <button

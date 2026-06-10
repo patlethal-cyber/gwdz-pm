@@ -1,13 +1,15 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
+import { useCurrentMember } from '@/components/layout/current-member-context'
 import Header from '@/components/layout/Header'
 import StatsCards from '@/components/dashboard/StatsCards'
 import GanttChart from '@/components/dashboard/GanttChart'
 import ScenarioGrid from '@/components/dashboard/ScenarioGrid'
 import PersonDetail from '@/components/team/PersonDetail'
-import { Calendar, Clock, Target, BarChart3, Cpu, Users, FileBox } from 'lucide-react'
+import { Calendar, Clock, Target, BarChart3, Cpu, Users, FileBox, AlertTriangle, Loader2, CalendarClock, ChevronsUpDown } from 'lucide-react'
 import type { TeamMember, DeliverableStatus } from '@/lib/types'
 import { daysBetween, getWeekEnd } from '@/lib/date'
 
@@ -62,12 +64,30 @@ export default function DashboardPage() {
     today,
   } = useData()
 
+  const router = useRouter()
+  const { memberId, hydrated, openPicker } = useCurrentMember()
+
   const [activeTab, setActiveTab] = useState<DashboardTab>('gantt')
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [pipelineFilter, setPipelineFilter] = useState<DeliverableStatus | null>(null)
 
   // --- Dashboard stats ---
   const stats = useMemo(() => getDashboardStats(), [getDashboardStats])
+
+  // --- 我的工作台（选了具体成员视角时显示）---
+  const me = memberId ? (getMember(memberId) as TeamMember | undefined) : undefined
+  const myWork = useMemo(() => {
+    if (!memberId) return null
+    const weekEnd = getWeekEnd(today)
+    const myTasks = tasks.filter(t => t.assigneeId === memberId)
+    return {
+      inProgress: myTasks.filter(t => t.status === '进行中').length,
+      overdue: myTasks.filter(t => t.status !== '已完成' && t.dueDate && t.dueDate < today).length,
+      dueThisWeek: myTasks.filter(t => t.status !== '已完成' && t.dueDate >= today && t.dueDate <= weekEnd).length,
+      scenarioCount: scenarios.filter(s => s.ownerId === memberId).length,
+      pendingDelivs: deliverables.filter(d => d.ownerId === memberId && d.status !== '已归档').length,
+    }
+  }, [memberId, tasks, scenarios, deliverables, today])
 
   // --- Today focus bar ---
   const todayFocus = useMemo(() => {
@@ -151,6 +171,70 @@ export default function DashboardPage() {
       <Header title="项目总览" subtitle="国微电子 HIAgent AI 智能体项目" />
 
       <div className="p-6 space-y-6">
+        {/* 我的工作台 — 选了具体成员视角时第一眼看到自己的活 */}
+        {hydrated && memberId && me && myWork && (
+          <div
+            className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm border-l-4"
+            style={{ borderLeftColor: me.color }}
+          >
+            <div className="flex items-center gap-2.5 mb-4">
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: me.color }}
+              >
+                {me.initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-bold text-gray-900 truncate">{me.name} 的工作台</h2>
+                <p className="text-[11px] text-gray-500">{me.role}</p>
+              </div>
+              <button
+                onClick={openPicker}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+                title="切换视角"
+              >
+                <ChevronsUpDown size={13} />
+                <span className="hidden sm:inline">切换</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <button
+                onClick={() => router.push(`/tasks?assignee=${memberId}&status=进行中`)}
+                className="flex flex-col items-start rounded-lg border border-gray-100 bg-gray-50/60 p-3 hover:border-blue-200 hover:bg-blue-50/50 transition-all text-left"
+              >
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500"><Loader2 size={12} /> 我的进行中</div>
+                <span className="mt-1 text-2xl font-bold text-blue-600">{myWork.inProgress}</span>
+              </button>
+              <button
+                onClick={() => router.push(`/tasks?assignee=${memberId}&status=overdue`)}
+                className={`flex flex-col items-start rounded-lg border p-3 transition-all text-left ${
+                  myWork.overdue > 0 ? 'border-red-200 bg-red-50/60 hover:bg-red-50' : 'border-gray-100 bg-gray-50/60 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500"><AlertTriangle size={12} /> 我的逾期</div>
+                <span className={`mt-1 text-2xl font-bold ${myWork.overdue > 0 ? 'text-red-600' : 'text-gray-400'}`}>{myWork.overdue}</span>
+              </button>
+              <button
+                onClick={() => router.push(`/tasks?assignee=${memberId}&status=dueThisWeek`)}
+                className="flex flex-col items-start rounded-lg border border-gray-100 bg-gray-50/60 p-3 hover:border-orange-200 hover:bg-orange-50/50 transition-all text-left"
+              >
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500"><CalendarClock size={12} /> 本周到期</div>
+                <span className="mt-1 text-2xl font-bold text-orange-600">{myWork.dueThisWeek}</span>
+              </button>
+              <button
+                onClick={() => router.push('/scenarios?mine=1')}
+                className="flex flex-col items-start rounded-lg border border-gray-100 bg-gray-50/60 p-3 hover:border-violet-200 hover:bg-violet-50/50 transition-all text-left"
+              >
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-500"><Cpu size={12} /> 我的场景</div>
+                <span className="mt-1 text-2xl font-bold text-violet-600">{myWork.scenarioCount}</span>
+                {myWork.pendingDelivs > 0 && (
+                  <span className="text-[10px] text-gray-500 mt-0.5">{myWork.pendingDelivs} 项交付物待完成</span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Today Focus Bar — 只保留独有指标（逾期/严重已在下方 StatsCards，去重）*/}
         <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">

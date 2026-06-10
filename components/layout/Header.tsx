@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
-import { Search, Bell, FolderOpen, FileText, CheckSquare, Bug, Calendar, Loader2, Check, CloudOff, AlertTriangle, RefreshCw, Menu } from 'lucide-react'
+import { Search, Bell, FileText, CheckSquare, Bug, Calendar, Loader2, Check, CloudOff, AlertTriangle, RefreshCw, Menu } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useData } from '@/lib/data-context'
 import { useSidebar } from '@/components/layout/sidebar-context'
 import NotificationPanel from '@/components/shared/NotificationPanel'
-import FileManagerPanel from '@/components/shared/FileManagerPanel'
 
 interface HeaderProps {
   title: string
@@ -87,7 +86,6 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [showNotifications, setShowNotifications] = useState(false)
-  const [showFileManager, setShowFileManager] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -323,19 +321,6 @@ export default function Header({ title, subtitle, actions }: HeaderProps) {
             </div>
           )}
         </div>
-
-        {/* File manager button */}
-        <button
-          onClick={() => setShowFileManager(prev => !prev)}
-          className="relative flex-shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          aria-label="文件管理"
-        >
-          <FolderOpen size={18} />
-        </button>
-        <FileManagerPanel
-          isOpen={showFileManager}
-          onClose={() => setShowFileManager(false)}
-        />
 
         {/* Notification bell */}
         <div ref={bellRef} className="relative">

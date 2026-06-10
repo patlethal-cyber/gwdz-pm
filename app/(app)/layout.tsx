@@ -3,6 +3,8 @@
 import { Suspense } from 'react'
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider } from "@/components/layout/sidebar-context";
+import { CurrentMemberProvider } from "@/components/layout/current-member-context";
+import MemberPicker from "@/components/layout/MemberPicker";
 import { DataProvider } from "@/lib/data-context";
 
 export default function AppLayout({
@@ -12,6 +14,7 @@ export default function AppLayout({
 }) {
   return (
     <DataProvider>
+      <CurrentMemberProvider>
       <SidebarProvider>
       <div className="flex h-screen">
         <Sidebar />
@@ -26,7 +29,9 @@ export default function AppLayout({
           </Suspense>
         </main>
       </div>
+      <MemberPicker />
       </SidebarProvider>
+      </CurrentMemberProvider>
     </DataProvider>
   );
 }

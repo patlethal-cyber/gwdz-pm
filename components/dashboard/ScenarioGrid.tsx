@@ -30,7 +30,12 @@ function truncate(s: string, max: number): string {
   return s.length > max ? s.slice(0, max) + '...' : s
 }
 
-export default function ScenarioGrid() {
+interface ScenarioGridProps {
+  ownerFilter?: string   // 传 memberId 则只显示该负责人的场景（/scenarios 页"只看我的"）
+  title?: string         // 自定义标题；传空字符串隐藏标题
+}
+
+export default function ScenarioGrid({ ownerFilter, title = '场景进度总览' }: ScenarioGridProps = {}) {
   const {
     scenarios, deliverables, getMember, ready,
     getTasksByScenario, getIssuesByScenario, getDeliverablesByScenario,
@@ -44,10 +49,10 @@ export default function ScenarioGrid() {
   const grouped = useMemo(() => {
     const map: Record<string, typeof scenarios> = {}
     for (const dept of DEPT_ORDER) {
-      map[dept] = scenarios.filter(s => s.department === dept)
+      map[dept] = scenarios.filter(s => s.department === dept && (!ownerFilter || s.ownerId === ownerFilter))
     }
     return map
-  }, [scenarios])
+  }, [scenarios, ownerFilter])
 
   // Metrics per scenario
   const metrics = useMemo(() => {
@@ -100,15 +105,18 @@ export default function ScenarioGrid() {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-base font-semibold text-gray-900 mb-5">
-        场景进度总览
-      </h2>
+      {title && (
+        <h2 className="text-base font-semibold text-gray-900 mb-5">
+          {title}
+        </h2>
+      )}
 
       <div className="space-y-5">
         {DEPT_ORDER.map(dept => {
           const style = DEPT_STYLE[dept]
           const isCollapsed = !!collapsedDepts[dept]
           const deptScenarios = grouped[dept] || []
+          if (ownerFilter && deptScenarios.length === 0) return null
           const deptTaskCount = deptScenarios.reduce((sum, sc) => sum + (metrics[sc.id]?.taskCount || 0), 0)
           const deptIssueCount = deptScenarios.reduce((sum, sc) => sum + (metrics[sc.id]?.issueCount || 0), 0)
 
