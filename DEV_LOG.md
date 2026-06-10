@@ -16,7 +16,7 @@
 | 技术栈 | Next.js 16 + Tailwind CSS v4 + Recharts + Lucide React + Zod |
 | 数据存储 | **Vercel Blob**（JSON 文档存储，db/*.json，多用户共享） |
 | 文件存储 | **Vercel Blob**（488 项目文件，gwdz/ 前缀，public URL） |
-| 代码规模 | 47 个源文件（+lib/schemas.ts） |
+| 代码规模 | 49 个源文件，~20,400 行 |
 | 版本 | **v6.3（2026-06-02）** |
 | 部署 | Vercel（自动从 GitHub main 分支部署） |
 
@@ -216,7 +216,7 @@ Meeting ──→ MeetingActionItem[] → Task
 | F4 | 会议文件上传是纯文本 URL | 需改成真实文件上传（未排期） |
 | F5 | 场景详情页只读 | 无法从场景直接创建任务/问题（未排期） |
 | F6 | 团队成员是只读种子数据 | 人员变动需改代码（未排期） |
-| F7 | Activity log 上限 200 条 | 2 周后旧记录丢失（未排期） |
+| F7 | Activity log 上限 200 条 | ⚠️ **2026-06-10 实测已 90/200**，按当前使用速度将触顶静默丢审计 → 下阶段 P1 |
 | F8 | ~~搜索 ?open= 深链接~~ | ✅ **已实现并验证**（tasks/deliverables/issues 三页均处理） |
 
 ### UX 级
@@ -289,4 +289,65 @@ node scripts/bulk-upload.mjs
 
 ---
 
-*最后更新：2026-06-02 by Claude Opus 4.8 — v6.3（A3 拆分 DataContext：usePersistedCollection，零回归。a11y-B 已砍出 backlog）*
+## 七、线上状态审查（2026-06-10）
+
+**部署 / 运行时**
+- production = v6.3（commit b346ac9）READY；**近 7 天运行时日志 error/warning/fatal 为 0**
+
+**数据（vs 2026-06-02 备份基线 `backups/2026-06-02T06-28-44/`）**
+- **工具被团队真实重度使用**：tasks 12→**76**、meetings 4→**14**、issues 1→**4**、versions 10→**36**、files 488→**493**、activities 51→**90**；最后写入 2026-06-05
+- 无任何集合缩水；写防护在生产生效（无 cookie→307、非法 body→422）；A4 公开 URL 现状不变（已接受）
+
+**代码**
+- 49 文件 / 20,417 行；TODO/FIXME = 0；'use client' 38/49
+- **死代码 ×2**（0 引用）：`components/dashboard/MilestoneTimeline.tsx`、`components/team/TeamDirectory.tsx`
+- U3 日期函数 3 处定义：`app/(app)/page.tsx` + `app/(app)/tasks/page.tsx` 的 getWeekEnd ×2、`app/(app)/reports/page.tsx` 的 getMonday
+- `middleware.ts` 仍在（Next 16 废弃警告，待迁 proxy）
+
+**文档**
+- README 原为 create-next-app 模板 → **2026-06-10 已重写**（项目说明/数据架构/脚本/部署安全流程）；DEV_LOG 截至 v6.3 最新
+
+---
+
+## 八、下阶段方向（建设期 → 运营期）
+
+状态审查的核心结论：工具已被团队真实采用，重心从"加功能"转向"**保数据 + 还卫生债**"。
+
+| 优先级 | 方向 | 理由 |
+|---|---|---|
+| **P1** | F7 活动日志上限 | 实测 90/200，触顶即静默丢审计记录 |
+| **P1** | 数据备份自动化 | 数据已是真资产（76 任务/36 版本），手动备份不可持续；backup-data.mjs 已就绪，差定时调度 |
+| **P2** | 小修打包 | U3 日期函数统一到 lib/date.ts + 删 2 个死代码文件 + middleware→proxy 迁移 |
+| **P3** | F4 会议附件 / F5 场景页可操作 / F6 团队可编辑 | 等团队使用反馈再挑 |
+| 观察 | A1 Postgres | 触发条件 = 409 冲突频发或实际数据丢失，当前无证据 |
+
+---
+
+## 九、下个 session 起始提示词
+
+```
+继续迭代 GWDZ PM 内部项目管理工具。
+
+项目：/Users/lipei/Documents/Claude/Projects/GWDZ/gwdz-pm（Next.js 16 + Tailwind v4 + Vercel Blob）
+线上：https://gwdz-pm.vercel.app（密码 gwdz2026）· push main 自动部署 · 15 人生产使用中
+先读 DEV_LOG.md（重点 §七 2026-06-10 状态审查 + §八 下阶段方向），不要凭记忆动手。
+
+硬约定：
+- 动数据层先 node scripts/backup-data.mjs 备份 + npx tsx scripts/validate-data.mts <备份目录> 预检
+- 验证期间禁写生产 Blob（.env.local 连的就是生产）；禁止裸 PUT /api/data/*（缺 X-Expected-Version 头会真实写入）
+- push main 前向我确认
+
+本期目标（按优先级，每完成一项校验一项）：
+1. F7 活动日志：activities 已 90/200，触顶静默丢审计 → 设计归档/裁剪策略并实现
+2. 数据备份自动化：基于 scripts/backup-data.mjs 给出每日定时备份方案并落地
+3. 小修打包：U3 日期函数统一到 lib/date.ts（3 处定义）+ 删死代码（components/dashboard/MilestoneTimeline.tsx、
+   components/team/TeamDirectory.tsx）+ middleware.ts → proxy 迁移（消除 Next16 废弃警告）
+4.（如有余力）F4 会议真实附件 / F5 场景页可创建任务问题 / F6 团队成员可编辑，与我确认后再做
+
+不做（已拍板，别再提）：F2 评论、A2 用户身份、A4 文件私有化、a11y-B 键盘可达/focus trap。
+A1 Postgres 维持缓做（触发条件 = 409 频发或数据丢失）。
+```
+
+---
+
+*最后更新：2026-06-10 by Claude Fable 5 — 状态审查 + README 重写 + 下阶段方向（v6.3 线上运行中，团队真实采用）*
